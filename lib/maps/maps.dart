@@ -49,11 +49,11 @@ class _MapsState extends State<Maps> {
       GeoPoint(latitude: 45.02, longitude: 12.25), // Esempio POI 2
     ];*/
 
-    print("poilist $poiListD");
+    
 
     for (var poi in poiListD) {
-      print("poi $poi");
-      if (true) {
+      
+      if (poi.containsKey("location")) {
         GeoPoint geoPoint = new GeoPoint(
           latitude: poi["location"].latitude,
           longitude: poi["location"].longitude,
@@ -62,9 +62,10 @@ class _MapsState extends State<Maps> {
         await controller.addMarker(
           geoPoint,
 
-          markerIcon: MarkerIcon(
-            icon: Icon(Icons.place, color: Colors.red, size: 48),
-          ),
+          markerIcon: MarkerIcon(iconWidget: Transform.rotate(
+            angle: 3.1416, // 180 gradi in radianti, altrimenti viene capovolta....
+            child: Icon(Icons.place_outlined, color: Colors.red, size: 48),
+          )),
         );
       } else {
         print("Errore: il POI non contiene coordinate valide.");
