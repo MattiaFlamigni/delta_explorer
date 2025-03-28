@@ -9,20 +9,19 @@ class Maps extends StatefulWidget {
   State<Maps> createState() => _MapsState();
 }
 
-
-
-
-
 class _MapsState extends State<Maps> {
   late MapController controller;
   Firebase firebase = Firebase();
 
   List<Map<String, dynamic>> poiListD = List.empty();
+  Set<String> selectedCategories =  {};
+  Set<String> categories =  {};
 
   @override
   void initState() {
     super.initState();
 
+    //firebase.addPOIs();
 
 
     controller = MapController(
@@ -36,6 +35,7 @@ class _MapsState extends State<Maps> {
         Duration(seconds: 1),
       ); // Aspetta che la mappa sia caricata
       await this.loadPOI(); //load poi
+      selectedCategories.addAll(categories);
       await addPOIs(); // Aggiunge i POI
       print(poiListD);
     });
@@ -44,29 +44,38 @@ class _MapsState extends State<Maps> {
 
 
   Future<void> addPOIs() async {
+
+
+
     /*List<GeoPoint> poiList = [
       GeoPoint(latitude: 45.08, longitude: 12.29), // Esempio POI 1
       GeoPoint(latitude: 45.02, longitude: 12.25), // Esempio POI 2
     ];*/
 
-    
-
     for (var poi in poiListD) {
-      
       if (poi.containsKey("location")) {
-        GeoPoint geoPoint = new GeoPoint(
-          latitude: poi["location"].latitude,
-          longitude: poi["location"].longitude,
-        );
+        if (selectedCategories.contains(poi["category"])) {
+          GeoPoint geoPoint = GeoPoint(
+            latitude: poi["location"].latitude,
+            longitude: poi["location"].longitude,
+          );
 
-        await controller.addMarker(
-          geoPoint,
+          await controller.addMarker(
+            geoPoint,
 
-          markerIcon: MarkerIcon(iconWidget: Transform.rotate(
-            angle: 3.1416, // 180 gradi in radianti, altrimenti viene capovolta....
-            child: Icon(Icons.place_outlined, color: Colors.red, size: 48),
-          )),
-        );
+
+            markerIcon: MarkerIcon(
+              iconWidget: Transform.rotate(
+                angle: 3.1416,
+                // 180 gradi in radianti, altrimenti viene capovolta....
+                child: Icon(Icons.place_outlined, color: Colors.red, size: 48),
+              ),
+            ),
+          );
+          setState(() {
+
+          });
+        }
       } else {
         print("Errore: il POI non contiene coordinate valide.");
       }
@@ -106,59 +115,85 @@ class _MapsState extends State<Maps> {
     setState(() {});
   }*/
 
-  // Funzione per mostrare informazioni quando un marker viene cliccato
-  void _showPOIInfo(GeoPoint poi) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Informazioni POI'),
-          content: Text(
-            'Latitudine: ${poi.latitude}\nLongitudine: ${poi.longitude}',
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Chiude la finestra di dialogo
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Mappa Delta del Po")),
-      body: loadMap(),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 20,
+      body: Stack(
         children: [
-          FloatingActionButton(
-
-              onPressed: () {  },
-              child: Icon(Icons.find_in_page_outlined)
+          // La mappa
+          Positioned.fill(
+            child: loadMap(),
           ),
-          FloatingActionButton(onPressed: (){},
-          child: Icon(Icons.abc_outlined),)
+          // Filtri sopra la mappa
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: SizedBox(
+              height: 50, // Imposta un'altezza per evitare errori
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal, // Scorrimento orizzontale
+                itemCount: categories.length,
+                itemBuilder: (BuildContext context, int index) {
+
+
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: FilterChip(
+
+                      label: Text(categories.elementAt(index)),
+                      selected: selectedCategories.contains(categories.elementAt(index)),
+                      onSelected: (bool value) {
+
+                         setState(() {
+                           if (value) {
+                             selectedCategories.add(
+                                 categories.elementAt(index));
+
+                           } else {
+                             selectedCategories.remove(
+                                 categories.elementAt(index));
+                           }
+
+
+                           addPOIs();
+                         });
+
+                         print("categorie abilitate $selectedCategories");
+
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
 
 
+    floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 20,
+        children: [
+          FloatingActionButton(
+            onPressed: () {},
+            child: Icon(Icons.find_in_page_outlined),
+          ),
+          FloatingActionButton(
+            onPressed: () {},
+            child: Icon(Icons.abc_outlined),
+          ),
+        ],
+      ),
     );
   }
 
-  loadMap(){
+  loadMap() {
     return OSMFlutter(
+
       controller: controller,
       osmOption: OSMOption(
         userTrackingOption: const UserTrackingOption(
@@ -191,8 +226,12 @@ class _MapsState extends State<Maps> {
   Future<void> loadPOI() async {
     List<Map<String, dynamic>> list = await firebase.getPOI();
 
+
     setState(() {
+
+
       poiListD = list;
+      categories = poiListD.map((poi) => poi["category"] as String).toSet();
     });
   }
 }
