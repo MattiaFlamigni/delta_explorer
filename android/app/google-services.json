@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589220994069",
+    "project_id": "deltaexplorer-7c080",
+    "storage_bucket": "deltaexplorer-7c080.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589220994069:android:49229a8e817525bf12421c",
+        "android_client_info": {
+          "package_name": "com.example.delta_explorer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfVqLFDyjEIn83IZHn26JJgRiVd4kNyzw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
