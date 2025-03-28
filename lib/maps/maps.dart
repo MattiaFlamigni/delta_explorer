@@ -9,6 +9,10 @@ class Maps extends StatefulWidget {
   State<Maps> createState() => _MapsState();
 }
 
+
+
+
+
 class _MapsState extends State<Maps> {
   late MapController controller;
   Firebase firebase = Firebase();
@@ -36,6 +40,8 @@ class _MapsState extends State<Maps> {
       print(poiListD);
     });
   }
+
+
 
   Future<void> addPOIs() async {
     /*List<GeoPoint> poiList = [
@@ -122,37 +128,61 @@ class _MapsState extends State<Maps> {
     );
   }
 
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Mappa Delta del Po")),
-      body: OSMFlutter(
-        controller: controller,
-        osmOption: OSMOption(
-          userTrackingOption: const UserTrackingOption(
-            enableTracking: true,
-            unFollowUser: false,
+      body: loadMap(),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 20,
+        children: [
+          FloatingActionButton(
+
+              onPressed: () {  },
+              child: Icon(Icons.find_in_page_outlined)
           ),
-          zoomOption: const ZoomOption(
-            initZoom: 10,
-            minZoomLevel: 8,
-            maxZoomLevel: 16,
-            stepZoom: 1.0,
-          ),
-          userLocationMarker: UserLocationMaker(
-            personMarker: MarkerIcon(
-              icon: const Icon(
-                Icons.location_history_rounded,
-                color: Colors.blue,
-                size: 48,
-              ),
-            ),
-            directionArrowMarker: MarkerIcon(
-              icon: const Icon(Icons.gps_fixed, size: 48),
-            ),
-          ),
-          roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
+          FloatingActionButton(onPressed: (){},
+          child: Icon(Icons.abc_outlined),)
+        ],
+      ),
+
+
+    );
+  }
+
+  loadMap(){
+    return OSMFlutter(
+      controller: controller,
+      osmOption: OSMOption(
+        userTrackingOption: const UserTrackingOption(
+          enableTracking: true,
+          unFollowUser: false,
         ),
+        zoomOption: const ZoomOption(
+          initZoom: 10,
+          minZoomLevel: 8,
+          maxZoomLevel: 16,
+          stepZoom: 1.0,
+        ),
+        userLocationMarker: UserLocationMaker(
+          personMarker: MarkerIcon(
+            icon: const Icon(
+              Icons.location_history_rounded,
+              color: Colors.blue,
+              size: 48,
+            ),
+          ),
+          directionArrowMarker: MarkerIcon(
+            icon: const Icon(Icons.gps_fixed, size: 48),
+          ),
+        ),
+        roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
       ),
     );
   }
