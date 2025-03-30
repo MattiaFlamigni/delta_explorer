@@ -20,8 +20,8 @@ class _SpottedState extends State<Spotted> {
   List<Map<String, dynamic>> categoriesList = List.empty();
   TextEditingController commentText = TextEditingController();
   bool _isImagePickerActive = false;
-  String selectedCategory = "";
-  String selectedSubcategory = "";
+  String _selectedCategory = "";
+  String _selectedSubcategory = "";
   File? _image; // Variabile per immagazzinare l'immagine selezionata
 
   final ImagePicker _picker = ImagePicker();
@@ -51,7 +51,7 @@ class _SpottedState extends State<Spotted> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedCategory = categoriesList[index]["nome"];
+                      _selectedCategory = categoriesList[index]["nome"];
 
                       List<dynamic> sottocategorie =
                           categoriesList[index]["sottocategorie"];
@@ -83,35 +83,7 @@ class _SpottedState extends State<Spotted> {
             padding: EdgeInsets.only(bottom: 50),
             child: ElevatedButton(
               onPressed: () async {
-                /*if (selectedCategory.isNotEmpty) {
-
-
-                  db.addReports("", selectedCategory,
-                    commentText.text,);
-                } else {
-                  this.showSnackbar("Seleziona una categoria");
-                }*/
-
-                if (selectedCategory.isNotEmpty) {
-                  String? imageUrl;
-
-                  // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
-                  if (_image != null) {
-                    imageUrl = await uploadImage(_image!);
-                  }
-
-                  // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-                  db.addSpotted(
-                    imageUrl ?? "",
-                    selectedCategory,
-                    commentText.text,
-                    selectedSubcategory,
-                  );
-
-                  showSnackbar("Segnalazione inviata con successo!");
-                } else {
-                  showSnackbar("Seleziona una categoria");
-                }
+                await uploadSpot();
               },
               child: Text("invia Avvistamento"),
             ),
@@ -119,6 +91,29 @@ class _SpottedState extends State<Spotted> {
         ],
       ),
     );
+  }
+
+  Future<void> uploadSpot() async {
+    if (_selectedCategory.isNotEmpty) {
+      String? imageUrl;
+
+      // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
+      if (_image != null) {
+        imageUrl = await uploadImage(_image!);
+      }
+
+      // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
+      db.addSpotted(
+        imageUrl ?? "",
+        _selectedCategory,
+        commentText.text,
+        _selectedSubcategory,
+      );
+
+      showSnackbar("Segnalazione inviata con successo!");
+    } else {
+      showSnackbar("Seleziona una categoria");
+    }
   }
 
   Padding showSelectedImage() {
@@ -143,7 +138,7 @@ class _SpottedState extends State<Spotted> {
   Card cardCategory(int index) {
     return Card(
       color:
-          (selectedCategory == categoriesList[index]["nome"])
+          (_selectedCategory == categoriesList[index]["nome"])
               ? Colors.red
               : Colors.white,
       child: Column(
@@ -182,8 +177,8 @@ class _SpottedState extends State<Spotted> {
                     title: Text(sub),
                     onTap: () {
                       setState(() {
-                        selectedSubcategory = sub;
-                        print(selectedSubcategory);
+                        _selectedSubcategory = sub;
+                        print(_selectedSubcategory);
                       });
                       Navigator.pop(context);
                     },
@@ -206,20 +201,22 @@ class _SpottedState extends State<Spotted> {
     await Permission.camera
         .onDeniedCallback(() {})
         .onGrantedCallback(() async {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
-      if (image != null) {
-        setState(() {
-          _image = File(image.path);
-        });
-      }
-      _isImagePickerActive = false; // Imposta a false dopo il completamento
-    })
+          final XFile? image = await _picker.pickImage(
+            source: ImageSource.gallery,
+          );
+          if (image != null) {
+            setState(() {
+              _image = File(image.path);
+            });
+          }
+          _isImagePickerActive = false; // Imposta a false dopo il completamento
+        })
         .onPermanentlyDeniedCallback(() {
-      showSnackbar("Devi concedere i permessi per selezionare una immagine");
-      _isImagePickerActive = false; // Imposta a false in caso di errore
-    })
+          showSnackbar(
+            "Devi concedere i permessi per selezionare una immagine",
+          );
+          _isImagePickerActive = false; // Imposta a false in caso di errore
+        })
         .request();
   }
 
