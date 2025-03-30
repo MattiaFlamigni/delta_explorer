@@ -66,13 +66,7 @@ class _SpottedState extends State<Spotted> {
           ),
           Padding(
             padding: EdgeInsets.all(8),
-            child: TextFormField(
-              controller: commentText,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Commenti',
-              ),
-            ),
+            child: buildTextFormField(),
           ),
 
 
@@ -83,17 +77,7 @@ class _SpottedState extends State<Spotted> {
 
           // Mostra l'immagine selezionata (se presente)
           if (_image != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ClipRect(
-                child: Image.file(
-                  _image!,
-                  width: 150,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            showSelectedImage(),
 
           Spacer(),
 
@@ -136,6 +120,30 @@ class _SpottedState extends State<Spotted> {
         ],
       ),
     );
+  }
+
+  Padding showSelectedImage() {
+    return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ClipRect(
+              child: Image.file(
+                _image!,
+                width: 150,
+                height: 150,
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+  }
+
+  TextFormField buildTextFormField() {
+    return TextFormField(
+            controller: commentText,
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Commenti',
+            ),
+          );
   }
 
   Card cardCategory(int index) {
@@ -192,8 +200,6 @@ class _SpottedState extends State<Spotted> {
     );
   }
 
-
-  // Funzione per selezionare l'immagine
   Future<void> _pickImage() async {
     Permission.camera.request();
     await Permission.camera
@@ -213,9 +219,6 @@ class _SpottedState extends State<Spotted> {
     })
         .request();
   }
-
-
-
 
   Future<String?> uploadImage(File image) async {
     try {
@@ -240,20 +243,6 @@ class _SpottedState extends State<Spotted> {
       return null;
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   showSnackbar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(
