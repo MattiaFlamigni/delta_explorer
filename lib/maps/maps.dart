@@ -2,6 +2,8 @@ import 'package:delta_explorer/database/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
+import '../reports/reports.dart';
+
 class Maps extends StatefulWidget {
   const Maps({super.key});
 
@@ -183,7 +185,11 @@ class _MapsState extends State<Maps> {
             child: Icon(Icons.find_in_page_outlined),
           ),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const Reports()),
+              );
+            },
             child: Icon(Icons.abc_outlined),
           ),
         ],

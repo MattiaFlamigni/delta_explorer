@@ -140,6 +140,38 @@ class Firebase {
       await _db.collection('POI').add(poi);
     }
   }
+
+
+  Future<List<Map<String, dynamic>>> getData({String collection = "POI"}) async {
+    List<Map<String, dynamic>> poiList = [];
+
+    try {
+      QuerySnapshot snapshot = await _db.collection(collection).get();
+      for (var doc in snapshot.docs) {
+        poiList.add(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Error reading data: $e");
+    }
+
+    return poiList;
+  }
+
+
+
+  Future<void> addReports(String image_path, String type, String comment) async{
+    try {
+      await _db.collection('reports').add({
+        'data': DateTime.now(),
+        'image_path': image_path,
+        'comment':comment,
+        'type':type
+      });
+      print("Data added successfully!");
+    } catch (e) {
+      print("Error adding document: $e");
+    }
+  }
 }
 
 
