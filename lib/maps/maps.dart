@@ -1,4 +1,5 @@
 import 'package:delta_explorer/database/firebase.dart';
+import 'package:delta_explorer/spotted/spotted.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
@@ -181,7 +182,11 @@ class _MapsState extends State<Maps> {
         spacing: 20,
         children: [
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const Spotted()),
+              );
+            },
             child: Icon(Icons.find_in_page_outlined),
           ),
           FloatingActionButton(
