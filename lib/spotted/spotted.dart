@@ -19,6 +19,7 @@ class _SpottedState extends State<Spotted> {
   Firebase db = Firebase();
   List<Map<String, dynamic>> categoriesList = List.empty();
   TextEditingController commentText = TextEditingController();
+  bool _isImagePickerActive = false;
   String selectedCategory = "";
   String selectedSubcategory = "";
   File? _image; // Variabile per immagazzinare l'immagine selezionata
@@ -195,24 +196,30 @@ class _SpottedState extends State<Spotted> {
   }
 
   Future<void> _pickImage() async {
+    if (_isImagePickerActive) {
+      return; // Impedisci l'esecuzione se è già attivo
+    }
+
+    _isImagePickerActive = true; // Imposta a true prima di avviare
+
     Permission.camera.request();
     await Permission.camera
         .onDeniedCallback(() {})
         .onGrantedCallback(() async {
-          final XFile? image = await _picker.pickImage(
-            source: ImageSource.gallery,
-          );
-          if (image != null) {
-            setState(() {
-              _image = File(image.path); // Salva il file immagine
-            });
-          }
-        })
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+      );
+      if (image != null) {
+        setState(() {
+          _image = File(image.path);
+        });
+      }
+      _isImagePickerActive = false; // Imposta a false dopo il completamento
+    })
         .onPermanentlyDeniedCallback(() {
-          this.showSnackbar(
-            "Devi concedere i permessi per selezionare una immagine",
-          );
-        })
+      showSnackbar("Devi concedere i permessi per selezionare una immagine");
+      _isImagePickerActive = false; // Imposta a false in caso di errore
+    })
         .request();
   }
 
@@ -220,7 +227,7 @@ class _SpottedState extends State<Spotted> {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       Reference storageRef = FirebaseStorage.instance.ref().child(
-        "reports/$fileName.jpg",
+        "spotted/$fileName.jpg",
       );
 
       UploadTask uploadTask = storageRef.putFile(image);
