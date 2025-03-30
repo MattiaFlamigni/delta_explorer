@@ -5,6 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 
 
 void main() async {
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();  // Inizializza Firebase
   runApp(const MyApp());

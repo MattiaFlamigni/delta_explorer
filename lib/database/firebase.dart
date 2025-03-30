@@ -3,37 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Firebase {
   FirebaseFirestore _db = FirebaseFirestore.instance;
 
-
-  // TEST PASSED - NOT USE THIS
-  Future<void> addData() async {
-    try {
-      await _db.collection('users').add({
-        'name': 'John Doe',
-        'age': 30,
-      });
-      print("Data added successfully!");
-    } catch (e) {
-      print("Error adding document: $e");
-    }
-  }
-
-
-  Future<List<Map<String, dynamic>>> getPOI() async {
-    List<Map<String, dynamic>> poiList = [];
-
-    try {
-      QuerySnapshot snapshot = await _db.collection("POI").get();
-      for (var doc in snapshot.docs) {
-        poiList.add(doc.data() as Map<String, dynamic>);
-      }
-    } catch (e) {
-      print("Error reading data: $e");
-    }
-
-    return poiList;
-  }
-
-
+  /*SEEDER*/
   Future<void> addPOIs() async {
     List<Map<String, dynamic>> pois = [
       // Punti panoramici
@@ -140,7 +110,72 @@ class Firebase {
       await _db.collection('POI').add(poi);
     }
   }
+  void inserisciCategorie() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+    // Dati delle categorie e sottocategorie
+    Map<String, dynamic> categorie = {
+      "uccelli": {
+        "image_path":"resources/uccelli.png",
+        "nome": "Uccelli",
+        "sottocategorie": ["Uccelli acquatici", "Rapaci", "Uccelli migratori", "Altri uccelli"]
+      },
+      "mammiferi": {
+        "image_path":"resources/mammiferi.png",
+        "nome": "Mammiferi",
+        "sottocategorie": ["Mammiferi acquatici", "Cervi e caprioli", "Volpi e cinghiali", "Lupi"]
+      },
+      "pesci": {
+        "image_path":"resources/pesci.png",
+        "nome": "Pesci",
+        "sottocategorie": ["Pesci d'acqua dolce", "Pesci marini"]
+      },
+      "rettili": {
+        "image_path":"resources/rettili.png",
+        "nome": "Rettili",
+        "sottocategorie": ["Serpenti", "Lucertole", "Tartarughe"]
+      },
+      "anfibi": {
+        "image_path":"resources/anfibi.png",
+        "nome": "Anfibi",
+        "sottocategorie": ["Rane", "Salamandre", "Tritoni"]
+      },
+      "insetti": {
+        "image_path":"resources/insetti.png",
+        "nome": "Insetti",
+        "sottocategorie": ["Farfalline e falene", "Api e impollinatori", "Insetti acquatici"]
+      },
+      "altro": {
+        "image_path":"resources/altro.png",
+        "nome": "Altri Animali",
+        "sottocategorie": ["Animali invertebrati", "Animali marini", "Specie protette"]
+      }
+    };
+
+    // Inserisce i dati in Firestore
+    categorie.forEach((key, value) async {
+      await firestore.collection("categorie_animali").doc(key).set(value);
+    });
+
+    print("✅ Categorie inserite con successo!");
+  }
+  /*END_SEEDERS*/
+
+
+  Future<List<Map<String, dynamic>>> getPOI() async {
+    List<Map<String, dynamic>> poiList = [];
+
+    try {
+      QuerySnapshot snapshot = await _db.collection("POI").get();
+      for (var doc in snapshot.docs) {
+        poiList.add(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Error reading data: $e");
+    }
+
+    return poiList;
+  }
 
   Future<List<Map<String, dynamic>>> getData({String collection = "POI"}) async {
     List<Map<String, dynamic>> poiList = [];
@@ -157,8 +192,6 @@ class Firebase {
     return poiList;
   }
 
-
-
   Future<void> addReports(String image_path, String type, String comment) async{
     try {
       await _db.collection('reports').add({
@@ -166,6 +199,22 @@ class Firebase {
         'image_path': image_path,
         'comment':comment,
         'type':type
+      });
+      print("Data added successfully!");
+    } catch (e) {
+      print("Error adding document: $e");
+    }
+  }
+
+  Future<void> addSpotted(String image_path, String type, String comment, String sub) async{
+    try {
+      await _db.collection('spotted').add({
+        'data': DateTime.now(),
+        'image_path': image_path,
+        'comment':comment,
+        'category':type,
+        'subCategory':sub
+
       });
       print("Data added successfully!");
     } catch (e) {
