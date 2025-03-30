@@ -8,7 +8,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 /*TODO: GESTIRE CARICAMENTO FOTO*/
 
-
 class Spotted extends StatefulWidget {
   const Spotted({super.key});
 
@@ -17,12 +16,11 @@ class Spotted extends StatefulWidget {
 }
 
 class _SpottedState extends State<Spotted> {
-
   Firebase db = Firebase();
   List<Map<String, dynamic>> categoriesList = List.empty();
   TextEditingController commentText = TextEditingController();
   String selectedCategory = "";
-  String selectedSubcategory="";
+  String selectedSubcategory = "";
   File? _image; // Variabile per immagazzinare l'immagine selezionata
 
   final ImagePicker _picker = ImagePicker();
@@ -54,9 +52,9 @@ class _SpottedState extends State<Spotted> {
                     setState(() {
                       selectedCategory = categoriesList[index]["nome"];
 
-                      List<dynamic> sottocategorie = categoriesList[index]["sottocategorie"];
+                      List<dynamic> sottocategorie =
+                          categoriesList[index]["sottocategorie"];
                       this.showSubcategoryDialog(sottocategorie);
-
                     });
                   },
                   child: cardCategory(index),
@@ -64,20 +62,19 @@ class _SpottedState extends State<Spotted> {
               },
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(8),
-            child: buildTextFormField(),
-          ),
-
+          Padding(padding: EdgeInsets.all(8), child: buildTextFormField()),
 
           // Button per selezionare un'immagine dalla galleria
-          Padding(padding: EdgeInsets.all(8),
-              child: ElevatedButton(
-                  onPressed: _pickImage, child: Text("Carica una foto"))),
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: ElevatedButton(
+              onPressed: _pickImage,
+              child: Text("Carica una foto"),
+            ),
+          ),
 
           // Mostra l'immagine selezionata (se presente)
-          if (_image != null)
-            showSelectedImage(),
+          if (_image != null) showSelectedImage(),
 
           Spacer(),
 
@@ -94,8 +91,6 @@ class _SpottedState extends State<Spotted> {
                   this.showSnackbar("Seleziona una categoria");
                 }*/
 
-
-
                 if (selectedCategory.isNotEmpty) {
                   String? imageUrl;
 
@@ -105,7 +100,12 @@ class _SpottedState extends State<Spotted> {
                   }
 
                   // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-                  db.addSpotted(imageUrl ?? "", selectedCategory, commentText.text, selectedSubcategory);
+                  db.addSpotted(
+                    imageUrl ?? "",
+                    selectedCategory,
+                    commentText.text,
+                    selectedSubcategory,
+                  );
 
                   showSnackbar("Segnalazione inviata con successo!");
                 } else {
@@ -115,8 +115,6 @@ class _SpottedState extends State<Spotted> {
               child: Text("invia Avvistamento"),
             ),
           ),
-
-
         ],
       ),
     );
@@ -124,34 +122,29 @@ class _SpottedState extends State<Spotted> {
 
   Padding showSelectedImage() {
     return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ClipRect(
-              child: Image.file(
-                _image!,
-                width: 150,
-                height: 150,
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
+      padding: const EdgeInsets.all(8.0),
+      child: ClipRect(
+        child: Image.file(_image!, width: 150, height: 150, fit: BoxFit.cover),
+      ),
+    );
   }
 
   TextFormField buildTextFormField() {
     return TextFormField(
-            controller: commentText,
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Commenti',
-            ),
-          );
+      controller: commentText,
+      decoration: const InputDecoration(
+        border: UnderlineInputBorder(),
+        labelText: 'Commenti',
+      ),
+    );
   }
 
   Card cardCategory(int index) {
     return Card(
       color:
-      (selectedCategory == categoriesList[index]["nome"])
-          ? Colors.red
-          : Colors.white,
+          (selectedCategory == categoriesList[index]["nome"])
+              ? Colors.red
+              : Colors.white,
       child: Column(
         children: [
           Text(categoriesList[index]["nome"]),
@@ -182,18 +175,19 @@ class _SpottedState extends State<Spotted> {
           title: Text("Seleziona sottocategoria"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: subcategories.map((sub) {
-              return ListTile(
-                title: Text(sub),
-                onTap: () {
-                  setState(() {
-                    selectedSubcategory = sub;
-                    print(selectedSubcategory);
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
+            children:
+                subcategories.map((sub) {
+                  return ListTile(
+                    title: Text(sub),
+                    onTap: () {
+                      setState(() {
+                        selectedSubcategory = sub;
+                        print(selectedSubcategory);
+                      });
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
           ),
         );
       },
@@ -205,29 +199,31 @@ class _SpottedState extends State<Spotted> {
     await Permission.camera
         .onDeniedCallback(() {})
         .onGrantedCallback(() async {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
-      if (image != null) {
-        setState(() {
-          _image = File(image.path); // Salva il file immagine
-        });
-      }
-    })
+          final XFile? image = await _picker.pickImage(
+            source: ImageSource.gallery,
+          );
+          if (image != null) {
+            setState(() {
+              _image = File(image.path); // Salva il file immagine
+            });
+          }
+        })
         .onPermanentlyDeniedCallback(() {
-      this.showSnackbar("Devi concedere i permessi per selezionare una immagine");
-    })
+          this.showSnackbar(
+            "Devi concedere i permessi per selezionare una immagine",
+          );
+        })
         .request();
   }
 
   Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child("reports/$fileName.jpg");
+      Reference storageRef = FirebaseStorage.instance.ref().child(
+        "reports/$fileName.jpg",
+      );
 
       UploadTask uploadTask = storageRef.putFile(image);
-
-
 
       uploadTask.snapshotEvents.listen((event) {
         print("Upload: ${event.bytesTransferred}/${event.totalBytes}");
@@ -245,10 +241,6 @@ class _SpottedState extends State<Spotted> {
   }
 
   showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 }
