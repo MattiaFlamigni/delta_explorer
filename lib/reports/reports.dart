@@ -15,11 +15,11 @@ class Reports extends StatefulWidget {
 
 class _ReportsState extends State<Reports> {
   //final supabase = Supabase.instance.client;
-  Firebase db = Firebase();
+  final Firebase _db = Firebase();
   bool _isImagePickerActive = false;
-  List<Map<String, dynamic>> categoriesList = List.empty();
-  TextEditingController commentText = TextEditingController();
-  String selectedCategory = "";
+  List<Map<String, dynamic>> _categoriesList = List.empty();
+  final TextEditingController _commentText = TextEditingController();
+  String _selectedCategory = "";
   File? _image;
 
   final ImagePicker _picker = ImagePicker();
@@ -43,12 +43,12 @@ class _ReportsState extends State<Reports> {
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
               ),
-              itemCount: categoriesList.length,
+              itemCount: _categoriesList.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedCategory = categoriesList[index]["title"];
+                      _selectedCategory = _categoriesList[index]["title"];
                     });
                   },
                   child: cardCategory(index),
@@ -56,76 +56,74 @@ class _ReportsState extends State<Reports> {
               },
             ),
           ),
+          Padding(padding: EdgeInsets.all(8), child: buildTextFormField()),
+
           Padding(
             padding: EdgeInsets.all(8),
-            child: TextFormField(
-              controller: commentText,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Commenti',
-              ),
+            child: ElevatedButton(
+              onPressed: _pickImage,
+              child: Text("Carica una foto"),
             ),
           ),
-
-
-          // Button per selezionare un'immagine dalla galleria
-          Padding(padding: EdgeInsets.all(8),
-              child: ElevatedButton(
-                  onPressed: _pickImage, child: Text("Carica una foto"))),
 
           // Mostra l'immagine selezionata (se presente)
           if (_image != null)
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ClipRect(
-                child: Image.file(
-                  _image!,
-                  width: 150,
-                  height: 150,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              child: showSelectedImage(),
             ),
 
-          Spacer(),
+          const Spacer(),
 
           Padding(
             padding: EdgeInsets.only(bottom: 50),
             child: ElevatedButton(
               onPressed: () async {
-                /*if (selectedCategory.isNotEmpty) {
-
-
-                  db.addReports("", selectedCategory,
-                    commentText.text,);
-                } else {
-                  this.showSnackbar("Seleziona una categoria");
-                }*/
-
-
-
-                if (selectedCategory.isNotEmpty) {
-                  String? imageUrl;
-
-                  // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
-                  if (_image != null) {
-                    imageUrl = await uploadImage(_image!);
-                  }
-
-                  // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-                  db.addReports(imageUrl ?? "", selectedCategory, commentText.text);
-
-                  showSnackbar("Segnalazione inviata con successo!");
-                } else {
-                  showSnackbar("Seleziona una categoria");
-                }
+                await submitReport();
               },
               child: Text("invia segnalazione"),
             ),
           ),
-
-
         ],
+      ),
+    );
+  }
+
+  ClipRect showSelectedImage() {
+    return ClipRect(
+              child: Image.file(
+                _image!,
+                width: 150,
+                height: 150,
+                fit: BoxFit.cover,
+              ),
+            );
+  }
+
+  Future<void> submitReport() async {
+    if (_selectedCategory.isNotEmpty) {
+      String? imageUrl;
+
+      // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
+      if (_image != null) {
+        imageUrl = await uploadImage(_image!);
+      }
+
+      // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
+      _db.addReports(imageUrl ?? "", _selectedCategory, _commentText.text);
+
+      showSnackbar("Segnalazione inviata con successo!");
+    } else {
+      showSnackbar("Seleziona una categoria");
+    }
+  }
+
+  TextFormField buildTextFormField() {
+    return TextFormField(
+      controller: _commentText,
+      decoration: const InputDecoration(
+        border: UnderlineInputBorder(),
+        labelText: 'Commenti',
       ),
     );
   }
@@ -133,14 +131,14 @@ class _ReportsState extends State<Reports> {
   Card cardCategory(int index) {
     return Card(
       color:
-      (selectedCategory == categoriesList[index]["title"])
-          ? Colors.red
-          : Colors.white,
+          (_selectedCategory == _categoriesList[index]["title"])
+              ? Colors.red
+              : Colors.white,
       child: Column(
         children: [
-          Text(categoriesList[index]["title"]),
+          Text(_categoriesList[index]["title"]),
           Image.asset(
-            'assets/${categoriesList[index]["image_path"]}',
+            'assets/${_categoriesList[index]["image_path"]}',
             fit: BoxFit.cover,
             width: 70,
             height: 70,
@@ -151,9 +149,9 @@ class _ReportsState extends State<Reports> {
   }
 
   loadCategories() async {
-    var categories = await db.getData(collection: "reports_category");
+    var categories = await _db.getData(collection: "reports_category");
     setState(() {
-      this.categoriesList = categories;
+      this._categoriesList = categories;
     });
   }
 
@@ -169,34 +167,33 @@ class _ReportsState extends State<Reports> {
     await Permission.camera
         .onDeniedCallback(() {})
         .onGrantedCallback(() async {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-      );
-      if (image != null) {
-        setState(() {
-          _image = File(image.path);
-        });
-      }
-      _isImagePickerActive = false; // Imposta a false dopo il completamento
-    })
+          final XFile? image = await _picker.pickImage(
+            source: ImageSource.gallery,
+          );
+          if (image != null) {
+            setState(() {
+              _image = File(image.path);
+            });
+          }
+          _isImagePickerActive = false; // Imposta a false dopo il completamento
+        })
         .onPermanentlyDeniedCallback(() {
-      showSnackbar("Devi concedere i permessi per selezionare una immagine");
-      _isImagePickerActive = false; // Imposta a false in caso di errore
-    })
+          showSnackbar(
+            "Devi concedere i permessi per selezionare una immagine",
+          );
+          _isImagePickerActive = false; // Imposta a false in caso di errore
+        })
         .request();
   }
-
-
-
 
   Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child("reports/$fileName.jpg");
+      Reference storageRef = FirebaseStorage.instance.ref().child(
+        "reports/$fileName.jpg",
+      );
 
       UploadTask uploadTask = storageRef.putFile(image);
-
-
 
       uploadTask.snapshotEvents.listen((event) {
         print("Upload: ${event.bytesTransferred}/${event.totalBytes}");
@@ -213,25 +210,7 @@ class _ReportsState extends State<Reports> {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(text),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 }
