@@ -1,8 +1,11 @@
+import 'dart:ffi';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/database/firebase.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -21,16 +24,28 @@ class _ReportsState extends State<Reports> {
   final TextEditingController _commentText = TextEditingController();
   String _selectedCategory = "";
   File? _image;
+  bool _canSendReports = true ; //se utente consente i permessi il bottone invia è abilitato
+
 
   final ImagePicker _picker = ImagePicker();
+  Position? position;
+
 
   @override
   void initState() {
+
     super.initState();
     setState(() {
       this.loadCategories();
     });
   }
+
+
+  Future<void> updatePosition() async {
+    this.position = await this.getUserLocation();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +94,14 @@ class _ReportsState extends State<Reports> {
             padding: EdgeInsets.only(bottom: 50),
             child: ElevatedButton(
               onPressed: () async {
-                await submitReport();
+                await this.updatePosition();
+                if(_canSendReports){
+                  await submitReport();
+                }else{
+                  this.showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
+                }
+
+                print("posso inviare? $_canSendReports");
               },
               child: Text("invia segnalazione"),
             ),
@@ -104,13 +126,17 @@ class _ReportsState extends State<Reports> {
     if (_selectedCategory.isNotEmpty) {
       String? imageUrl;
 
+
+
       // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
       if (_image != null) {
         imageUrl = await uploadImage(_image!);
       }
 
+
+      GeoPoint geopoint = position!=null?GeoPoint(position!.latitude, position!.longitude):GeoPoint(0, 0);
       // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-      _db.addReports(imageUrl ?? "", _selectedCategory, _commentText.text);
+      _db.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
 
       showSnackbar("Segnalazione inviata con successo!");
     } else {
@@ -213,4 +239,45 @@ class _ReportsState extends State<Reports> {
   showSnackbar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
+
+
+
+
+  Future<Position?> getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Controlla se il GPS è attivo
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print("GPS disabilitato");
+      _canSendReports = false;
+      return null;
+    }
+
+    // Controlla i permessi
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _canSendReports = false;
+        this.showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      print("Permessi negati permanentemente");
+      _canSendReports = false;
+      return null;
+    }
+
+    // Ottieni la posizione corrente
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+  }
+
+
+
 }

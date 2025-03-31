@@ -192,13 +192,14 @@ class Firebase {
     return poiList;
   }
 
-  Future<void> addReports(String image_path, String type, String comment) async{
+  Future<void> addReports(String image_path, String type, String comment, GeoPoint geopoint) async{
     try {
       await _db.collection('reports').add({
         'data': DateTime.now(),
         'image_path': image_path,
         'comment':comment,
-        'type':type
+        'type':type,
+        'position':geopoint
       });
       print("Data added successfully!");
     } catch (e) {
