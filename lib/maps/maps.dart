@@ -1,9 +1,8 @@
 import 'package:delta_explorer/database/firebase.dart';
-import 'package:delta_explorer/spotted/spotted.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
-import '../reports/reports.dart';
+import '../../reports/reports.dart';
 
 class Maps extends StatefulWidget {
   const Maps({super.key});
@@ -47,6 +46,9 @@ class _MapsState extends State<Maps> {
 
 
   Future<void> addPOIs() async {
+
+
+    controller.removeMarkers(await controller.geopoints);
 
 
 
@@ -182,11 +184,7 @@ class _MapsState extends State<Maps> {
         spacing: 20,
         children: [
           FloatingActionButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const Spotted()),
-              );
-            },
+            onPressed: () {},
             child: Icon(Icons.find_in_page_outlined),
           ),
           FloatingActionButton(
@@ -235,7 +233,7 @@ class _MapsState extends State<Maps> {
   }
 
   Future<void> loadPOI() async {
-    List<Map<String, dynamic>> list = await firebase.getPOI();
+    List<Map<String, dynamic>> list = await firebase.getData();
 
 
     setState(() {
