@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/database/firebase.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-/*TODO: GESTIRE CARICAMENTO FOTO*/
 
 class Spotted extends StatefulWidget {
   const Spotted({super.key});
@@ -18,160 +15,209 @@ class Spotted extends StatefulWidget {
 }
 
 class _SpottedState extends State<Spotted> {
-  Firebase db = Firebase();
-  List<Map<String, dynamic>> categoriesList = List.empty();
-  TextEditingController commentText = TextEditingController();
-  bool _isImagePickerActive = false;
+  final Firebase db = Firebase();
+  final TextEditingController commentText = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+
+  List<Map<String, dynamic>> categoriesList = [];
   String _selectedCategory = "";
   String _selectedSubcategory = "";
-  File? _image; // Variabile per immagazzinare l'immagine selezionata
-  bool _canSendReports = true ; //se utente consente i permessi il bottone invia è abilitato
+  File? _image;
+  bool _canSendReports = true;
+  bool _isImagePickerActive = false;
+  int numSpotted = 1;
   Position? position;
-
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      // seeder: db.inserisciCategorie();
-      this.loadCategories();
-    });
+    loadCategories();
+  }
+
+  Future<void> loadCategories() async {
+    var categories = await db.getData(collection: "categorie_animali");
+    setState(() => categoriesList = categories);
+  }
+
+  Future<void> _pickImage() async {
+    if (_isImagePickerActive) return;
+    _isImagePickerActive = true;
+
+    Permission.camera.request();
+    await Permission.camera.onGrantedCallback(() async {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) setState(() => _image = File(image.path));
+    }).onPermanentlyDeniedCallback(() => showSnackbar("Devi concedere i permessi per selezionare una immagine")).request();
+
+    _isImagePickerActive = false;
+  }
+
+  Future<void> uploadSpot() async {
+    if (_selectedCategory.isEmpty) {
+      showSnackbar("Seleziona una categoria");
+      return;
+    }
+
+    String? imageUrl;
+    if (_image != null) imageUrl = await uploadImage(_image!);
+
+    GeoPoint geopoint = position != null
+        ? GeoPoint(position!.latitude, position!.longitude)
+        : GeoPoint(0, 0);
+
+    db.addSpotted(imageUrl ?? "", _selectedCategory, commentText.text, _selectedSubcategory, geopoint);
+    showSnackbar("Segnalazione inviata con successo!");
+  }
+
+  Future<String?> uploadImage(File image) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference storageRef = FirebaseStorage.instance.ref().child("spotted/$fileName.jpg");
+      UploadTask uploadTask = storageRef.putFile(image);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print("Errore nel caricamento: $e");
+      return null;
+    }
+  }
+
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Segnala problema")),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              itemCount: categoriesList.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = categoriesList[index]["nome"];
-
-                      List<dynamic> sottocategorie =
-                          categoriesList[index]["sottocategorie"];
-                      this.showSubcategoryDialog(sottocategorie);
-                    });
-                  },
-                  child: cardCategory(index),
-                );
-              },
-            ),
-          ),
-          Padding(padding: EdgeInsets.all(8), child: buildTextFormField()),
-
-          // Button per selezionare un'immagine dalla galleria
-          Padding(
-            padding: EdgeInsets.all(8),
-            child: ElevatedButton(
-              onPressed: _pickImage,
-              child: Text("Carica una foto"),
-            ),
-          ),
-
-          // Mostra l'immagine selezionata (se presente)
-          if (_image != null) showSelectedImage(),
-
-          Spacer(),
-
-          Padding(
-            padding: EdgeInsets.only(bottom: 50),
-            child: ElevatedButton(
-              onPressed: () async {
-                await this.updatePosition();
-                if(_canSendReports) {
-                  await uploadSpot();
-                }else{
-                  this.showSnackbar("Permessi non abilitati - Attivali per inviare");
-                }
-              },
-              child: Text("invia Avvistamento"),
-            ),
-          ),
-        ],
+      appBar: AppBar(title: const Text("Segnala Avvistamento")),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: buildCategoryGrid()),
+            const SizedBox(height: 10),
+            buildTextFormField(),
+            const SizedBox(height: 10),
+            buildImagePicker(),
+            const SizedBox(height: 10),
+            buildCounterRow(),
+            const SizedBox(height: 10),
+            buildSendButton(),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> uploadSpot() async {
-    if (_selectedCategory.isNotEmpty) {
-      String? imageUrl;
-
-      // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
-      if (_image != null) {
-        imageUrl = await uploadImage(_image!);
-      }
-
-      GeoPoint geopoint = position!=null?GeoPoint(position!.latitude, position!.longitude):GeoPoint(0, 0);
-      // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-      db.addSpotted(
-        imageUrl ?? "",
-        _selectedCategory,
-        commentText.text,
-        _selectedSubcategory,
-        geopoint
-      );
-
-      showSnackbar("Segnalazione inviata con successo!");
-    } else {
-      showSnackbar("Seleziona una categoria");
-    }
-  }
-
-  Padding showSelectedImage() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRect(
-        child: Image.file(_image!, width: 150, height: 150, fit: BoxFit.cover),
+  Widget buildCategoryGrid() {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 3 / 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
       ),
+      itemCount: categoriesList.length,
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedCategory = categoriesList[index]["nome"];
+              showSubcategoryDialog(categoriesList[index]["sottocategorie"]);
+            });
+          },
+          child: cardCategory(index),
+        );
+      },
     );
   }
 
-  TextFormField buildTextFormField() {
+  Widget buildTextFormField() {
     return TextFormField(
       controller: commentText,
       decoration: const InputDecoration(
-        border: UnderlineInputBorder(),
+        border: OutlineInputBorder(),
         labelText: 'Commenti',
       ),
     );
   }
 
-  Card cardCategory(int index) {
-    return Card(
-      color:
-          (_selectedCategory == categoriesList[index]["nome"])
-              ? Colors.red
-              : Colors.white,
-      child: Column(
-        children: [
-          Text(categoriesList[index]["nome"]),
-          Image.asset(
-            'assets/${categoriesList[index]["image_path"]}',
-            fit: BoxFit.cover,
-            width: 70,
-            height: 70,
-          ), //resources/prova.png
-        ],
+  Widget buildImagePicker() {
+    return Column(
+      children: [
+        ElevatedButton(onPressed: _pickImage, child: const Text("Carica una foto")),
+        if (_image != null) showSelectedImage(),
+      ],
+    );
+  }
+
+  Widget buildCounterRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(onPressed: () => setState(() => numSpotted = (numSpotted > 1) ? numSpotted - 1 : 1), icon: const Icon(Icons.remove)),
+        Text(numSpotted.toString(), style: const TextStyle(fontSize: 24)),
+        IconButton(onPressed: () => setState(() => numSpotted++), icon: const Icon(Icons.add)),
+      ],
+    );
+  }
+
+  Widget buildSendButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        if (_canSendReports) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return const AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 10),
+                    Text("Invio in corso..."),
+                  ],
+                ),
+              );
+            },
+          );
+
+          await uploadSpot();
+          Navigator.pop(context); // Chiude il dialogo di caricamento
+        } else {
+          showSnackbar("Permessi non abilitati - Attivali per inviare");
+        }
+
+
+        Navigator.pop(context);
+      },
+      child: const Text("Invia Avvistamento"),
+    );
+  }
+
+  Widget showSelectedImage() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(_image!, width: 150, height: 150, fit: BoxFit.cover),
       ),
     );
   }
 
-  loadCategories() async {
-    var categories = await db.getData(collection: "categorie_animali");
-    setState(() {
-      this.categoriesList = categories;
-      print(categoriesList);
-    });
+  Widget cardCategory(int index) {
+    return Card(
+      color: (_selectedCategory == categoriesList[index]["nome"]) ? Colors.red : Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(categoriesList[index]["nome"]),
+          Image.asset('assets/${categoriesList[index]["image_path"]}', width: 50, height: 50),
+        ],
+      ),
+    );
   }
 
   void showSubcategoryDialog(List<dynamic> subcategories) {
@@ -179,124 +225,19 @@ class _SpottedState extends State<Spotted> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Seleziona sottocategoria"),
+          title: const Text("Seleziona sottocategoria"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children:
-                subcategories.map((sub) {
-                  return ListTile(
-                    title: Text(sub),
-                    onTap: () {
-                      setState(() {
-                        _selectedSubcategory = sub;
-                        print(_selectedSubcategory);
-                      });
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
+            children: subcategories.map((sub) => ListTile(
+              title: Text(sub),
+              onTap: () {
+                setState(() => _selectedSubcategory = sub);
+                Navigator.pop(context);
+              },
+            )).toList(),
           ),
         );
       },
     );
   }
-
-  Future<void> _pickImage() async {
-    if (_isImagePickerActive) {
-      return; // Impedisci l'esecuzione se è già attivo
-    }
-
-    _isImagePickerActive = true; // Imposta a true prima di avviare
-
-    Permission.camera.request();
-    await Permission.camera
-        .onDeniedCallback(() {})
-        .onGrantedCallback(() async {
-          final XFile? image = await _picker.pickImage(
-            source: ImageSource.gallery,
-          );
-          if (image != null) {
-            setState(() {
-              _image = File(image.path);
-            });
-          }
-          _isImagePickerActive = false; // Imposta a false dopo il completamento
-        })
-        .onPermanentlyDeniedCallback(() {
-          showSnackbar(
-            "Devi concedere i permessi per selezionare una immagine",
-          );
-          _isImagePickerActive = false; // Imposta a false in caso di errore
-        })
-        .request();
-  }
-
-  Future<String?> uploadImage(File image) async {
-    try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child(
-        "spotted/$fileName.jpg",
-      );
-
-      UploadTask uploadTask = storageRef.putFile(image);
-
-      uploadTask.snapshotEvents.listen((event) {
-        print("Upload: ${event.bytesTransferred}/${event.totalBytes}");
-      });
-
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-
-      print("Immagine caricata: $downloadUrl");
-      return downloadUrl;
-    } catch (e, stacktrace) {
-      print("Errore nel caricamento: $e");
-      return null;
-    }
-  }
-
-  showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-
-  Future<Position?> getUserLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Controlla se il GPS è attivo
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print("GPS disabilitato");
-      _canSendReports = false;
-      return null;
-    }
-
-    // Controlla i permessi
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _canSendReports = false;
-        this.showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
-        return null;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      print("Permessi negati permanentemente");
-      _canSendReports = false;
-      return null;
-    }
-
-    // Ottieni la posizione corrente
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-  }
-
-  Future<void> updatePosition() async {
-    this.position = await this.getUserLocation();
-  }
-
 }
