@@ -207,14 +207,15 @@ class Firebase {
     }
   }
 
-  Future<void> addSpotted(String image_path, String type, String comment, String sub) async{
+  Future<void> addSpotted(String image_path, String type, String comment, String sub, GeoPoint geopoint) async{
     try {
       await _db.collection('spotted').add({
         'data': DateTime.now(),
         'image_path': image_path,
         'comment':comment,
         'category':type,
-        'subCategory':sub
+        'subCategory':sub,
+        'location':geopoint
 
       });
       print("Data added successfully!");
