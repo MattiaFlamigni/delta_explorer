@@ -369,14 +369,14 @@ class _MapsState extends State<Maps> {
 
   Future<void> loadPOI() async {
     List<Map<String, dynamic>> list = await firebase.getData();
-    List<Map<String, dynamic>> list2 = await firebase.getData(
-      collection: "spotted",
-    );
+    List<Map<String, dynamic>> list2 = await firebase.getTodaySpotted();
 
+    print("dimensione ${list2.length}");
     setState(() {
       poiListD = list;
       categories = poiListD.map((poi) => poi["category"] as String).toSet();
-      spottedList = list2;
+      this.spottedList = list2;
+
     });
   }
 }

@@ -192,6 +192,32 @@ class Firebase {
     return poiList;
   }
 
+
+
+
+  Future<List<Map<String, dynamic>>> getTodaySpotted() async {
+    List<Map<String, dynamic>> poiList = [];
+    DateTime todayStart = DateTime.now().toLocal().copyWith(
+        hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0
+    );
+    DateTime todayEnd = todayStart.add(Duration(days: 1)); // Fine della giornata
+
+    try {
+      QuerySnapshot snapshot = await _db.collection("spotted")
+          .where("data", isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart))
+          .where("data", isLessThan: Timestamp.fromDate(todayEnd))
+          .get(); // Manca get() nella tua query
+
+      for (var doc in snapshot.docs) {
+        poiList.add(doc.data() as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print("Error reading data: $e");
+    }
+
+    return poiList;
+  }
+
   Future<void> addReports(String image_path, String type, String comment, GeoPoint geopoint) async{
     try {
       await _db.collection('reports').add({
@@ -210,7 +236,8 @@ class Firebase {
   Future<void> addSpotted(String image_path, String type, String comment, String sub, GeoPoint geopoint) async{
     try {
       await _db.collection('spotted').add({
-        'data': DateTime.now(),
+        'data': DateTime.now().toLocal().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0),
+
         'image_path': image_path,
         'comment':comment,
         'category':type,
