@@ -5,6 +5,9 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import '../../reports/reports.dart';
 import '../spotted/spotted.dart';
 
+
+/*TODO: AGGIUNGERE IMMAGINI A BOTTOMSHEET => IMMAGINI RELATIVI POI*/
+
 class Maps extends StatefulWidget {
   const Maps({super.key});
 
@@ -41,7 +44,102 @@ class _MapsState extends State<Maps> {
       selectedCategories.addAll(categories);
       await addPOIs(); // Aggiunge i POI
       print(poiListD);
+
+
+
+      // 🔥 Verifica se il listener è stato correttamente impostato
+      controller.listenerMapSingleTapping.addListener(() async {
+        var tappedPoint = controller.listenerMapSingleTapping.value;
+        if (tappedPoint != null) {
+          print("Hai toccato: ${tappedPoint.latitude}, ${tappedPoint.longitude}");
+          _handleMarkerTap(tappedPoint);
+        }
+      });
+
+      print("Listener attivato");
+
+
+
+
+
     });
+  }
+
+
+
+  void _handleMarkerTap(GeoPoint tappedPoint) {
+    for (var poi in poiListD) {
+      GeoPoint geoPoint = GeoPoint(
+        latitude: poi["location"].latitude,
+        longitude: poi["location"].longitude,
+      );
+
+      if (_isSameLocation(geoPoint, tappedPoint)) {
+        // Se il tocco corrisponde a un marker, mostra un dialog con i dettagli
+
+
+        /*print('titolo $poi["title"]');
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Dettagli POI"),
+              content: Text("Categoria: ${poi["category"]}"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Chiudi"),
+                ),
+              ],
+            );
+          },
+        );
+        break;*/
+
+
+        showModalBottomSheet(
+          context: context,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (context) {
+            return Container(
+              width: double.infinity, // Occupa tutta la larghezza disponibile
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start, // Allinea il testo a sinistra
+                children: [
+                  Text(poi["title"], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Text(poi["description"]),
+                  SizedBox(height: 20),
+                  Center( // Per centrare il pulsante
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("Chiudi"),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+
+
+
+
+      }
+    }
+  }
+
+// Controlla se due punti sono molto vicini
+  bool _isSameLocation(GeoPoint p1, GeoPoint p2) {
+    //const double threshold = 0.0001; // Soglia per considerare due punti uguali
+    const double threshold = 0.01;
+    return (p1.latitude - p2.latitude).abs() < threshold &&
+        (p1.longitude - p2.longitude).abs() < threshold;
   }
 
 
@@ -74,11 +172,20 @@ class _MapsState extends State<Maps> {
               iconWidget: Transform.rotate(
                 angle: 3.1416,
                 // 180 gradi in radianti, altrimenti viene capovolta....
-                child: Icon(Icons.place_outlined, color: Colors.red, size: 48),
+                child: Icon(Icons.place_outlined, color: Colors.red, size: 30),
               ),
+
             ),
+
+
           );
-          setState(() {
+
+
+
+
+
+
+    setState(() {
 
           });
         }
@@ -212,7 +319,7 @@ class _MapsState extends State<Maps> {
       osmOption: OSMOption(
         userTrackingOption: const UserTrackingOption(
           enableTracking: true,
-          unFollowUser: false,
+          unFollowUser: true,
         ),
         zoomOption: const ZoomOption(
           initZoom: 10,
