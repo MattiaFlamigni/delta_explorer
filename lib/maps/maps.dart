@@ -5,8 +5,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import '../../reports/reports.dart';
 import '../spotted/spotted.dart';
 
-
-/*TODO: AGGIUNGERE IMMAGINI A BOTTOMSHEET => IMMAGINI RELATIVI POI*/
+/*TODO: AGGIUNGERE IMMAGINI AI BOTTOMSHEET => IMMAGINI RELATIVI POI*/
 
 class Maps extends StatefulWidget {
   const Maps({super.key});
@@ -20,15 +19,15 @@ class _MapsState extends State<Maps> {
   Firebase firebase = Firebase();
 
   List<Map<String, dynamic>> poiListD = List.empty();
-  Set<String> selectedCategories =  {};
-  Set<String> categories =  {};
+  List<Map<String, dynamic>> spottedList = List.empty();
+  Set<String> selectedCategories = {};
+  Set<String> categories = {};
 
   @override
   void initState() {
     super.initState();
 
     //firebase.addPOIs();
-
 
     controller = MapController(
       initPosition: GeoPoint(latitude: 45.0639, longitude: 12.2777),
@@ -45,29 +44,23 @@ class _MapsState extends State<Maps> {
       await addPOIs(); // Aggiunge i POI
       print(poiListD);
 
-
-
       // 🔥 Verifica se il listener è stato correttamente impostato
       controller.listenerMapSingleTapping.addListener(() async {
         var tappedPoint = controller.listenerMapSingleTapping.value;
         if (tappedPoint != null) {
-          print("Hai toccato: ${tappedPoint.latitude}, ${tappedPoint.longitude}");
+          print(
+            "Hai toccato: ${tappedPoint.latitude}, ${tappedPoint.longitude}",
+          );
           _handleMarkerTap(tappedPoint);
         }
       });
 
       print("Listener attivato");
-
-
-
-
-
     });
   }
 
-
-
   void _handleMarkerTap(GeoPoint tappedPoint) {
+
     for (var poi in poiListD) {
       GeoPoint geoPoint = GeoPoint(
         latitude: poi["location"].latitude,
@@ -75,27 +68,6 @@ class _MapsState extends State<Maps> {
       );
 
       if (_isSameLocation(geoPoint, tappedPoint)) {
-        // Se il tocco corrisponde a un marker, mostra un dialog con i dettagli
-
-
-        /*print('titolo $poi["title"]');
-
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Dettagli POI"),
-              content: Text("Categoria: ${poi["category"]}"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text("Chiudi"),
-                ),
-              ],
-            );
-          },
-        );
-        break;*/
 
 
         showModalBottomSheet(
@@ -109,13 +81,18 @@ class _MapsState extends State<Maps> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start, // Allinea il testo a sinistra
+                crossAxisAlignment: CrossAxisAlignment.start,
+                // Allinea il testo a sinistra
                 children: [
-                  Text(poi["title"], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    poi["title"],
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 10),
                   Text(poi["description"]),
                   SizedBox(height: 20),
-                  Center( // Per centrare il pulsante
+                  Center(
+                    // Per centrare il pulsante
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text("Chiudi"),
@@ -126,15 +103,57 @@ class _MapsState extends State<Maps> {
             );
           },
         );
+      }
+    }
 
 
+    for (var poi in spottedList) {
+      GeoPoint geoPoint = GeoPoint(
+        latitude: poi["location"].latitude,
+        longitude: poi["location"].longitude,
+      );
+
+      if (_isSameLocation(geoPoint, tappedPoint)) {
 
 
+        showModalBottomSheet(
+          context: context,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (context) {
+            return Container(
+              width: double.infinity, // Occupa tutta la larghezza disponibile
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                // Allinea il testo a sinistra
+                children: [
+                  Text(
+                    poi["category"],
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  Text(poi["subCategory"]),
+                  SizedBox(height: 20),
+                  Center(
+                    // Per centrare il pulsante
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("Chiudi"),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       }
     }
   }
 
-// Controlla se due punti sono molto vicini
+  // Controlla se due punti sono molto vicini
   bool _isSameLocation(GeoPoint p1, GeoPoint p2) {
     //const double threshold = 0.0001; // Soglia per considerare due punti uguali
     const double threshold = 0.01;
@@ -142,14 +161,8 @@ class _MapsState extends State<Maps> {
         (p1.longitude - p2.longitude).abs() < threshold;
   }
 
-
-
   Future<void> addPOIs() async {
-
-
     controller.removeMarkers(await controller.geopoints);
-
-
 
     /*List<GeoPoint> poiList = [
       GeoPoint(latitude: 45.08, longitude: 12.29), // Esempio POI 1
@@ -167,32 +180,52 @@ class _MapsState extends State<Maps> {
           await controller.addMarker(
             geoPoint,
 
-
             markerIcon: MarkerIcon(
               iconWidget: Transform.rotate(
                 angle: 3.1416,
                 // 180 gradi in radianti, altrimenti viene capovolta....
                 child: Icon(Icons.place_outlined, color: Colors.red, size: 30),
               ),
-
             ),
-
-
           );
 
-
-
-
-
-
-    setState(() {
-
-          });
+          setState(() {});
         }
       } else {
         print("Errore: il POI non contiene coordinate valide.");
       }
     }
+
+
+    for (var spotted in spottedList) {
+      if (spotted.containsKey("category")) {
+        if (true) {
+          GeoPoint geoPoint = GeoPoint(
+            latitude: spotted["location"].latitude,
+            longitude: spotted["location"].longitude,
+          );
+
+          await controller.addMarker(
+            geoPoint,
+
+            markerIcon: MarkerIcon(
+              iconWidget: Transform.rotate(
+                angle: 3.1416,
+                // 180 gradi in radianti, altrimenti viene capovolta....
+                child: Icon(Icons.place_outlined, color: Colors.blue, size: 30),
+              ),
+            ),
+          );
+
+          setState(() {});
+        }
+      } else {
+        print("Errore: il POI non contiene coordinate valide.");
+      }
+    }
+
+
+
 
     // Forza l'aggiornamento della UI per vedere i marker
     setState(() {});
@@ -235,9 +268,7 @@ class _MapsState extends State<Maps> {
       body: Stack(
         children: [
           // La mappa
-          Positioned.fill(
-            child: loadMap(),
-          ),
+          Positioned.fill(child: loadMap()),
           // Filtri sopra la mappa
           Positioned(
             top: 10,
@@ -249,33 +280,27 @@ class _MapsState extends State<Maps> {
                 scrollDirection: Axis.horizontal, // Scorrimento orizzontale
                 itemCount: categories.length,
                 itemBuilder: (BuildContext context, int index) {
-
-
-
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: FilterChip(
-
                       label: Text(categories.elementAt(index)),
-                      selected: selectedCategories.contains(categories.elementAt(index)),
+                      selected: selectedCategories.contains(
+                        categories.elementAt(index),
+                      ),
                       onSelected: (bool value) {
+                        setState(() {
+                          if (value) {
+                            selectedCategories.add(categories.elementAt(index));
+                          } else {
+                            selectedCategories.remove(
+                              categories.elementAt(index),
+                            );
+                          }
 
-                         setState(() {
-                           if (value) {
-                             selectedCategories.add(
-                                 categories.elementAt(index));
+                          addPOIs();
+                        });
 
-                           } else {
-                             selectedCategories.remove(
-                                 categories.elementAt(index));
-                           }
-
-
-                           addPOIs();
-                         });
-
-                         print("categorie abilitate $selectedCategories");
-
+                        print("categorie abilitate $selectedCategories");
                       },
                     ),
                   );
@@ -286,24 +311,23 @@ class _MapsState extends State<Maps> {
         ],
       ),
 
-
-    floatingActionButton: Row(
+      floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 20,
         children: [
           FloatingActionButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const Spotted()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => const Spotted()));
             },
             child: Icon(Icons.find_in_page_outlined),
           ),
           FloatingActionButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const Reports()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => const Reports()));
             },
             child: Icon(Icons.abc_outlined),
           ),
@@ -314,7 +338,6 @@ class _MapsState extends State<Maps> {
 
   loadMap() {
     return OSMFlutter(
-
       controller: controller,
       osmOption: OSMOption(
         userTrackingOption: const UserTrackingOption(
@@ -346,13 +369,14 @@ class _MapsState extends State<Maps> {
 
   Future<void> loadPOI() async {
     List<Map<String, dynamic>> list = await firebase.getData();
-
+    List<Map<String, dynamic>> list2 = await firebase.getData(
+      collection: "spotted",
+    );
 
     setState(() {
-
-
       poiListD = list;
       categories = poiListD.map((poi) => poi["category"] as String).toSet();
+      spottedList = list2;
     });
   }
 }
