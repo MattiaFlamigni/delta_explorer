@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
 import '../../reports/reports.dart';
+import '../spotted/spotted.dart';
 
 class Maps extends StatefulWidget {
   const Maps({super.key});
@@ -184,7 +185,11 @@ class _MapsState extends State<Maps> {
         spacing: 20,
         children: [
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const Spotted()),
+              );
+            },
             child: Icon(Icons.find_in_page_outlined),
           ),
           FloatingActionButton(
