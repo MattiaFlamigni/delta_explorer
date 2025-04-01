@@ -77,7 +77,7 @@ class _ReportsState extends State<Reports> {
             padding: EdgeInsets.all(8),
             child: ElevatedButton(
               onPressed: _pickImage,
-              child: Text("Carica una foto"),
+              child: Text("Scatta una foto"),
             ),
           ),
 
@@ -194,7 +194,7 @@ class _ReportsState extends State<Reports> {
         .onDeniedCallback(() {})
         .onGrantedCallback(() async {
           final XFile? image = await _picker.pickImage(
-            source: ImageSource.gallery,
+            source: ImageSource.camera,
           );
           if (image != null) {
             setState(() {

@@ -45,7 +45,7 @@ class _SpottedState extends State<Spotted> {
 
     Permission.camera.request();
     await Permission.camera.onGrantedCallback(() async {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
       if (image != null) setState(() => _image = File(image.path));
     }).onPermanentlyDeniedCallback(() => showSnackbar("Devi concedere i permessi per selezionare una immagine")).request();
 
@@ -147,7 +147,7 @@ class _SpottedState extends State<Spotted> {
   Widget buildImagePicker() {
     return Column(
       children: [
-        ElevatedButton(onPressed: _pickImage, child: const Text("Carica una foto")),
+        ElevatedButton(onPressed: _pickImage, child: const Text("Scatta una foto")),
         if (_image != null) showSelectedImage(),
       ],
     );
