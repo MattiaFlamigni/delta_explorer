@@ -55,6 +55,7 @@ class _SpottedState extends State<Spotted> {
   Future<void> uploadSpot() async {
     if (_selectedCategory.isEmpty) {
       showSnackbar("Seleziona una categoria");
+
       return;
     }
 
@@ -166,6 +167,7 @@ class _SpottedState extends State<Spotted> {
   Widget buildSendButton() {
     return ElevatedButton(
       onPressed: () async {
+        this.updatePosition();
         if (_canSendReports) {
           showDialog(
             context: context,
@@ -186,12 +188,13 @@ class _SpottedState extends State<Spotted> {
 
           await uploadSpot();
           Navigator.pop(context); // Chiude il dialogo di caricamento
+          Navigator.pop(context);//torna alla mappa
         } else {
           showSnackbar("Permessi non abilitati - Attivali per inviare");
         }
 
 
-        Navigator.pop(context);
+
       },
       child: const Text("Invia Avvistamento"),
     );
@@ -239,5 +242,48 @@ class _SpottedState extends State<Spotted> {
         );
       },
     );
+  }
+
+
+
+  Future<void> updatePosition() async {
+    this.position = await this.getUserLocation();
+  }
+
+
+
+  Future<Position?> getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Controlla se il GPS è attivo
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print("GPS disabilitato");
+      _canSendReports = false;
+      return null;
+    }
+
+    // Controlla i permessi
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _canSendReports = false;
+        this.showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      print("Permessi negati permanentemente");
+      _canSendReports = false;
+      return null;
+    }
+
+    // Ottieni la posizione corrente
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
   }
 }
