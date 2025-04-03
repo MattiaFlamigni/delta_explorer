@@ -18,93 +18,24 @@ class Spotted extends StatefulWidget {
 
 class _SpottedState extends State<Spotted> {
   //final Firebase db = Firebase();
-  SupabaseDB supabase = SupabaseDB();
-  final TextEditingController commentText = TextEditingController();
+  SupabaseDB _supabase = SupabaseDB();
+  final TextEditingController _commentTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
-  List<Map<String, dynamic>> categoriesList = [];
+  List<Map<String, dynamic>> _categoriesList = [];
   String _selectedCategory = "";
   String _selectedSubcategory = "";
   File? _image;
   bool _canSendReports = true;
   bool _isImagePickerActive = false;
   int numSpotted = 1;
-  Position? position;
-  SupabaseDB sup = SupabaseDB();
+  Position? _position;
 
   @override
   void initState() {
     super.initState();
 
     loadCategories();
-  }
-
-  Future<void> loadCategories() async {
-    var categories = await supabase.getData(table: "categorie_animali");
-    setState(() => categoriesList = categories);
-  }
-
-  Future<void> _pickImage() async {
-    if (_isImagePickerActive) return;
-    _isImagePickerActive = true;
-
-    Permission.camera.request();
-    await Permission.camera.onGrantedCallback(() async {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-      if (image != null) setState(() => _image = File(image.path));
-    }).onPermanentlyDeniedCallback(() => showSnackbar("Devi concedere i permessi per selezionare una immagine")).request();
-
-    _isImagePickerActive = false;
-  }
-
-  Future<void> uploadSpot() async {
-    if (_selectedCategory.isEmpty) {
-      showSnackbar("Seleziona una categoria");
-
-      return;
-    }
-
-    String? imageUrl;
-    if (_image != null) imageUrl = await uploadImage(_image!);
-    await this.updatePosition();
-
-    GeoPoint geopoint = position != null
-        ? GeoPoint(position!.latitude, position!.longitude)
-        : GeoPoint(0, 0);
-
-
-    supabase.addSpotted(imageUrl ?? "", _selectedCategory, commentText.text, _selectedSubcategory, geopoint);
-    showSnackbar("Segnalazione inviata con successo!");
-  }
-
-  Future<String?> uploadImage(File image) async {
-
-
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    final String fullPath = await supabase.supabase.storage.from('spotted').upload(
-      '$fileName.png',
-      image,
-      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-    );
-
-    return fullPath;
-
-
-
-    /*try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child("spotted/$fileName.jpg");
-      UploadTask uploadTask = storageRef.putFile(image);
-      TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
-    } catch (e) {
-      print("Errore nel caricamento: $e");
-      return null;
-    }*/
-  }
-
-  void showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   @override
@@ -131,6 +62,60 @@ class _SpottedState extends State<Spotted> {
     );
   }
 
+
+  Future<void> loadCategories() async {
+    var categories = await _supabase.getData(table: "categorie_animali");
+    setState(() => _categoriesList = categories);
+  }
+
+  Future<void> _pickImage() async {
+    if (_isImagePickerActive) return;
+    _isImagePickerActive = true;
+
+    Permission.camera.request();
+    await Permission.camera.onGrantedCallback(() async {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) setState(() => _image = File(image.path));
+    }).onPermanentlyDeniedCallback(() => showSnackbar("Devi concedere i permessi per selezionare una immagine")).request();
+
+    _isImagePickerActive = false;
+  }
+
+  Future<void> uploadSpot() async {
+    if (_selectedCategory.isEmpty) {
+      showSnackbar("Seleziona una categoria");
+
+      return;
+    }
+
+    String? imageUrl;
+    if (_image != null) imageUrl = await uploadImage(_image!);
+    await this.updatePosition();
+
+    GeoPoint geopoint = _position != null
+        ? GeoPoint(_position!.latitude, _position!.longitude)
+        : GeoPoint(0, 0);
+
+
+    _supabase.addSpotted(imageUrl ?? "", _selectedCategory, _commentTextController.text, _selectedSubcategory, geopoint);
+    showSnackbar("Segnalazione inviata con successo!");
+  }
+
+  Future<String?> uploadImage(File image) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    final String fullPath = await _supabase.supabase.storage.from('spotted').upload(
+      '$fileName.png',
+      image,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+
+    return fullPath;
+  }
+
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
   Widget buildCategoryGrid() {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -139,13 +124,13 @@ class _SpottedState extends State<Spotted> {
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
-      itemCount: categoriesList.length,
+      itemCount: _categoriesList.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
             setState(() {
-              _selectedCategory = categoriesList[index]["nome"];
-              showSubcategoryDialog(categoriesList[index]["sottocategorie"]);
+              _selectedCategory = _categoriesList[index]["nome"];
+              showSubcategoryDialog(_categoriesList[index]["sottocategorie"]);
             });
           },
           child: cardCategory(index),
@@ -156,7 +141,7 @@ class _SpottedState extends State<Spotted> {
 
   Widget buildTextFormField() {
     return TextFormField(
-      controller: commentText,
+      controller: _commentTextController,
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Commenti',
@@ -232,12 +217,12 @@ class _SpottedState extends State<Spotted> {
 
   Widget cardCategory(int index) {
     return Card(
-      color: (_selectedCategory == categoriesList[index]["nome"]) ? Colors.red : Colors.white,
+      color: (_selectedCategory == _categoriesList[index]["nome"]) ? Colors.red : Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(categoriesList[index]["nome"]),
-          Image.asset('assets/${categoriesList[index]["image_path"]}', width: 50, height: 50),
+          Text(_categoriesList[index]["nome"]),
+          Image.asset('assets/${_categoriesList[index]["image_path"]}', width: 50, height: 50),
         ],
       ),
     );
@@ -264,13 +249,9 @@ class _SpottedState extends State<Spotted> {
     );
   }
 
-
-
   Future<void> updatePosition() async {
-    this.position = await this.getUserLocation();
+    this._position = await this.getUserLocation();
   }
-
-
 
   Future<Position?> getUserLocation() async {
     bool serviceEnabled;

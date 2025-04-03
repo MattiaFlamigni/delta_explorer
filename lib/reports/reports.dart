@@ -17,44 +17,21 @@ class Reports extends StatefulWidget {
 }
 
 class _ReportsState extends State<Reports> {
-  SupabaseDB supabase = SupabaseDB();
+  final SupabaseDB _supabase = SupabaseDB();
   bool _isImagePickerActive = false;
   List<Map<String, dynamic>> _categoriesList = [];
-  final TextEditingController _commentText = TextEditingController();
+  final TextEditingController _commentTextController = TextEditingController();
   String _selectedCategory = "";
   File? _image;
   bool _canSendReports = true; // Stato che indica se il bottone invia è abilitato
 
   final ImagePicker _picker = ImagePicker();
-  Position? position;
+  Position? _position;
 
   @override
   void initState() {
     super.initState();
     loadCategories();
-  }
-
-  Future<void> updatePosition() async {
-    position = await getUserLocation();
-  }
-
-  Widget buildGridView() {
-    return Expanded(
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        itemCount: _categoriesList.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategory = _categoriesList[index]["title"];
-              });
-            },
-            child: cardCategory(index),
-          );
-        },
-      ),
-    );
   }
 
   @override
@@ -83,6 +60,29 @@ class _ReportsState extends State<Reports> {
     );
   }
 
+
+  Future<void> updatePosition() async {
+    _position = await getUserLocation();
+  }
+
+  Widget buildGridView() {
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemCount: _categoriesList.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedCategory = _categoriesList[index]["title"];
+              });
+            },
+            child: cardCategory(index),
+          );
+        },
+      ),
+    );
+  }
 
   drawReportButton(){
     return ElevatedButton(
@@ -123,8 +123,8 @@ class _ReportsState extends State<Reports> {
         imageUrl = await uploadImage(_image!);
       }
 
-      GeoPoint geopoint = position != null ? GeoPoint(position!.latitude, position!.longitude) : GeoPoint(0, 0);
-      await supabase.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
+      GeoPoint geopoint = _position != null ? GeoPoint(_position!.latitude, _position!.longitude) : GeoPoint(0, 0);
+      await _supabase.addReports(imageUrl ?? "", _selectedCategory, _commentTextController.text, geopoint);
 
       showSnackbar("Segnalazione inviata con successo!");
     } else {
@@ -134,7 +134,7 @@ class _ReportsState extends State<Reports> {
 
   TextFormField buildTextFormField() {
     return TextFormField(
-      controller: _commentText,
+      controller: _commentTextController,
       decoration: const InputDecoration(
         border: UnderlineInputBorder(),
         labelText: 'Commenti',
@@ -161,7 +161,7 @@ class _ReportsState extends State<Reports> {
 
   Future<void> loadCategories() async {
     try {
-      var categories = await supabase.getData(table: "reports_category");
+      var categories = await _supabase.getData(table: "reports_category");
       setState(() {
         _categoriesList = categories;
       });
@@ -192,7 +192,7 @@ class _ReportsState extends State<Reports> {
   Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final String fullPath = await supabase.supabase.storage.from('reports').upload(
+      final String fullPath = await _supabase.supabase.storage.from('reports').upload(
         '$fileName.png',
         image,
         fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
