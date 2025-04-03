@@ -76,23 +76,28 @@ class _ReportsState extends State<Reports> {
           const Spacer(),
           Padding(
             padding: const EdgeInsets.only(bottom: 50),
-            child: ElevatedButton(
-              onPressed: () async {
-                await updatePosition();
-                if (_canSendReports) {
-                  showLoadingDialog();
-                  await submitReport();
-                  Navigator.pop(context); // Chiude il dialogo di caricamento
-                  Navigator.pop(context); //torna alla mappa
-                } else {
-                  showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
-                }
-              },
-              child: const Text("invia segnalazione"),
-            ),
+            child: drawReportButton(),
           ),
         ],
       ),
+    );
+  }
+
+
+  drawReportButton(){
+    return ElevatedButton(
+        onPressed: () async {
+      await updatePosition();
+      if (_canSendReports) {
+        showLoadingDialog();
+        await submitReport();
+        Navigator.pop(context); // Chiude il dialogo di caricamento
+        Navigator.pop(context); //torna alla mappa
+      } else {
+        showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
+      }
+    },
+    child: const Text("invia segnalazione")
     );
   }
 
