@@ -1,4 +1,4 @@
-import 'package:delta_explorer/database/firebase.dart';
+
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
@@ -43,24 +43,131 @@ class _MapsState extends State<Maps> {
       await Future.delayed(
         Duration(seconds: 1),
       ); // Aspetta che la mappa sia caricata
-      await this.loadPOI(); //load poi
+      await loadPOI(); //load poi
       selectedCategories.addAll(categories);
       await addPOIs(); // Aggiunge i POI
-      print(poiListD);
 
       // 🔥 Verifica se il listener è stato correttamente impostato
       controller.listenerMapSingleTapping.addListener(() async {
         var tappedPoint = controller.listenerMapSingleTapping.value;
         if (tappedPoint != null) {
-          print(
-            "Hai toccato: ${tappedPoint.latitude}, ${tappedPoint.longitude}",
-          );
           _handleMarkerTap(tappedPoint);
         }
       });
-
-      print("Listener attivato");
     });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Mappa Delta del Po")),
+      body: Stack(
+        children: [
+          // La mappa
+          Positioned.fill(child: loadMap()),
+          // Filtri sopra la mappa
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: SizedBox(
+              height: 50, // Imposta un'altezza per evitare errori
+              child: filterRow()
+            ),
+          ),
+        ],
+      ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 20,
+        children: [
+          drawFloatingButton(Icons.pets, "avvistamento!"), //flaoting button per spotted e reports
+          drawFloatingButton(Icons.report, "segnalazione"),
+        ],
+      ),
+    );
+  }
+
+  Widget filterRow(){
+    return ListView.builder(
+      scrollDirection: Axis.horizontal, // Scorrimento orizzontale
+      itemCount: categories.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: FilterChip(
+            label: Text(categories.elementAt(index)),
+            selected: selectedCategories.contains(
+              categories.elementAt(index),
+            ),
+            onSelected: (bool value) {
+              setState(() {
+                if (value) {
+                  selectedCategories.add(categories.elementAt(index));
+                } else {
+                  selectedCategories.remove(
+                    categories.elementAt(index),
+                  );
+                }
+
+                addPOIs();
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget drawFloatingButton(IconData iconData, String label) {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const Spotted()),
+        );
+      },
+      icon: Icon(iconData, size: 24),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget loadMap() {
+    return OSMFlutter(
+      controller: controller,
+      osmOption: OSMOption(
+        userTrackingOption: const UserTrackingOption(
+          enableTracking: true,
+          unFollowUser: true,
+        ),
+        zoomOption: const ZoomOption(
+          initZoom: 10,
+          minZoomLevel: 8,
+          maxZoomLevel: 16,
+          stepZoom: 1.0,
+        ),
+        userLocationMarker: UserLocationMaker(
+          personMarker: MarkerIcon(
+            icon: const Icon(
+              Icons.location_history_rounded,
+              color: Colors.blue,
+              size: 48,
+            ),
+          ),
+          directionArrowMarker: MarkerIcon(
+            icon: const Icon(Icons.gps_fixed, size: 48),
+          ),
+        ),
+        roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
+      ),
+    );
   }
 
   void _handleMarkerTap(GeoPoint tappedPoint) {
@@ -187,8 +294,6 @@ class _MapsState extends State<Maps> {
 
           setState(() {});
         }
-      } else {
-        print("Errore: il POI non contiene coordinate valide.");
       }
     }
 
@@ -215,163 +320,21 @@ class _MapsState extends State<Maps> {
 
           setState(() {});
         }
-      } else {
-        print("Errore: il POI non contiene coordinate valide.");
-      }
-    }
-
-
-
-
-    // Forza l'aggiornamento della UI per vedere i marker
-    setState(() {});
-  }
-
-  /*
-    FUNZIONANTE UTILIZZANDO DUE CAMPI LAT E LONG INVECE DEL GEOPOINT
-
-  Future<void> addPOIs() async {
-
-
-    print("poilist $poiListD");
-
-    for (var poi in poiListD) {
-      print("poi $poi");
-      if (poi.containsKey("lat") && poi.containsKey("long")) {
-        double latitude = poi["lat"];
-        double longitude = poi["long"];
-
-        // Aggiungi il marker con le coordinate ottenute
-        await controller.addMarker(
-          GeoPoint(latitude: latitude, longitude: longitude),
-          markerIcon: MarkerIcon(
-            icon: Icon(Icons.place, color: Colors.red, size: 48),
-          ),
-        );
-      } else {
-        print("Errore: il POI non contiene coordinate valide.");
       }
     }
 
     // Forza l'aggiornamento della UI per vedere i marker
     setState(() {});
-  }*/
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Mappa Delta del Po")),
-      body: Stack(
-        children: [
-          // La mappa
-          Positioned.fill(child: loadMap()),
-          // Filtri sopra la mappa
-          Positioned(
-            top: 10,
-            left: 10,
-            right: 10,
-            child: SizedBox(
-              height: 50, // Imposta un'altezza per evitare errori
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal, // Scorrimento orizzontale
-                itemCount: categories.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: FilterChip(
-                      label: Text(categories.elementAt(index)),
-                      selected: selectedCategories.contains(
-                        categories.elementAt(index),
-                      ),
-                      onSelected: (bool value) {
-                        setState(() {
-                          if (value) {
-                            selectedCategories.add(categories.elementAt(index));
-                          } else {
-                            selectedCategories.remove(
-                              categories.elementAt(index),
-                            );
-                          }
-
-                          addPOIs();
-                        });
-
-                        print("categorie abilitate $selectedCategories");
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 20,
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => const Spotted()));
-            },
-            child: Icon(Icons.find_in_page_outlined),
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => const Reports()));
-            },
-            child: Icon(Icons.abc_outlined),
-          ),
-        ],
-      ),
-    );
   }
 
-  loadMap() {
-    return OSMFlutter(
-      controller: controller,
-      osmOption: OSMOption(
-        userTrackingOption: const UserTrackingOption(
-          enableTracking: true,
-          unFollowUser: true,
-        ),
-        zoomOption: const ZoomOption(
-          initZoom: 10,
-          minZoomLevel: 8,
-          maxZoomLevel: 16,
-          stepZoom: 1.0,
-        ),
-        userLocationMarker: UserLocationMaker(
-          personMarker: MarkerIcon(
-            icon: const Icon(
-              Icons.location_history_rounded,
-              color: Colors.blue,
-              size: 48,
-            ),
-          ),
-          directionArrowMarker: MarkerIcon(
-            icon: const Icon(Icons.gps_fixed, size: 48),
-          ),
-        ),
-        roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
-      ),
-    );
-  }
 
   Future<void> loadPOI() async {
     List<Map<String, dynamic>> list = await supabase.getData();
     List<Map<String, dynamic>> list2 = await supabase.getTodaySpotted();
-
-    print("dimensione ${list2.length}");
     setState(() {
       poiListD = list;
       categories = poiListD.map((poi) => poi["category"] as String).toSet();
-      this.spottedList = list2;
+      spottedList = list2;
 
     });
   }
