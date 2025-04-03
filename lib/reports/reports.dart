@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,42 +17,31 @@ class Reports extends StatefulWidget {
 }
 
 class _ReportsState extends State<Reports> {
-  //final supabase = Supabase.instance.client;
-  //final Firebase _db = Firebase();
   SupabaseDB supabase = SupabaseDB();
   bool _isImagePickerActive = false;
-  List<Map<String, dynamic>> _categoriesList = List.empty();
+  List<Map<String, dynamic>> _categoriesList = [];
   final TextEditingController _commentText = TextEditingController();
   String _selectedCategory = "";
   File? _image;
-  bool _canSendReports = true ; //se utente consente i permessi il bottone invia è abilitato
-
+  bool _canSendReports = true; // Stato che indica se il bottone invia è abilitato
 
   final ImagePicker _picker = ImagePicker();
   Position? position;
 
-
   @override
   void initState() {
-
     super.initState();
-    setState(() {
-      this.loadCategories();
-    });
+    loadCategories();
   }
-
 
   Future<void> updatePosition() async {
-    this.position = await this.getUserLocation();
+    position = await getUserLocation();
   }
 
-
-  Widget buildGridView(){
+  Widget buildGridView() {
     return Expanded(
       child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-        ),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
         itemCount: _categoriesList.length,
         itemBuilder: (context, index) {
           return GestureDetector(
@@ -69,63 +57,38 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Segnala problema")),
+      appBar: AppBar(title: const Text("Segnala problema")),
       body: Column(
         children: [
-          this.buildGridView(),
-          Padding(padding: EdgeInsets.all(8), child: buildTextFormField()),
-
+          buildGridView(),
+          Padding(padding: const EdgeInsets.all(8), child: buildTextFormField()),
           Padding(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             child: ElevatedButton(
               onPressed: _pickImage,
-              child: Text("Scatta una foto"),
+              child: const Text("Scatta una foto"),
             ),
           ),
-
-          // Mostra l'immagine selezionata (se presente)
           if (_image != null) showSelectedImage(),
-
-
           const Spacer(),
-
           Padding(
-            padding: EdgeInsets.only(bottom: 50),
+            padding: const EdgeInsets.only(bottom: 50),
             child: ElevatedButton(
               onPressed: () async {
-                await this.updatePosition();
-                if(_canSendReports){
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return const AlertDialog(
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 10),
-                            Text("Invio in corso..."),
-                          ],
-                        ),
-                      );
-                    },
-                  );
+                await updatePosition();
+                if (_canSendReports) {
+                  showLoadingDialog();
                   await submitReport();
                   Navigator.pop(context); // Chiude il dialogo di caricamento
-                  Navigator.pop(context);
-                }else{
-                  this.showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
+                  Navigator.pop(context); //torna alla mappa
+                } else {
+                  showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
                 }
-
-                print("posso inviare? $_canSendReports");
               },
-              child: Text("invia segnalazione"),
+              child: const Text("invia segnalazione"),
             ),
           ),
         ],
@@ -133,20 +96,17 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-   showSelectedImage() {
-
-
-
+  Widget showSelectedImage() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRect(
-              child: Image.file(
-                _image!,
-                width: 150,
-                height: 150,
-                fit: BoxFit.cover,
-              ),
-            )
+        child: Image.file(
+          _image!,
+          width: 150,
+          height: 150,
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 
@@ -154,17 +114,12 @@ class _ReportsState extends State<Reports> {
     if (_selectedCategory.isNotEmpty) {
       String? imageUrl;
 
-
-
-      // Se l'utente ha selezionato un'immagine, la carica su Firebase Storage
       if (_image != null) {
         imageUrl = await uploadImage(_image!);
       }
 
-
-      GeoPoint geopoint = position!=null?GeoPoint(position!.latitude, position!.longitude):GeoPoint(0, 0);
-      // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-      supabase.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
+      GeoPoint geopoint = position != null ? GeoPoint(position!.latitude, position!.longitude) : GeoPoint(0, 0);
+      await supabase.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
 
       showSnackbar("Segnalazione inviata con successo!");
     } else {
@@ -184,10 +139,7 @@ class _ReportsState extends State<Reports> {
 
   Card cardCategory(int index) {
     return Card(
-      color:
-          (_selectedCategory == _categoriesList[index]["title"])
-              ? Colors.red
-              : Colors.white,
+      color: (_selectedCategory == _categoriesList[index]["title"]) ? Colors.red : Colors.white,
       child: Column(
         children: [
           Text(_categoriesList[index]["title"]),
@@ -196,133 +148,105 @@ class _ReportsState extends State<Reports> {
             fit: BoxFit.cover,
             width: 70,
             height: 70,
-          ), //resources/prova.png
+          ),
         ],
       ),
     );
   }
 
-  loadCategories() async {
-    var categories = await supabase.getData(table: "reports_category");
-    setState(() {
-      this._categoriesList = categories;
-    });
+  Future<void> loadCategories() async {
+    try {
+      var categories = await supabase.getData(table: "reports_category");
+      setState(() {
+        _categoriesList = categories;
+      });
+    } catch (e) {
+      showSnackbar("Errore nel caricamento delle categorie");
+    }
   }
 
-  // Funzione per selezionare l'immagine
   Future<void> _pickImage() async {
-    if (_isImagePickerActive) {
-      return; // Impedisci l'esecuzione se è già attivo
+    if (_isImagePickerActive) return; // Impedisce duplicazioni
+
+    _isImagePickerActive = true;
+
+    final permissionStatus = await Permission.camera.request();
+    if (permissionStatus.isGranted) {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          _image = File(image.path);
+        });
+      }
+    } else {
+      showSnackbar("Permesso fotocamera negato. Abilitalo nelle impostazioni.");
     }
-
-    _isImagePickerActive = true; // Imposta a true prima di avviare
-
-    Permission.camera.request();
-    await Permission.camera
-        .onDeniedCallback(() {})
-        .onGrantedCallback(() async {
-          final XFile? image = await _picker.pickImage(
-            source: ImageSource.camera,
-          );
-          if (image != null) {
-            setState(() {
-              _image = File(image.path);
-            });
-          }
-          _isImagePickerActive = false; // Imposta a false dopo il completamento
-        })
-        .onPermanentlyDeniedCallback(() {
-          showSnackbar(
-            "Devi concedere i permessi per selezionare una immagine",
-          );
-          _isImagePickerActive = false; // Imposta a false in caso di errore
-        })
-        .request();
+    _isImagePickerActive = false;
   }
 
   Future<String?> uploadImage(File image) async {
-
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-    final String fullPath = await supabase.supabase.storage.from('reports').upload(
-      '$fileName.png',
-      image,
-      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-    );
-
-    return fullPath;
-
-
-
-
-
-
-
-    /*try {
+    try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child(
-        "reports/$fileName.jpg",
+      final String fullPath = await supabase.supabase.storage.from('reports').upload(
+        '$fileName.png',
+        image,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
       );
-
-      UploadTask uploadTask = storageRef.putFile(image);
-
-      uploadTask.snapshotEvents.listen((event) {
-        print("Upload: ${event.bytesTransferred}/${event.totalBytes}");
-      });
-
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-
-      print("Immagine caricata: $downloadUrl");
-      return downloadUrl;
-    } catch (e, stacktrace) {
-      print("Errore nel caricamento: $e");
+      return fullPath;
+    } catch (e) {
+      showSnackbar("Errore nel caricamento dell'immagine");
       return null;
-    }*/
+    }
   }
 
-  showSnackbar(String text) {
+  void showSnackbar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-
-
-
   Future<Position?> getUserLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Controlla se il GPS è attivo
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print("GPS disabilitato");
-      _canSendReports = false;
-      return null;
-    }
-
-    // Controlla i permessi
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
         _canSendReports = false;
-        this.showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
+        showSnackbar("GPS disabilitato");
         return null;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      print("Permessi negati permanentemente");
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission != LocationPermission.whileInUse && permission!=LocationPermission.always) {
+          _canSendReports = false;
+          showSnackbar("Permessi di localizzazione negati. Consenti per inviare");
+          return null;
+        }
+      }
+
+      return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    } catch (e) {
       _canSendReports = false;
+      showSnackbar("Errore nel recupero della posizione");
       return null;
     }
-
-    // Ottieni la posizione corrente
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
   }
 
+  showLoadingDialog(){
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text("Invio in corso..."),
+            ],
+          ),
+        );
+      },
+    );
 
-
+  }
 }
