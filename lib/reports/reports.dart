@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/database/supabase.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -91,6 +90,7 @@ class _ReportsState extends State<Reports> {
       if (_canSendReports) {
         showLoadingDialog();
         await submitReport();
+        if(!mounted) return;
         Navigator.pop(context); // Chiude il dialogo di caricamento
         Navigator.pop(context); //torna alla mappa
       } else {

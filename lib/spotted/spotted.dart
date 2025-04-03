@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/database/firebase.dart';
 import 'package:delta_explorer/database/supabase.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +16,7 @@ class Spotted extends StatefulWidget {
 
 class _SpottedState extends State<Spotted> {
   //final Firebase db = Firebase();
-  SupabaseDB _supabase = SupabaseDB();
+  final SupabaseDB _supabase = SupabaseDB();
   final TextEditingController _commentTextController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
@@ -90,7 +88,7 @@ class _SpottedState extends State<Spotted> {
 
     String? imageUrl;
     if (_image != null) imageUrl = await uploadImage(_image!);
-    await this.updatePosition();
+    await updatePosition();
 
     GeoPoint geopoint = _position != null
         ? GeoPoint(_position!.latitude, _position!.longitude)
@@ -172,7 +170,7 @@ class _SpottedState extends State<Spotted> {
   Widget buildSendButton() {
     return ElevatedButton(
       onPressed: () async {
-        this.updatePosition();
+        updatePosition();
         if (_canSendReports) {
           showDialog(
             context: context,
@@ -192,6 +190,7 @@ class _SpottedState extends State<Spotted> {
           );
 
           await uploadSpot();
+          if(!mounted) return;
           Navigator.pop(context); // Chiude il dialogo di caricamento
           Navigator.pop(context);//torna alla mappa
         } else {
@@ -250,7 +249,7 @@ class _SpottedState extends State<Spotted> {
   }
 
   Future<void> updatePosition() async {
-    this._position = await this.getUserLocation();
+    _position = await getUserLocation();
   }
 
   Future<Position?> getUserLocation() async {
@@ -260,7 +259,6 @@ class _SpottedState extends State<Spotted> {
     // Controlla se il GPS è attivo
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print("GPS disabilitato");
       _canSendReports = false;
       return null;
     }
@@ -271,13 +269,12 @@ class _SpottedState extends State<Spotted> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         _canSendReports = false;
-        this.showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
+        showSnackbar("permessi disabilitati. Consenti per inviare la segnalazione");
         return null;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      print("Permessi negati permanentemente");
       _canSendReports = false;
       return null;
     }
