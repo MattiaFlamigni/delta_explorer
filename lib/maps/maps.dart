@@ -1,4 +1,5 @@
 import 'package:delta_explorer/database/firebase.dart';
+import 'package:delta_explorer/database/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
@@ -16,7 +17,8 @@ class Maps extends StatefulWidget {
 
 class _MapsState extends State<Maps> {
   late MapController controller;
-  Firebase firebase = Firebase();
+  //Firebase firebase = Firebase();
+  SupabaseDB supabase = SupabaseDB();
 
   List<Map<String, dynamic>> poiListD = List.empty();
   List<Map<String, dynamic>> spottedList = List.empty();
@@ -26,6 +28,8 @@ class _MapsState extends State<Maps> {
   @override
   void initState() {
     super.initState();
+
+    //supabase.addPOIs();
 
     //firebase.addPOIs();
 
@@ -60,16 +64,13 @@ class _MapsState extends State<Maps> {
   }
 
   void _handleMarkerTap(GeoPoint tappedPoint) {
-
     for (var poi in poiListD) {
       GeoPoint geoPoint = GeoPoint(
-        latitude: poi["location"].latitude,
-        longitude: poi["location"].longitude,
+        latitude: poi["location"]["latitude"],
+        longitude: poi["location"]["longitude"],
       );
 
       if (_isSameLocation(geoPoint, tappedPoint)) {
-
-
         showModalBottomSheet(
           context: context,
           shape: RoundedRectangleBorder(
@@ -77,12 +78,11 @@ class _MapsState extends State<Maps> {
           ),
           builder: (context) {
             return Container(
-              width: double.infinity, // Occupa tutta la larghezza disponibile
+              width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                // Allinea il testo a sinistra
                 children: [
                   Text(
                     poi["title"],
@@ -92,7 +92,6 @@ class _MapsState extends State<Maps> {
                   Text(poi["description"]),
                   SizedBox(height: 20),
                   Center(
-                    // Per centrare il pulsante
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text("Chiudi"),
@@ -103,19 +102,17 @@ class _MapsState extends State<Maps> {
             );
           },
         );
+        break; // Interrompe il ciclo non appena trova una corrispondenza
       }
     }
 
-
     for (var poi in spottedList) {
       GeoPoint geoPoint = GeoPoint(
-        latitude: poi["location"].latitude,
-        longitude: poi["location"].longitude,
+        latitude: poi["location"]["latitude"],
+        longitude: poi["location"]["longitude"],
       );
 
       if (_isSameLocation(geoPoint, tappedPoint)) {
-
-
         showModalBottomSheet(
           context: context,
           shape: RoundedRectangleBorder(
@@ -123,12 +120,11 @@ class _MapsState extends State<Maps> {
           ),
           builder: (context) {
             return Container(
-              width: double.infinity, // Occupa tutta la larghezza disponibile
+              width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                // Allinea il testo a sinistra
                 children: [
                   Text(
                     poi["category"],
@@ -138,7 +134,6 @@ class _MapsState extends State<Maps> {
                   Text(poi["subCategory"]),
                   SizedBox(height: 20),
                   Center(
-                    // Per centrare il pulsante
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text("Chiudi"),
@@ -149,6 +144,7 @@ class _MapsState extends State<Maps> {
             );
           },
         );
+        break; // Interrompe il ciclo non appena trova una corrispondenza
       }
     }
   }
@@ -173,8 +169,8 @@ class _MapsState extends State<Maps> {
       if (poi.containsKey("location")) {
         if (selectedCategories.contains(poi["category"])) {
           GeoPoint geoPoint = GeoPoint(
-            latitude: poi["location"].latitude,
-            longitude: poi["location"].longitude,
+            latitude: poi["location"]["latitude"],
+            longitude: poi["location"]["longitude"],
           );
 
           await controller.addMarker(
@@ -201,8 +197,8 @@ class _MapsState extends State<Maps> {
       if (spotted.containsKey("category")) {
         if (true) {
           GeoPoint geoPoint = GeoPoint(
-            latitude: spotted["location"].latitude,
-            longitude: spotted["location"].longitude,
+            latitude: spotted["location"]["latitude"],
+            longitude: spotted["location"]["longitude"],
           );
 
           await controller.addMarker(
@@ -368,8 +364,8 @@ class _MapsState extends State<Maps> {
   }
 
   Future<void> loadPOI() async {
-    List<Map<String, dynamic>> list = await firebase.getData();
-    List<Map<String, dynamic>> list2 = await firebase.getTodaySpotted();
+    List<Map<String, dynamic>> list = await supabase.getData();
+    List<Map<String, dynamic>> list2 = await supabase.getTodaySpotted();
 
     print("dimensione ${list2.length}");
     setState(() {

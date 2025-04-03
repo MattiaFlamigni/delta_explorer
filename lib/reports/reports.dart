@@ -2,12 +2,13 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/database/firebase.dart';
+import 'package:delta_explorer/database/supabase.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -18,7 +19,8 @@ class Reports extends StatefulWidget {
 
 class _ReportsState extends State<Reports> {
   //final supabase = Supabase.instance.client;
-  final Firebase _db = Firebase();
+  //final Firebase _db = Firebase();
+  SupabaseDB supabase = SupabaseDB();
   bool _isImagePickerActive = false;
   List<Map<String, dynamic>> _categoriesList = List.empty();
   final TextEditingController _commentText = TextEditingController();
@@ -46,6 +48,28 @@ class _ReportsState extends State<Reports> {
   }
 
 
+  Widget buildGridView(){
+    return Expanded(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+        ),
+        itemCount: _categoriesList.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedCategory = _categoriesList[index]["title"];
+              });
+            },
+            child: cardCategory(index),
+          );
+        },
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,24 +77,7 @@ class _ReportsState extends State<Reports> {
       appBar: AppBar(title: Text("Segnala problema")),
       body: Column(
         children: [
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              itemCount: _categoriesList.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = _categoriesList[index]["title"];
-                    });
-                  },
-                  child: cardCategory(index),
-                );
-              },
-            ),
-          ),
+          this.buildGridView(),
           Padding(padding: EdgeInsets.all(8), child: buildTextFormField()),
 
           Padding(
@@ -82,11 +89,8 @@ class _ReportsState extends State<Reports> {
           ),
 
           // Mostra l'immagine selezionata (se presente)
-          if (_image != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: showSelectedImage(),
-            ),
+          if (_image != null) showSelectedImage(),
+
 
           const Spacer(),
 
@@ -96,7 +100,25 @@ class _ReportsState extends State<Reports> {
               onPressed: () async {
                 await this.updatePosition();
                 if(_canSendReports){
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return const AlertDialog(
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 10),
+                            Text("Invio in corso..."),
+                          ],
+                        ),
+                      );
+                    },
+                  );
                   await submitReport();
+                  Navigator.pop(context); // Chiude il dialogo di caricamento
+                  Navigator.pop(context);
                 }else{
                   this.showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
                 }
@@ -111,15 +133,21 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  ClipRect showSelectedImage() {
-    return ClipRect(
+   showSelectedImage() {
+
+
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ClipRect(
               child: Image.file(
                 _image!,
                 width: 150,
                 height: 150,
                 fit: BoxFit.cover,
               ),
-            );
+            )
+    );
   }
 
   Future<void> submitReport() async {
@@ -136,7 +164,7 @@ class _ReportsState extends State<Reports> {
 
       GeoPoint geopoint = position!=null?GeoPoint(position!.latitude, position!.longitude):GeoPoint(0, 0);
       // Salva il report nel database con l'URL dell'immagine (o stringa vuota se non c'è)
-      _db.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
+      supabase.addReports(imageUrl ?? "", _selectedCategory, _commentText.text, geopoint);
 
       showSnackbar("Segnalazione inviata con successo!");
     } else {
@@ -175,7 +203,7 @@ class _ReportsState extends State<Reports> {
   }
 
   loadCategories() async {
-    var categories = await _db.getData(collection: "reports_category");
+    var categories = await supabase.getData(table: "reports_category");
     setState(() {
       this._categoriesList = categories;
     });
@@ -213,7 +241,24 @@ class _ReportsState extends State<Reports> {
   }
 
   Future<String?> uploadImage(File image) async {
-    try {
+
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final String fullPath = await supabase.supabase.storage.from('reports').upload(
+      '$fileName.png',
+      image,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+
+    return fullPath;
+
+
+
+
+
+
+
+    /*try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       Reference storageRef = FirebaseStorage.instance.ref().child(
         "reports/$fileName.jpg",
@@ -233,7 +278,7 @@ class _ReportsState extends State<Reports> {
     } catch (e, stacktrace) {
       print("Errore nel caricamento: $e");
       return null;
-    }
+    }*/
   }
 
   showSnackbar(String text) {

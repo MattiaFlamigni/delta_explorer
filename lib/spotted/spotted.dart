@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/database/firebase.dart';
+import 'package:delta_explorer/database/supabase.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Spotted extends StatefulWidget {
   const Spotted({super.key});
@@ -15,7 +17,8 @@ class Spotted extends StatefulWidget {
 }
 
 class _SpottedState extends State<Spotted> {
-  final Firebase db = Firebase();
+  //final Firebase db = Firebase();
+  SupabaseDB supabase = SupabaseDB();
   final TextEditingController commentText = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
@@ -27,15 +30,17 @@ class _SpottedState extends State<Spotted> {
   bool _isImagePickerActive = false;
   int numSpotted = 1;
   Position? position;
+  SupabaseDB sup = SupabaseDB();
 
   @override
   void initState() {
     super.initState();
+
     loadCategories();
   }
 
   Future<void> loadCategories() async {
-    var categories = await db.getData(collection: "categorie_animali");
+    var categories = await supabase.getData(table: "categorie_animali");
     setState(() => categoriesList = categories);
   }
 
@@ -61,17 +66,32 @@ class _SpottedState extends State<Spotted> {
 
     String? imageUrl;
     if (_image != null) imageUrl = await uploadImage(_image!);
+    await this.updatePosition();
 
     GeoPoint geopoint = position != null
         ? GeoPoint(position!.latitude, position!.longitude)
         : GeoPoint(0, 0);
 
-    db.addSpotted(imageUrl ?? "", _selectedCategory, commentText.text, _selectedSubcategory, geopoint);
+
+    supabase.addSpotted(imageUrl ?? "", _selectedCategory, commentText.text, _selectedSubcategory, geopoint);
     showSnackbar("Segnalazione inviata con successo!");
   }
 
   Future<String?> uploadImage(File image) async {
-    try {
+
+
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    final String fullPath = await supabase.supabase.storage.from('spotted').upload(
+      '$fileName.png',
+      image,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+
+    return fullPath;
+
+
+
+    /*try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       Reference storageRef = FirebaseStorage.instance.ref().child("spotted/$fileName.jpg");
       UploadTask uploadTask = storageRef.putFile(image);
@@ -80,7 +100,7 @@ class _SpottedState extends State<Spotted> {
     } catch (e) {
       print("Errore nel caricamento: $e");
       return null;
-    }
+    }*/
   }
 
   void showSnackbar(String text) {
