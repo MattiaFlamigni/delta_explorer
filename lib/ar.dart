@@ -1,4 +1,3 @@
-
 import 'dart:math';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -6,31 +5,15 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final cameras = await availableCameras();
-  final camera = cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.back);
-
-  runApp(MyApp(camera: camera));
-}
-
-class MyApp extends StatelessWidget {
-  final CameraDescription camera;
-
-  const MyApp({super.key, required this.camera});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: CompassArrowScreen(camera: camera),
-    );
-  }
-}
-
 class CompassArrowScreen extends StatefulWidget {
-  final CameraDescription camera;
+  final double targetLat;
+  final double targetLon;
 
-  const CompassArrowScreen({super.key, required this.camera});
+  const CompassArrowScreen({
+    super.key,
+    required this.targetLat,
+    required this.targetLon,
+  });
 
   @override
   State<CompassArrowScreen> createState() => _CompassArrowScreenState();
@@ -40,23 +23,21 @@ class _CompassArrowScreenState extends State<CompassArrowScreen> {
   CameraController? _cameraController;
   double heading = 0;
   double bearing = 0;
-
-  // Coordinate destinazione (es. un punto nel Delta del Po)
-  final double targetLat = 40.1171;
-  final double targetLon = -4.8718;
-
   Position? _currentPosition;
+  late CameraDescription _camera; // Aggiunto per memorizzare la camera
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    _initCamera(); //inizializzo la camera qui dentro.
     _initLocation();
     _initCompass();
   }
 
   Future<void> _initCamera() async {
-    _cameraController = CameraController(widget.camera, ResolutionPreset.low);
+    final cameras = await availableCameras();
+    _camera = cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.back);
+    _cameraController = CameraController(_camera, ResolutionPreset.low);
     await _cameraController!.initialize();
     setState(() {});
   }
@@ -70,7 +51,12 @@ class _CompassArrowScreenState extends State<CompassArrowScreen> {
         _currentPosition = position;
         if (_currentPosition != null) {
           // Calcola e aggiorna il bearing quando la posizione cambia
-          bearing = _calculateBearing(_currentPosition!.latitude, _currentPosition!.longitude, targetLat, targetLon);
+          bearing = _calculateBearing(
+            _currentPosition!.latitude,
+            _currentPosition!.longitude,
+            widget.targetLat,
+            widget.targetLon,
+          );
         }
       });
     });
@@ -112,7 +98,7 @@ class _CompassArrowScreenState extends State<CompassArrowScreen> {
           Center(
             child: Transform.rotate(
               angle: radians(angle),
-              child: Icon(
+              child: const Icon(
                 Icons.navigation,
                 size: 100,
               ),
