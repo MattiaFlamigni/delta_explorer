@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
 import '../../reports/reports.dart';
+import '../ar.dart';
 import '../spotted/spotted.dart';
 
 /*TODO: AGGIUNGERE IMMAGINI AI BOTTOMSHEET => IMMAGINI RELATIVI POI*/
@@ -191,6 +192,11 @@ class _MapsState extends State<Maps> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  ElevatedButton(onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => CompassArrowScreen(targetLat:geoPoint.latitude, targetLon: geoPoint.longitude,)), //TODO
+                    );
+                  }, child: Text("naviga in AR")),
                   Text(
                     poi["title"],
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
