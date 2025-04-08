@@ -310,6 +310,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.8.1"
+  flutter_dotenv:
+    dependency: "direct main"
+    description:
+      name: flutter_dotenv
+      sha256: b7c7be5cd9f6ef7a78429cabd2774d3c4af50e79cb2b7593e3d5d763ef95c61b
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -360,6 +368,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  font_awesome_flutter:
+    dependency: "direct main"
+    description:
+      name: font_awesome_flutter
+      sha256: d3a89184101baec7f4600d58840a764d2ef760fe1c5a20ef9e6b0e9b24a07a3a
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.8.0"
   functions_client:
     dependency: transitive
     description:
@@ -520,6 +536,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   jwt_decode:
     dependency: transitive
     description:
@@ -1005,6 +1029,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.3.1"
+  weatherapi:
+    dependency: "direct main"
+    description:
+      name: weatherapi
+      sha256: "95e11726db6c010904ec65a32c220cc9a4e3ee1e770401c1f787983fd98bb6b8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   web:
     dependency: transitive
     description:
