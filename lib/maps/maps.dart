@@ -84,8 +84,8 @@ class _MapsState extends State<Maps> {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 20,
         children: [
-          drawFloatingButton(Icons.pets, "avvistamento!"), //flaoting button per spotted e reports
-          drawFloatingButton(Icons.report, "segnalazione"),
+          drawFloatingButton(Icons.pets, "avvistamento!", Spotted()), //flaoting button per spotted e reports
+          drawFloatingButton(Icons.report, "segnalazione", Reports()),
         ],
       ),
     );
@@ -122,11 +122,11 @@ class _MapsState extends State<Maps> {
     );
   }
 
-  Widget drawFloatingButton(IconData iconData, String label) {
+  Widget drawFloatingButton(IconData iconData, String label, Widget pageToNav) {
     return FloatingActionButton.extended(
       onPressed: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const Spotted()),
+          MaterialPageRoute(builder: (context) => pageToNav),
         );
       },
       icon: Icon(iconData, size: 24),
