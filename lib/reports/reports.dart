@@ -200,6 +200,7 @@ class _ReportsState extends State<Reports> {
       return fullPath;
     } catch (e) {
       showSnackbar("Errore nel caricamento dell'immagine");
+      print("errore nel caricamento: $e");
       return null;
     }
   }

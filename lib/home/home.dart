@@ -1,8 +1,8 @@
-import 'package:delta_explorer/database/supabase.dart';
+import 'package:delta_explorer/home/homeController.dart';
+import 'package:delta_explorer/maps/maps.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:weatherapi/weatherapi.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,22 +12,34 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final SupabaseDB db = SupabaseDB();
   List<Map<String, dynamic>> curiosity = [];
-  WeatherRequest wr = WeatherRequest('9e7aac68e41b4e53877132202250804'); //todo: sistemare per app in produzione
   List<Map<String, dynamic>> currentMeteo = [];
+  List<Map<String, dynamic>> spottedList = [];
+  HomeController controller = HomeController();
 
   @override
   void initState() {
     super.initState();
-    getMeteo();
-    getCuriosity();
+    fetchMeteo();
+    fetchCuriosity();
+    fetchSpotted();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Home")),
+      floatingActionButton: Container(
+        alignment: Alignment.bottomCenter,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => Maps()),
+            );
+          },
+          label: Text("MAP")
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,11 +49,14 @@ class _HomeState extends State<Home> {
             //mostra un immagine con testo in sovraimpressione
             Padding(
               padding: EdgeInsets.only(top: 15, left: 16, right: 16),
-              child: drawDoubleTextRow("I PIU VISTI", "gallery >"),
+              child: drawDoubleTextRow("ALCUNI AVVISTAMENTI", "gallery >"),
             ),
 
             const SizedBox(height: 10),
-            // TODO: CARICARE ALCUNE IMMAGINI
+
+            /*carica immagini casuali da db*/
+            showSpottedImages(),
+
             Row(children: const []),
 
             /*Disegna una riga scrollabile di card contente curiosita e dati*/
@@ -61,7 +76,7 @@ class _HomeState extends State<Home> {
 
                 drawChip("Meteo", (selected) {
                   bottomheetMeteo();
-                }), // TODO : meteo
+                }),
 
                 drawChip("Contatti", (selected) {
                   bottomheetContatti();
@@ -87,29 +102,68 @@ class _HomeState extends State<Home> {
                 "24 ore su 24",
               ),
             ),
+            SizedBox(height: 100,)
           ],
         ),
       ),
     );
   }
 
-  getMeteo() async {
-    List<Map<String, dynamic>> meteoCondition = [];
-    var meteo = await wr.getRealtimeWeatherByLocation(44.95, 12.41);
-
-    meteoCondition.add({
-      "temp": meteo.current.tempC,
-      "humidity": meteo.current.humidity,
-      "windSpeed": meteo.current.windMph,
-      "rain": meteo.current.precipMm,
-      "icona": meteo.current.condition.icon,
-      "condition": meteo.current.condition.text,
-      "windDirection": meteo.current.windDir,
-    });
-
+  Future<void> fetchMeteo() async {
+    final meteoData = await controller.getMeteo();
     setState(() {
-      currentMeteo = meteoCondition;
+      currentMeteo = meteoData;
     });
+  }
+
+  Widget showSpottedImages() {
+
+    if(spottedList.isEmpty){
+      return Text("no data avaiable");
+    }
+
+    return SizedBox(
+      height: 200, // imposta un'altezza fissa altrimenti non si vede
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: spottedList.length,
+        itemBuilder: (BuildContext context, int index) {
+          var current = spottedList[index];
+          if(current["image_path"]!="") {
+            print("Image URL: https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${current["image_path"]}");
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${current["image_path"]}",
+                  width: 200,
+                  height: 200,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.error),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> fetchSpotted() async {
+    final list = await controller.getSpotted();
+    setState(() {
+      spottedList = list;
+    });
+    print("Lista spotted: $list");
   }
 
   Widget drawRowTitle(String text) {
@@ -209,11 +263,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> getCuriosity() async {
-    var cur = await db.getData(table: "curiosity");
-    debugPrint(cur.toString());
+  Future<void> fetchCuriosity() async {
+    final List<Map<String, dynamic>> fetchedCuriosity =
+        await controller.getCuriosity();
     setState(() {
-      curiosity = cur;
+      curiosity = fetchedCuriosity;
     });
   }
 
@@ -427,7 +481,10 @@ class _HomeState extends State<Home> {
               Row(
                 children: [
                   Image.network("https:${currentMeteo[0]["icona"]}"),
-                  Text("${currentMeteo[0]["temp"]}°", style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  Text(
+                    "${currentMeteo[0]["temp"]}°",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
               Text(

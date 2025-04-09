@@ -183,11 +183,22 @@ class SupabaseDB {
     return poiList;
   }
 
-  Future<List<Map<String, dynamic>>> getData({String table = "poi"}) async {
+  Future<List<Map<String, dynamic>>> getData({String table = "poi", int limit = 0}) async {
     List<Map<String, dynamic>> poiList = [];
 
     try {
-      final response = await supabase.from(table).select();
+
+
+      PostgrestTransformBuilder<PostgrestList> query = supabase.from(table).select();
+
+      if(limit!=0) {
+        query = query.limit(limit);
+      }
+
+      final response = await query;
+
+
+
 
       if (response == null || response.isEmpty) {
         print("No data found in table: $table");
@@ -254,5 +265,6 @@ class SupabaseDB {
     print(spottedList);
     return spottedList;
   }
+
 
 }
