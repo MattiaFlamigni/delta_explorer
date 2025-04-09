@@ -1,12 +1,10 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:delta_explorer/reports/reportsController.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -16,16 +14,19 @@ class Reports extends StatefulWidget {
 }
 
 class _ReportsState extends State<Reports> {
+  final ReportsController controller = ReportsController();
   final SupabaseDB _supabase = SupabaseDB();
   bool _isImagePickerActive = false;
   List<Map<String, dynamic>> _categoriesList = [];
   final TextEditingController _commentTextController = TextEditingController();
   String _selectedCategory = "";
   File? _image;
-  bool _canSendReports = true; // Stato che indica se il bottone invia è abilitato
+
+  //bool _canSendReports = true; // Stato che indica se il bottone invia è abilitato
 
   final ImagePicker _picker = ImagePicker();
-  Position? _position;
+
+  //Position? _position;
 
   @override
   void initState() {
@@ -40,7 +41,7 @@ class _ReportsState extends State<Reports> {
       body: Column(
         children: [
           buildGridView(),
-          Padding(padding: const EdgeInsets.all(8), child: buildTextFormField()),
+          Padding(padding: const EdgeInsets.all(8), child: showTextFormField()),
           Padding(
             padding: const EdgeInsets.all(8),
             child: ElevatedButton(
@@ -59,15 +60,12 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-
-  Future<void> updatePosition() async {
-    _position = await getUserLocation();
-  }
-
   Widget buildGridView() {
     return Expanded(
       child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+        ),
         itemCount: _categoriesList.length,
         itemBuilder: (context, index) {
           return GestureDetector(
@@ -83,21 +81,28 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  drawReportButton(){
+  drawReportButton() {
     return ElevatedButton(
-        onPressed: () async {
-      await updatePosition();
-      if (_canSendReports) {
-        showLoadingDialog();
-        await submitReport();
-        if(!mounted) return;
-        Navigator.pop(context); // Chiude il dialogo di caricamento
-        Navigator.pop(context); //torna alla mappa
-      } else {
-        showSnackbar("Permessi non abilitati - attivali per inviare la segnalazione");
-      }
-    },
-    child: const Text("invia segnalazione")
+      onPressed: () async {
+        await controller.updatePosition();
+        if (controller.getCanSendReport()) {
+          showLoadingDialog();
+          var response = await controller.submitReport(
+            _selectedCategory,
+            _image!,
+            _commentTextController,
+          );
+          showSnackbar(response!);
+          if (!mounted) return;
+          Navigator.pop(context); // Chiude il dialogo di caricamento
+          Navigator.pop(context); //torna alla mappa
+        } else {
+          showSnackbar(
+            "Permessi non abilitati - attivali per inviare la segnalazione",
+          );
+        }
+      },
+      child: const Text("invia segnalazione"),
     );
   }
 
@@ -105,34 +110,12 @@ class _ReportsState extends State<Reports> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRect(
-        child: Image.file(
-          _image!,
-          width: 150,
-          height: 150,
-          fit: BoxFit.cover,
-        ),
+        child: Image.file(_image!, width: 150, height: 150, fit: BoxFit.cover),
       ),
     );
   }
 
-  Future<void> submitReport() async {
-    if (_selectedCategory.isNotEmpty) {
-      String? imageUrl;
-
-      if (_image != null) {
-        imageUrl = await uploadImage(_image!);
-      }
-
-      GeoPoint geopoint = _position != null ? GeoPoint(_position!.latitude, _position!.longitude) : GeoPoint(0, 0);
-      await _supabase.addReports(imageUrl ?? "", _selectedCategory, _commentTextController.text, geopoint);
-
-      showSnackbar("Segnalazione inviata con successo!");
-    } else {
-      showSnackbar("Seleziona una categoria");
-    }
-  }
-
-  TextFormField buildTextFormField() {
+  TextFormField showTextFormField() {
     return TextFormField(
       controller: _commentTextController,
       decoration: const InputDecoration(
@@ -144,7 +127,10 @@ class _ReportsState extends State<Reports> {
 
   Card cardCategory(int index) {
     return Card(
-      color: (_selectedCategory == _categoriesList[index]["title"]) ? Colors.red : Colors.white,
+      color:
+          (_selectedCategory == _categoriesList[index]["title"])
+              ? Colors.red
+              : Colors.white,
       child: Column(
         children: [
           Text(_categoriesList[index]["title"]),
@@ -189,7 +175,57 @@ class _ReportsState extends State<Reports> {
     _isImagePickerActive = false;
   }
 
-  Future<String?> uploadImage(File image) async {
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 10),
+              Text("Invio in corso..."),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /*Future<void> updatePosition() async {
+    _position = await controller.getUserLocation();
+    if(_position==null) {
+      showSnackbar("GPS disabilitato o permessi non concessi");
+    }
+  }*/
+
+  /*Future<void> submitReport() async {
+    if (_selectedCategory.isNotEmpty) {
+      String? imageUrl;
+
+      if (_image != null) {
+        imageUrl = await controller.uploadImage(_image!);
+        if(imageUrl==null){
+          showSnackbar("errore nel caricamento dell'immagine");
+        }
+      }
+
+      GeoPoint geopoint = _position != null ? GeoPoint(_position!.latitude, _position!.longitude) : GeoPoint(0, 0);
+      await _supabase.addReports(imageUrl ?? "", _selectedCategory, _commentTextController.text, geopoint);
+
+      showSnackbar("Segnalazione inviata con successo!");
+    } else {
+      showSnackbar("Seleziona una categoria");
+    }
+  }*/
+
+  /*Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       final String fullPath = await _supabase.supabase.storage.from('reports').upload(
@@ -203,13 +239,9 @@ class _ReportsState extends State<Reports> {
       print("errore nel caricamento: $e");
       return null;
     }
-  }
+  }*/
 
-  void showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-  Future<Position?> getUserLocation() async {
+  /*Future<Position?> getUserLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -234,25 +266,5 @@ class _ReportsState extends State<Reports> {
       showSnackbar("Errore nel recupero della posizione");
       return null;
     }
-  }
-
-  showLoadingDialog(){
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return const AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 10),
-              Text("Invio in corso..."),
-            ],
-          ),
-        );
-      },
-    );
-
-  }
+  }*/
 }
