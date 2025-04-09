@@ -1,3 +1,4 @@
+import 'package:delta_explorer/gallery/gallery.dart';
 import 'package:delta_explorer/home/homeController.dart';
 import 'package:delta_explorer/maps/maps.dart';
 import 'package:flutter/material.dart';
@@ -309,13 +310,29 @@ class _HomeState extends State<Home> {
       children: [
         Text(
           text1,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        Spacer(),
-        Text(text2),
+        const Spacer(),
+        text2.toLowerCase() == "gallery >"
+            ? GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => GalleryScreen()),
+            );
+          },
+          child: Text(
+            text2,
+            style: const TextStyle(
+              color: Colors.blue,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        )
+            : Text(text2),
       ],
     );
   }
+
 
   Widget drawRowWithCard() {
     return ListView.builder(
