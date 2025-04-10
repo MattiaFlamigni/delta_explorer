@@ -1,4 +1,5 @@
 import 'package:delta_explorer/login/login.dart';
+import 'package:delta_explorer/login/registration.dart';
 import 'package:delta_explorer/maps/maps.dart';
 import 'package:delta_explorer/profile/profile.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginForm(),
+      home: const RegisterForm(),
     );
   }
 }
