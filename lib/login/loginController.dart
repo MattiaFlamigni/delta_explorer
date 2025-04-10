@@ -4,6 +4,17 @@ class LoginController{
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
 
+
+
+  Future<String> submitLogin(String mail, String password) async {
+    if(mail.isEmpty){
+      return "inserire mail";
+    }
+    var res = await signInWithEmail(mail, password,);
+    return res;
+  }
+
+
   Future<String> signUpNewUser(String email, String password) async {
     try {
       print("Tentativo di registrazione con l'email: $email"); // Aggiungi il print dell'email

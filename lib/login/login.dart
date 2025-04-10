@@ -36,36 +36,8 @@ class _LoginFormState extends State<LoginForm> {
             decoration: InputDecoration(labelText: 'Password'),
           ),
           SizedBox(height: 20),
-          Row(
-            children: [
-              _loading
-                  ? CircularProgressIndicator()
-                  : ElevatedButton(
-                onPressed: () async {
-                  if(_emailController.text.isEmpty){
-                    showSnackbar("Inserire mail");
-                    return;
-                  }
-                  var res = await controller.signInWithEmail(
-                    _emailController.text,
-                    _passwordController.text,
-                  ); //TODO: NAVIGARE ALLA SCHERMATA PROFILO
-                  if(res!="Ok"){
-                    showSnackbar(res);
-                  }else{
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Profile()),
-                    );
-                  }
 
-                },
-                child: Text('Login'),
-              ),
-              ElevatedButton(onPressed: (){Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => RegisterForm()),
-              );}, child: Text("registrati")) //TODO: NAVIGARE ALLA SCHERMATA REGISTRATI
-            ],
-          )
+          drawRowButton()
 
         ],
       ),
@@ -73,6 +45,48 @@ class _LoginFormState extends State<LoginForm> {
   }
 
 
+
+  Widget drawRowButton(){
+    return Row(
+      children: [
+        _loading
+            ? CircularProgressIndicator()
+            : ElevatedButton(
+          onPressed: () async {
+            /*if(_emailController.text.isEmpty){
+              showSnackbar("Inserire mail");
+              return;
+            }
+            var res = await controller.signInWithEmail(
+              _emailController.text,
+              _passwordController.text,
+            );
+            if(res!="Ok"){
+              showSnackbar(res);
+            }else{
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => Profile()),
+              );
+            }*/
+
+            var res = await controller.submitLogin(_emailController.text, _passwordController.text);
+            if(res=="Ok"){
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => Profile()),
+              );
+            }else{
+              showSnackbar(res);
+            }
+
+          },
+          child: Text('Login'),
+        ),
+        ElevatedButton(onPressed: (){Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => RegisterForm()),
+        );}, child: Text("registrati")) //TODO: NAVIGARE ALLA SCHERMATA REGISTRATI
+      ],
+    );
+  }
 
   void showSnackbar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
