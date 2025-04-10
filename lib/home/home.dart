@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../components/bottomnav.dart';
+import '../profile/profile.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -17,6 +20,7 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> currentMeteo = [];
   List<Map<String, dynamic>> spottedList = [];
   HomeController controller = HomeController();
+  int _selectedTab = 0;
 
   @override
   void initState() {
@@ -26,10 +30,12 @@ class _HomeState extends State<Home> {
     fetchSpotted();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Home")),
       floatingActionButton: Container(
         alignment: Alignment.bottomCenter,
         child: FloatingActionButton.extended(
@@ -94,6 +100,8 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+
 
   Future<void> fetchMeteo() async {
     final meteoData = await controller.getMeteo();
