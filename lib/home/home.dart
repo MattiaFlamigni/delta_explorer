@@ -67,23 +67,8 @@ class _HomeState extends State<Home> {
 
             /*Sezione informazioni con chip e bottomsheet*/
             drawRowTitle("INFORMAZIONI"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 15,
-              children: [
-                drawChip("Website", (selected) {
-                  bottomSheetWebsite();
-                }),
+            drawRowChip(),
 
-                drawChip("Meteo", (selected) {
-                  bottomheetMeteo();
-                }),
-
-                drawChip("Contatti", (selected) {
-                  bottomheetContatti();
-                }),
-              ],
-            ),
 
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -333,6 +318,25 @@ class _HomeState extends State<Home> {
     );
   }
 
+Widget drawRowChip(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: 15,
+      children: [
+        drawChip("Website", (selected) {
+          bottomSheetWebsite();
+        }),
+
+        drawChip("Meteo", (selected) {
+          bottomheetMeteo();
+        }),
+
+        drawChip("Contatti", (selected) {
+          bottomheetContatti();
+        }),
+      ],
+    );
+}
 
   Widget drawRowWithCard() {
     return ListView.builder(
