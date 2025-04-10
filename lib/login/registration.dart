@@ -1,3 +1,4 @@
+import 'package:delta_explorer/login/login.dart';
 import 'package:delta_explorer/login/loginController.dart';
 import 'package:flutter/material.dart';
 
@@ -46,7 +47,25 @@ class _RegisterFormState extends State<RegisterForm> {
       _emailController.text,
       _passwordController.text,
     );
-    showSnackbar(res);
+
+    if(res=="Registrazione avvenuta con successo"){
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => LoginForm()),
+      );
+    }else{
+      showSnackbar(res);
+    }
+  }
+
+  Widget drawButon(){
+    return _loading
+        ? CircularProgressIndicator()
+        : ElevatedButton(
+      onPressed: () async {
+        showRegistrationMessage();
+      },
+      child: Text('Registrati'),
+    );
   }
 
   Widget showRegistrationForm(){
@@ -72,14 +91,8 @@ class _RegisterFormState extends State<RegisterForm> {
           decoration: InputDecoration(labelText: 'Conferma Password'),
         ),
         SizedBox(height: 20),
-        _loading
-            ? CircularProgressIndicator()
-            : ElevatedButton(
-          onPressed: () async {
-            showRegistrationMessage();
-          },
-          child: Text('Registrati'),
-        ),
+
+        drawButon()
       ],
     );
   }

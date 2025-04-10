@@ -17,7 +17,7 @@ class LoginController{
       final user = res.user;
       if (user != null) {
         print("Utente registrato con successo: ${user.email}"); // Stampa l'email dell'utente
-        return "Registrazione avvenuta con successo. Controlla l'email per la conferma.";
+        return "Registrazione avvenuta con successo";
       } else {
         print("Utente non trovato dopo la registrazione."); // Aggiungi un messaggio per quando l'utente è null
         return "Registrazione avviata, ma senza utente. Verifica l’email.";

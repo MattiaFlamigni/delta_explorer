@@ -6,14 +6,18 @@ class ProfileController{
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
 
-
-
   bool isUserLogged(){
+
     final user = _auth.currentUser;
     if(user!=null){
       return true;
     }
     return false;
+  }
+
+
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 
 
