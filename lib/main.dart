@@ -1,4 +1,6 @@
+import 'package:delta_explorer/login/login.dart';
 import 'package:delta_explorer/maps/maps.dart';
+import 'package:delta_explorer/profile/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -54,7 +56,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Home(),
+      home: const LoginForm(),
     );
   }
 }
