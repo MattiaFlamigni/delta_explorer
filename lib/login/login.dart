@@ -10,8 +10,6 @@ class LoginForm extends StatefulWidget {
   State<LoginForm> createState() => _LoginFormState();
 }
 
-
-
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -19,76 +17,147 @@ class _LoginFormState extends State<LoginForm> {
 
   bool _loading = false;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
-      body: Column(
-        children: [
-          TextField(
-            controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email'),
+      appBar: AppBar(
+        title: Text("Login"),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0, // rimuove la linea sotto l'AppBar
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.blue.shade100],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          TextField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration: InputDecoration(labelText: 'Password'),
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Benvenuto!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Accedi per continuare',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                  ),
+                ),
+                SizedBox(height: 40),
+                // Email TextField
+                _buildTextField(_emailController, 'Email', false),
+                SizedBox(height: 16),
+                // Password TextField
+                _buildTextField(_passwordController, 'Password', true),
+                SizedBox(height: 20),
+                // Buttons Row
+                drawRowButton(),
+              ],
+            ),
           ),
-          SizedBox(height: 20),
-
-          drawRowButton()
-
-        ],
+        ),
       ),
     );
   }
 
 
+  Widget _buildTextField(TextEditingController controller, String label, bool obscure) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.blueAccent),
+        hintText: 'Inserisci $label',
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
 
-  Widget drawRowButton(){
-    return Row(
+  // Row with buttons
+  Widget drawRowButton() {
+    return Column(
       children: [
         _loading
             ? CircularProgressIndicator()
-            : ElevatedButton(
-          onPressed: () async {
-            /*if(_emailController.text.isEmpty){
-              showSnackbar("Inserire mail");
-              return;
-            }
-            var res = await controller.signInWithEmail(
-              _emailController.text,
-              _passwordController.text,
+            : _buildButton('Login', () async {
+          var res = await controller.submitLogin(
+            _emailController.text,
+            _passwordController.text,
+          );
+          if (res == "Ok") {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => Profile()),
             );
-            if(res!="Ok"){
-              showSnackbar(res);
-            }else{
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => Profile()),
-              );
-            }*/
-
-            var res = await controller.submitLogin(_emailController.text, _passwordController.text);
-            if(res=="Ok"){
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => Profile()),
-              );
-            }else{
-              showSnackbar(res);
-            }
-
-          },
-          child: Text('Login'),
-        ),
-        ElevatedButton(onPressed: (){Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => RegisterForm()),
-        );}, child: Text("registrati")) //TODO: NAVIGARE ALLA SCHERMATA REGISTRATI
+          } else {
+            showSnackbar(res);
+          }
+        }),
+        SizedBox(height: 16),
+        _buildButton('Registrati', () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => RegisterForm()),
+          );
+        }),
       ],
     );
   }
 
+  // Custom button with gradient and hover effect
+  Widget _buildButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 28),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 5, // shadow effect
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  // Snackbar for showing messages
   void showSnackbar(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        backgroundColor: Colors.blueAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 }
