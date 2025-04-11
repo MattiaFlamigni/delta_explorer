@@ -15,9 +15,14 @@ class ProfileController{
     return false;
   }
 
-
   Future<void> signOut() async {
     await _auth.signOut();
+  }
+
+  Future<List<Map<String, dynamic>>> getBadge()async{
+    List<Map<String, dynamic>> list = [];
+    list = await _db.getData(table: "badge");
+    return list;
   }
 
 
