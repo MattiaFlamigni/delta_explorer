@@ -84,6 +84,11 @@ class _ReportsState extends State<Reports> {
   drawReportButton() {
     return ElevatedButton(
       onPressed: () async {
+        if (_image == null) {
+          showSnackbar("Scatta una foto prima di inviare la segnalazione.");
+          return;
+        }
+
         await controller.updatePosition();
         if (controller.getCanSendReport()) {
           showLoadingDialog();
