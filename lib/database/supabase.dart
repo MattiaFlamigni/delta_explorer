@@ -91,7 +91,7 @@ class SupabaseDB {
           'latitude': geopoint.latitude,
           'longitude': geopoint.longitude
         }),
-        'User' : userID,
+        'user' : userID,
       });
 
       print("Data added successfully!");
@@ -213,11 +213,8 @@ class SupabaseDB {
     } catch (e) {
       print("Error reading data from Supabase: $e");
     }
-
     return poiList;
   }
-
-
 
   Future<List<Map<String, dynamic>>> getTodaySpotted() async {
     List<Map<String, dynamic>> spottedList = [];
@@ -265,6 +262,17 @@ class SupabaseDB {
     print("Fine ricerca 'spotted'. Documenti restituiti: ${spottedList.length}");
     print(spottedList);
     return spottedList;
+  }
+
+  Future<int?> countRowFromTableWhereUser(String table, String userid) async{
+    try{
+      final response = await supabase.from(table).select().eq("user", userid).count();
+      print("conteggio: ${response.count}");
+      return response.count ;
+    }catch(e){
+      print("Errore durante il conteggio delle righe: $e");
+      return null;
+    }
   }
 
 

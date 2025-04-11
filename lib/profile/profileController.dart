@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfileController{
   final SupabaseDB _db = SupabaseDB();
   final GoTrueClient _auth = Supabase.instance.client.auth;
+  double numSpotted=0;
+  double numReport=0;
 
 
   bool isUserLogged(){
@@ -24,6 +26,29 @@ class ProfileController{
     list = await _db.getData(table: "badge");
     return list;
   }
+
+  Future<void> loadNumSpotted() async{
+
+    int num = await _db.countRowFromTableWhereUser("spotted", _auth.currentUser!.id) ?? 0;
+    numSpotted = num.toDouble();
+
+  }
+
+  Future<void> loadNumReport() async{
+    int num = await _db.countRowFromTableWhereUser("reports", _auth.currentUser!.id) ?? 0;
+    print("num report: $num");
+    numReport = num.toDouble();
+  }
+
+  double getNumSpotted()  {
+    return numSpotted;
+  }
+
+  double getNumReport(){
+    return numReport;
+  }
+
+
 
 
 }

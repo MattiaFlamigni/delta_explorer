@@ -21,19 +21,18 @@ class _ProfileState extends State<Profile> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLoginStatus();
     });
-    loadBadge();
-
+    loadData();
   }
 
-  _checkLoginStatus() async {
-    final isLoggedIn = controller.isUserLogged();
-    print("loggato: $isLoggedIn");
-    if (!isLoggedIn) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginForm()),
-      );
-    }
+
+  Future<void> loadData() async {
+    await controller.loadNumSpotted();
+    await controller.loadNumReport();
+    await loadBadge(); // loadBadge() chiama già setState
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +59,16 @@ class _ProfileState extends State<Profile> {
         ),
       ),
     );
+  }
+
+  _checkLoginStatus() async {
+    final isLoggedIn = controller.isUserLogged();
+    print("loggato: $isLoggedIn");
+    if (!isLoggedIn) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginForm()),
+      );
+    }
   }
 
   // Sezione per i livelli
@@ -99,11 +108,29 @@ class _ProfileState extends State<Profile> {
       ),
       itemCount: badge.length,
       itemBuilder: (BuildContext context, int index) {
+
+        double? progres;
+        int goalBadge = badge[index]["threshold"];
+
+
+        if(badge[index]["type"]=="spot"){
+          print("entrato");
+          progres = controller.getNumSpotted();
+        }else{
+          progres=controller.getNumReport();
+        }
+
+        print("progress: $progres");
+
+        print("Badge: ${badge[index]['title']} - type: ${badge[index]['type']} - progres: $progres - goal: $goalBadge");
+
+
         return Container( // Aggiungi un Container per gestire l'allineamento e il padding degli elementi della griglia
           alignment: Alignment.center, // Allinea il contenuto al centro della cella
           child: badgeWidget(
             badge[index]["image_path"] ?? "",
             badge[index]["title"] ?? "",
+            progres/goalBadge
           ),
         );
       },
@@ -149,7 +176,8 @@ class _ProfileState extends State<Profile> {
   }
 
   // Widget per i badge
-  Widget badgeWidget(String imageAsset, String badgeName) {
+  Widget badgeWidget(String imageAsset, String badgeName, double progress ) {
+    print("progress passato: ${progress}");
     return Column(
       mainAxisAlignment: MainAxisAlignment.center, // Allinea verticalmente al centro
       children: [
@@ -159,7 +187,7 @@ class _ProfileState extends State<Profile> {
           child: DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
             valueNotifier: _valueNotifier,
-            progress: 0,
+            progress: progress*100,
             startAngle: 225,
             sweepAngle: 270,
             foregroundColor: Colors.blue,
