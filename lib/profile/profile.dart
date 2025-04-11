@@ -130,7 +130,9 @@ class _ProfileState extends State<Profile> {
           child: badgeWidget(
             badge[index]["image_path"] ?? "",
             badge[index]["title"] ?? "",
-            progres/goalBadge
+            progres/goalBadge,
+              badge[index]["description"],
+              badge[index]["threshold"]
           ),
         );
       },
@@ -176,7 +178,7 @@ class _ProfileState extends State<Profile> {
   }
 
   // Widget per i badge
-  Widget badgeWidget(String imageAsset, String badgeName, double progress ) {
+  Widget badgeWidget(String imageAsset, String badgeName, double progress, String description, int threshold ) {
     print("progress passato: ${progress}");
     return Column(
       mainAxisAlignment: MainAxisAlignment.center, // Allinea verticalmente al centro
@@ -197,9 +199,12 @@ class _ProfileState extends State<Profile> {
             animation: true,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                imageAsset,
-                fit: BoxFit.cover,
+              child: GestureDetector(
+                onTap: (){bottomSheetBadge(description,progress*10, threshold);}, //TODO APPARE BOTTOM SHEET CON INFO,
+                child: Image.asset(
+                  imageAsset,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -221,5 +226,76 @@ class _ProfileState extends State<Profile> {
     setState(() {
       badge = list;
     });
+  }
+
+
+
+  Future bottomSheetBadge(String desc, double progres, int obiettivo) {
+    return showModalBottomSheet(
+      enableDrag: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Dettagli",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              Text(
+                desc,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.web, color: Colors.blue),
+                  SizedBox(width: 10),
+                  Text(
+                    "Obiettivo:",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Spacer(),
+                  SelectableText(obiettivo.toString()),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(Icons.web, color: Colors.blue),
+                  SizedBox(width: 10),
+                  Text(
+                    "Progresso:",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Spacer(),
+                  SelectableText("${progres.toStringAsFixed(2)}%"),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
