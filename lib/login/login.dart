@@ -1,7 +1,10 @@
+import 'package:delta_explorer/MainPage.dart';
 import 'package:delta_explorer/login/loginController.dart';
 import 'package:delta_explorer/login/registration.dart';
 import 'package:delta_explorer/profile/profile.dart';
 import 'package:flutter/material.dart';
+
+import '../home/home.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -123,6 +126,17 @@ class _LoginFormState extends State<LoginForm> {
             MaterialPageRoute(builder: (context) => RegisterForm()),
           );
         }),
+
+        SizedBox(height: 16),
+        _buildButton('Torna alla Home', () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => MainPage()),
+                (route) => false, // Rimuove tutte le route precedenti
+          );
+
+        }),
+
       ],
     );
   }
