@@ -77,7 +77,7 @@ class SupabaseDB {
     }
   }
 
-  Future<void> addSpotted(String image_path, String type, String comment, String sub, GeoPoint geopoint) async {
+  Future<void> addSpotted(String image_path, String type, String comment, String sub, GeoPoint geopoint, String? userID) async {
     try {
       await supabase.from('spotted').insert({
         'data': DateTime.now().toLocal().copyWith(
@@ -91,6 +91,7 @@ class SupabaseDB {
           'latitude': geopoint.latitude,
           'longitude': geopoint.longitude
         }),
+        'User' : userID,
       });
 
       print("Data added successfully!");

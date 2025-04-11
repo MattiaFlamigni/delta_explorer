@@ -7,6 +7,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+
+
+/*
+* [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: Null check operator used on a null value
+E/flutter (30144): #0      _SpottedState.uploadSpot (package:delta_explorer/spotted/spotted.dart:98:127)
+E/flutter (30144): <asynchronous suspension>
+E/flutter (30144): #1      _SpottedState.buildSendButton.<anonymous closure> (package:delta_explorer/spotted/spotted.dart:192:11)
+E/flutter (30144): <asynchronous suspension>
+E/flutter (30144):
+*
+* */
+
 class Spotted extends StatefulWidget {
   const Spotted({super.key});
 
@@ -89,13 +101,14 @@ class _SpottedState extends State<Spotted> {
     String? imageUrl;
     if (_image != null) imageUrl = await uploadImage(_image!);
     await updatePosition();
+    var userID = Supabase.instance.client.auth.currentUser?.id;
 
     GeoPoint geopoint = _position != null
         ? GeoPoint(_position!.latitude, _position!.longitude)
         : GeoPoint(0, 0);
 
 
-    _supabase.addSpotted(imageUrl ?? "", _selectedCategory, _commentTextController.text, _selectedSubcategory, geopoint);
+    _supabase.addSpotted(imageUrl ?? "", _selectedCategory, _commentTextController.text, _selectedSubcategory, geopoint,userID);
     showSnackbar("Segnalazione inviata con successo!");
   }
 
