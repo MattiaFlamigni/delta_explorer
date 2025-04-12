@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
-import '../components/bottomnav.dart';
-import '../profile/profile.dart';
-
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -20,7 +17,6 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> currentMeteo = [];
   List<Map<String, dynamic>> spottedList = [];
   HomeController controller = HomeController();
-  int _selectedTab = 0;
 
   @override
   void initState() {
@@ -30,9 +26,6 @@ class _HomeState extends State<Home> {
     fetchSpotted();
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,11 +33,11 @@ class _HomeState extends State<Home> {
         alignment: Alignment.bottomCenter,
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Maps()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => Maps()));
           },
-          label: Text("MAP")
+          label: Text("MAP"),
         ),
       ),
       body: SingleChildScrollView(
@@ -54,17 +47,7 @@ class _HomeState extends State<Home> {
             drawHeaderImageWithText(),
 
             //mostra un immagine con testo in sovraimpressione
-            Padding(
-              padding: EdgeInsets.only(top: 15, left: 16, right: 16),
-              child: drawDoubleTextRow("ALCUNI AVVISTAMENTI", "gallery >"),
-            ),
-
-            const SizedBox(height: 10),
-
-            /*carica immagini casuali da db*/
-            showSpottedImages(),
-
-            Row(children: const []),
+            buldSpottedSection(),
 
             /*Disegna una riga scrollabile di card contente curiosita e dati*/
             drawRowTitle("CURIOSITA E DATI"),
@@ -75,26 +58,10 @@ class _HomeState extends State<Home> {
             drawRowTitle("INFORMAZIONI"),
             drawRowChip(),
 
-
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-              // Aggiunta una spaziatura più bilanciata
-              child: drawInfoSection(
-                Icons.place_rounded,
-                "Indirizzo",
-                "Provincia di Ferrara",
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-              // Aggiunta una spaziatura più bilanciata
-              child: drawInfoSection(
-                Icons.access_time_rounded,
-                "Orari",
-                "24 ore su 24",
-              ),
-            ),
+            drawInfoSection(Icons.place_rounded, "Indirizzo", "Provincia di Ferrara"),
+            drawInfoSection(Icons.access_time_rounded, "Orari", "24 ore su 24",),
             SizedBox(height: 100,)
+
           ],
         ),
       ),
@@ -102,6 +69,23 @@ class _HomeState extends State<Home> {
   }
 
 
+
+
+  Widget buldSpottedSection(){
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 15, left: 16, right: 16),
+          child: drawDoubleTextRow("ALCUNI AVVISTAMENTI", "gallery >"),
+        ),
+
+        const SizedBox(height: 10),
+
+        /*carica immagini casuali da db*/
+        showSpottedImages(),
+      ],
+    );
+  }
 
   Future<void> fetchMeteo() async {
     final meteoData = await controller.getMeteo();
@@ -111,8 +95,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget showSpottedImages() {
-
-    if(spottedList.isEmpty){
+    if (spottedList.isEmpty) {
       return Text("no data avaiable");
     }
 
@@ -123,8 +106,7 @@ class _HomeState extends State<Home> {
         itemCount: spottedList.length,
         itemBuilder: (BuildContext context, int index) {
           var current = spottedList[index];
-          if(current["image_path"]!="") {
-            print("Image URL: https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${current["image_path"]}");
+          if (current["image_path"] != "") {
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -136,17 +118,16 @@ class _HomeState extends State<Home> {
                   height: 200,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return Center(child: CircularProgressIndicator());
                   },
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Icon(Icons.error),
+                  errorBuilder:
+                      (context, error, stackTrace) => Icon(Icons.error),
                 ),
               ),
             );
           }
+          return Text("no data");
         },
       ),
     );
@@ -272,25 +253,35 @@ class _HomeState extends State<Home> {
   Widget drawHeaderImageWithText() {
     return GestureDetector(
       onTap: () {
-        print("tappato");
-      }, // TODO: BOTTOM SHEET
+        bottomSheetMainImage();
+      },
       child: Container(
         width: double.infinity,
         height: 200,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/resources/pesci.png'),
+            image: AssetImage('assets/resources/main.png'),
             fit: BoxFit.cover,
           ),
         ),
-        child: const Center(
-          child: Text(
-            "testo di prova",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              backgroundColor: Colors.black45,
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+            padding: EdgeInsets.all(16), // margine dal bordo
+            child: Text(
+              "UN PARCO DISEGNATO DALL'ACQUA, ${controller.getMainImageDescription().substring(0,30)}... readMore",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    blurRadius: 4,
+                    color: Colors.black54,
+                    offset: Offset(1, 1),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -308,25 +299,25 @@ class _HomeState extends State<Home> {
         const Spacer(),
         text2.toLowerCase() == "gallery >"
             ? GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => GalleryScreen()),
-            );
-          },
-          child: Text(
-            text2,
-            style: const TextStyle(
-              color: Colors.blue,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        )
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => GalleryScreen()),
+                );
+              },
+              child: Text(
+                text2,
+                style: const TextStyle(
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            )
             : Text(text2),
       ],
     );
   }
 
-Widget drawRowChip(){
+  Widget drawRowChip() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       spacing: 15,
@@ -344,7 +335,7 @@ Widget drawRowChip(){
         }),
       ],
     );
-}
+  }
 
   Widget drawRowWithCard() {
     return ListView.builder(
@@ -588,33 +579,108 @@ Widget drawRowChip(){
     );
   }
 
-  Widget drawInfoSection(IconData icon, String text1, String text2) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: Colors.orange,
-          size: 24, // Rende l'icona leggermente più grande
-        ),
-        SizedBox(width: 10), // Distanza tra icona e testo
-        Text(
-          text1,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color:
-                Colors.black87, // Colore scuro per contrastare con l'arancione
-          ),
-        ),
-        Spacer(),
-        Text(
-          text2,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.black54, // Colore grigio per il testo secondario
-          ),
-        ),
-      ],
+  Future bottomSheetMainImage() {
+    return showModalBottomSheet(
+      enableDrag: true,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      context: context,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.4,
+          minChildSize: 0.2,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Descrizione",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Text(
+                        controller.getMainImageDescription(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          wordSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
+
+  Widget drawInfoSection(IconData icon, String text1, String text2) {
+    return Padding(
+      padding: EdgeInsets.all(10),
+      child: Row(
+
+        children: [
+          Icon(
+            icon,
+            color: Colors.orange,
+            size: 24, // Rende l'icona leggermente più grande
+          ),
+          SizedBox(width: 10), // Distanza tra icona e testo
+          Text(
+            text1,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color:
+                  Colors.black87, // Colore scuro per contrastare con l'arancione
+            ),
+          ),
+          Spacer(),
+          Text(
+            text2,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black54, // Colore grigio per il testo secondario
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildInfoSection(IconData icon, String title, String text) =>
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        child: drawInfoSection(icon, title, text),
+      );
 }

@@ -25,6 +25,15 @@ class HomeController{
     return meteoCondition;
   }
 
+  String getMainImageDescription() {
+    return '''
+Benvenuto nel Parco del Delta del Po dell’Emilia-Romagna, un territorio dove la natura incontra l’avventura! Preparati a esplorare paesaggi mozzafiato, costellati da lagune, canali e sentieri immersi nel silenzio.
+Lasciati guidare tra antiche valli da pesca, boschi misteriosi e distese d’acqua popolate da fenicotteri e altre specie rare. Ad ogni passo, ogni avvistamento e ogni scoperta potrai collezionare ricordi... e magari anche qualche badge!
+Che tu sia un esploratore curioso, un fotografo appassionato o un semplice amante delle passeggiate nella natura, qui troverai un’esperienza unica, tra avventure, biodiversità e la magia di un paesaggio in continua trasformazione.
+Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
+''';
+  }
+
 
   Future<List<Map<String, dynamic>>> getCuriosity() async {
     var cur = await db.getData(table: "curiosity");
