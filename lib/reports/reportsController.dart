@@ -11,6 +11,7 @@ class ReportsController {
   final SupabaseDB _supabase = SupabaseDB();
   bool _canSendReports = true;
   Position? _position;
+  final GoTrueClient _auth = Supabase.instance.client.auth;
 
   Future<String?> uploadImage(File image) async {
     try {
@@ -74,6 +75,7 @@ class ReportsController {
         selectedCategory,
         commentTextController.text,
         geopoint,
+        _auth.currentUser?.id
       );
 
       return ("Segnalazione inviata con successo!");

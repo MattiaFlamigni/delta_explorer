@@ -62,14 +62,15 @@ class SupabaseDB {
     }
   }
 
-  Future<void> addReports(String image_path, String type, String comment, GeoPoint geopoint) async{
+  Future<void> addReports(String image_path, String type, String comment, GeoPoint geopoint, String? userID) async{
     try {
       await supabase.from("reports").insert({
         'data': DateTime.now().toIso8601String(),
         'image_path': image_path,
         'comment':comment,
         'type':type,
-        'position': [geopoint.latitude, geopoint.longitude]
+        'position': [geopoint.latitude, geopoint.longitude],
+        'user':userID
       });
       print("Data added successfully!");
     } catch (e) {
