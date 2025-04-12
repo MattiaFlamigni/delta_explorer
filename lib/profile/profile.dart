@@ -24,36 +24,28 @@ class _ProfileState extends State<Profile> {
     loadData();
   }
 
-
   Future<void> loadData() async {
     await controller.loadNumSpotted();
     await controller.loadNumReport();
-    await loadBadge(); // loadBadge() chiama già setState
+    await loadBadge();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Profilo'),
+        backgroundColor: Colors.green,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Livelli',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
             drawLevelRow(),
             const SizedBox(height: 20),
-            const Text(
-              'Badge',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
+            drawPersonalNumbers(),
+            const SizedBox(height: 20),
             drawBadgeRow(),
           ],
         ),
@@ -61,9 +53,31 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  Widget drawPersonalNumbers(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Statistiche personali", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.green)),
+        const SizedBox(height: 8),
+        drawDoubleTextRow("Contributi", controller.getNumSpotted().toInt().toString()),
+        drawDoubleTextRow("Segnalazioni", controller.getNumReport().toInt().toString()),
+      ],
+    );
+  }
+
+  Widget drawDoubleTextRow(String text1, String text2) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        title: Text(text1, style: TextStyle(fontSize: 15, color: Colors.black)),
+        trailing: Text(text2, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green)),
+      ),
+    );
+  }
+
   _checkLoginStatus() async {
     final isLoggedIn = controller.isUserLogged();
-    print("loggato: $isLoggedIn");
     if (!isLoggedIn) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginForm()),
@@ -71,81 +85,75 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  // Sezione per i livelli
   Widget drawLevelRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: progressIndicator("assets/resources/abbandono.png", 0.15, "Livello 1"),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: progressIndicator("assets/resources/abbandono.png", 0.25, "Livello 2"),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: progressIndicator("assets/resources/abbandono.png", 0.35, "Livello 3"),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: progressIndicator("assets/resources/abbandono.png", 0.0, "Livello 4"),
+        const Text('Livelli', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.15, "Livello 1")),
+            const SizedBox(width: 10),
+            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.25, "Livello 2")),
+            const SizedBox(width: 10),
+            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.35, "Livello 3")),
+            const SizedBox(width: 10),
+            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.0, "Livello 4")),
+          ],
         ),
       ],
     );
   }
 
-  // Sezione per i badge
   Widget drawBadgeRow() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Ottimizzato per 3 badge per riga su schermi medi
-        crossAxisSpacing: 10.0, // Spazio orizzontale tra i badge
-        mainAxisSpacing: 10.0, // Spazio verticale tra i badge
-        childAspectRatio: 0.85, // Leggermente aumentato per dare più spazio al testo
-      ),
-      itemCount: badge.length,
-      itemBuilder: (BuildContext context, int index) {
-
-        double? progres;
-        int goalBadge = badge[index]["threshold"];
-
-
-        if(badge[index]["type"]=="spot"){
-          print("entrato");
-          progres = controller.getNumSpotted();
-        }else{
-          progres=controller.getNumReport();
-        }
-
-        print("progress: $progres");
-
-        print("Badge: ${badge[index]['title']} - type: ${badge[index]['type']} - progres: $progres - goal: $goalBadge");
-
-
-        return Container( // Aggiungi un Container per gestire l'allineamento e il padding degli elementi della griglia
-          alignment: Alignment.center, // Allinea il contenuto al centro della cella
-          child: badgeWidget(
-            badge[index]["image_path"] ?? "",
-            badge[index]["title"] ?? "",
-            progres/goalBadge,
-              badge[index]["description"],
-              badge[index]["threshold"]
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Badge', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+            childAspectRatio: 0.85,
           ),
-        );
-      },
+          itemCount: badge.length,
+          itemBuilder: (BuildContext context, int index) {
+            double? progres;
+            int goalBadge = badge[index]["threshold"];
+
+            if (badge[index]["type"] == "spot") {
+              progres = controller.getNumSpotted();
+            } else {
+              progres = controller.getNumReport();
+            }
+
+            return Container(
+              alignment: Alignment.center,
+              child: badgeWidget(
+                badge[index]["image_path"] ?? "",
+                badge[index]["title"] ?? "",
+                progres / goalBadge,
+                badge[index]["description"],
+                badge[index]["threshold"],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
-  // Widget per il progress indicator
   Widget progressIndicator(String imageAsset, double progress, String label) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center, // Allinea verticalmente al centro
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 80, // Riduci la dimensione per un layout più compatto nella riga
+          width: 80,
           height: 80,
           child: DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
@@ -160,36 +168,27 @@ class _ProfileState extends State<Profile> {
             animation: true,
             child: Padding(
               padding: const EdgeInsets.all(6.0),
-              child: Image.asset(
-                imageAsset,
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(imageAsset, fit: BoxFit.cover),
             ),
           ),
         ),
-        const SizedBox(height: 5), // Riduci lo spazio sotto il livello
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center, // Assicura che il testo sia centrato
-        ),
+        const SizedBox(height: 5),
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
       ],
     );
   }
 
-  // Widget per i badge
-  Widget badgeWidget(String imageAsset, String badgeName, double progress, String description, int threshold ) {
-    print("progress passato: ${progress}");
+  Widget badgeWidget(String imageAsset, String badgeName, double progress, String description, int threshold) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center, // Allinea verticalmente al centro
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
-          width: 60, // Riduci la dimensione per un layout più compatto nella griglia
+          width: 60,
           height: 60,
           child: DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
             valueNotifier: _valueNotifier,
-            progress: progress*100,
+            progress: progress * 100,
             startAngle: 225,
             sweepAngle: 270,
             foregroundColor: Colors.blue,
@@ -200,21 +199,20 @@ class _ProfileState extends State<Profile> {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
-                onTap: (){bottomSheetBadge(description,progress*10, threshold);}, //TODO APPARE BOTTOM SHEET CON INFO,
-                child: Image.asset(
-                  imageAsset,
-                  fit: BoxFit.cover,
-                ),
+                onTap: () {
+                  bottomSheetBadge(description, progress * 10, threshold);
+                },
+                child: Image.asset(imageAsset, fit: BoxFit.cover),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 5), // Riduci lo spazio sotto il badge
+        const SizedBox(height: 5),
         Text(
           badgeName,
-          style: const TextStyle(fontSize: 10),
+          style: const TextStyle(fontSize: 10, color: Colors.black),
           textAlign: TextAlign.center,
-          maxLines: 2, // Gestisci nomi più lunghi
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
       ],
@@ -228,14 +226,10 @@ class _ProfileState extends State<Profile> {
     });
   }
 
-
-
   Future bottomSheetBadge(String desc, double progres, int obiettivo) {
     return showModalBottomSheet(
       enableDrag: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       context: context,
       builder: (BuildContext context) {
         return Container(
@@ -252,30 +246,18 @@ class _ProfileState extends State<Profile> {
                 child: Container(
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
                 ),
               ),
               SizedBox(height: 20),
-              Text(
-                "Dettagli",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              Text("Dettagli", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               SizedBox(height: 20),
-              Text(
-                desc,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              Text(desc, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Icon(Icons.web, color: Colors.blue),
                   SizedBox(width: 10),
-                  Text(
-                    "Obiettivo:",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                  Text("Obiettivo:", style: TextStyle(fontWeight: FontWeight.w500)),
                   Spacer(),
                   SelectableText(obiettivo.toString()),
                 ],
@@ -284,10 +266,7 @@ class _ProfileState extends State<Profile> {
                 children: [
                   Icon(Icons.web, color: Colors.blue),
                   SizedBox(width: 10),
-                  Text(
-                    "Progresso:",
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
+                  Text("Progresso:", style: TextStyle(fontWeight: FontWeight.w500)),
                   Spacer(),
                   SelectableText("${progres.toStringAsFixed(2)}%"),
                 ],
