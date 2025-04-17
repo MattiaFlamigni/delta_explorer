@@ -11,8 +11,9 @@ class LensController {
   bool _isImagePickerActive = false;
   List<Map<String, dynamic>> _suggestions = [];
 
+
   final String _api =
-      "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5MTMyODMwLCJleHAiOjE3NDQ3MzA0ODJ9.nZ3yU-sOMbEGBzHEfqFFzGTgaNvf-UhO8FTEUmB3Wam969q-qbjdoTOpVMXjt9_C6HVkhaM4uSA-bxUwq-Wqig";
+      "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5MTMyODMwLCJleHAiOjE3NDQ5NjE1ODd9.8qeHTzOVezOv08ZcarhvFlNnw9kZIDbzN9M-nL1rtgY4EkA_KFdaUopnYm2a-gMss0OjNHQ1VXTHsp5s0YrkiQ";
 
   List<Map<String, dynamic>> getSuggestions() {
     return _suggestions;
@@ -55,10 +56,15 @@ class LensController {
       );
       request.headers['Authorization'] = _api;
 
+      //request.headers['Authorization'] = 'Bearer $_api';
+
+
       request.files.add(await http.MultipartFile.fromPath('image', image.path));
 
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
+
+      print("risposta: $responseBody");
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(responseBody);

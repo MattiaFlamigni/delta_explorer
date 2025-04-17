@@ -162,10 +162,10 @@ class _LensState extends State<Lens> {
           itemBuilder: (context, index) {
             final suggestion = controller.getSuggestions()[index];
             final commonName =
-            suggestion['taxon']?['preferred_common_name']
-            as String?;
+            suggestion['taxon']?['preferred_common_name'];
+            final imagePath = suggestion['taxon']?['default_photo']?['url'] as String?;
             final score = suggestion['vision_score'] as double?;
-            return drawCard(commonName??"N/A", score??0.00);
+            return drawCard(commonName??"N/A", score??0.00, imagePath??"");
           },
         ),
       ],
@@ -173,28 +173,75 @@ class _LensState extends State<Lens> {
   }
 
 
-  Widget drawCard(String commonName, double score){
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              commonName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+  Widget drawCard(String commonName, double score, String image_path){
+    return GestureDetector(
+      onTap: (){drawBottomSheet(image_path);},
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                'Probabilità: ${(score).toStringAsFixed(2)}%',
-                style: const TextStyle(color: Colors.grey),
+                commonName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-          ],
+                Text(
+                  'Probabilità: ${(score).toStringAsFixed(2)}%',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future drawBottomSheet(String url){
+    return showModalBottomSheet(
+      enableDrag: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Barra centrale visibile
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Immagine",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              Image.network(url),
+            ],
+          ),
+        );
+      },
     );
   }
 }
