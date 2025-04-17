@@ -57,7 +57,7 @@ class SpottedController {
       userID,
     );
 
-    if (supabase.supabase.auth.currentUser != null) {
+    if (_auth.currentUser != null) {
       message = "Punti Aggiornati!";
       if (image != null) {
         supabase.addPoints(
