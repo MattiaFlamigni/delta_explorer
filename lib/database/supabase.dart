@@ -169,6 +169,14 @@ class SupabaseDB {
     }
   }
 
+  Future<void> addUser(User user) async{
+    try {
+      await supabase.from("users").insert({"id": user.id});
+    }catch(e){
+      print("ERRORE: $e");
+    }
+  }
+
 
 
   Future<List<Map<String, dynamic>>> getPOI() async {
