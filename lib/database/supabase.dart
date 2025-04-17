@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delta_explorer/constants/point.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseDB {
@@ -177,14 +178,15 @@ class SupabaseDB {
     }
   }
 
-  Future<String> addPoints(int points, String userID) async{
-
-    int partialPoints = await getUserPoints(userID);
-    int finalPoints = partialPoints+points;
+  Future<String> addPoints(int points, String userID, String type) async{
 
     try{
-      await supabase.from("users").update({"points":finalPoints}).eq("id", userID);
-      print("PUNTI AGGIORNATI: $finalPoints");
+      await supabase.from("points").insert({
+        "userID" : userID,
+        "numPoints":points,
+        "type" : type,
+      });
+
       return "punti aggiornati";
     }catch(e){
       print("errore: $e");
@@ -195,16 +197,25 @@ class SupabaseDB {
 
   Future<int> getUserPoints(String userID) async {
     try {
-      final response = await supabase.from("users").select("points").eq("id", userID).single();
-      final points = response["points"];
-      print("PUNTI ATTUALI: $points");
-      return points;
+      final response = await supabase
+          .from("points")
+          .select("numPoints")
+          .eq("userID", userID);
 
-    }catch(e){
+      int totalPoints = 0;
+      for (var row in response) {
+        totalPoints += row["numPoints"] as int;
+      }
+
+      print("PUNTI ATTUALI: $totalPoints");
+      return totalPoints;
+
+    } catch (e) {
       print("errore $e");
     }
     return -1;
   }
+
 
   Future<List<Map<String, dynamic>>> getPOI() async {
     final supabaseClient = Supabase.instance.client;

@@ -114,7 +114,7 @@ class ReportsController {
 
   Future <String> addPoints(int points, String userID) async {
     try {
-      await _supabase.addPoints(points, userID);
+      await _supabase.addPoints(points, userID, TypePoints.reports);
       return "Punti Aggiornati";
     }catch(e){
       return "errore: $e";

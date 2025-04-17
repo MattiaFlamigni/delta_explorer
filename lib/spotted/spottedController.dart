@@ -60,12 +60,12 @@ class SpottedController {
     if (_auth.currentUser != null) {
       message = "Punti Aggiornati!";
       if (image != null) {
-        supabase.addPoints(
+        addPoints(
           Points.spottedPhoto,
           supabase.supabase.auth.currentUser!.id,
         );
       } else {
-        supabase.addPoints(
+        addPoints(
           Points.spotted,
           supabase.supabase.auth.currentUser!.id,
         );
@@ -126,6 +126,6 @@ class SpottedController {
   }
 
   void addPoints(int points, String userID) async {
-    await supabase.addPoints(points, userID);
+    await supabase.addPoints(points, userID, TypePoints.spotted);
   }
 }
