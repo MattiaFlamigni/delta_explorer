@@ -12,7 +12,7 @@ class LensController {
   List<Map<String, dynamic>> _suggestions = [];
 
 
-  final String _api =
+  final String _api = //TODO: questo sarebbe di sessione, andrebbe modificato. ho mandato ticket a inaturalist
       "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5MTMyODMwLCJleHAiOjE3NDQ5NjE1ODd9.8qeHTzOVezOv08ZcarhvFlNnw9kZIDbzN9M-nL1rtgY4EkA_KFdaUopnYm2a-gMss0OjNHQ1VXTHsp5s0YrkiQ";
 
   List<Map<String, dynamic>> getSuggestions() {
