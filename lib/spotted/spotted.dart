@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -99,6 +100,14 @@ class _SpottedState extends State<Spotted> {
 
     _supabase.addSpotted(imageUrl ?? "", _selectedCategory, _commentTextController.text, _selectedSubcategory, geopoint,userID);
     showSnackbar("Segnalazione inviata con successo!");
+
+    if(_supabase.supabase.auth.currentUser!=null){
+      if(_image!=null) {
+        _supabase.addPoints(Points.spottedPhoto, _supabase.supabase.auth.currentUser!.id);
+      }else{
+        _supabase.addPoints(Points.spotted, _supabase.supabase.auth.currentUser!.id);
+      }
+    }
   }
 
   Future<String?> uploadImage(File image) async {
