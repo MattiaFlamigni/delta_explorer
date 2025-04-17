@@ -22,6 +22,7 @@ class _ProfileState extends State<Profile> {
       _checkLoginStatus();
     });
     loadData();
+    controller.fetchUserPoint();
   }
 
   Future<void> loadData() async {
@@ -59,8 +60,10 @@ class _ProfileState extends State<Profile> {
       children: [
         Text("Statistiche personali", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.green)),
         const SizedBox(height: 8),
+        drawDoubleTextRow("Punti Guadagnati", controller.getUserPoint().toString()),
         drawDoubleTextRow("Contributi", controller.getNumSpotted().toInt().toString()),
         drawDoubleTextRow("Segnalazioni", controller.getNumReport().toInt().toString()),
+
       ],
     );
   }

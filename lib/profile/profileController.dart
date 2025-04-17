@@ -6,6 +6,7 @@ class ProfileController{
   final GoTrueClient _auth = Supabase.instance.client.auth;
   double numSpotted=0;
   double numReport=0;
+  int userPoint = -1;
 
 
   bool isUserLogged(){
@@ -47,6 +48,17 @@ class ProfileController{
   double getNumReport(){
     return numReport;
   }
+
+  Future<void> fetchUserPoint() async {
+    int point =  await  _db.getUserPoints(_auth.currentUser!.id);
+    userPoint = point;
+  }
+
+  int getUserPoint(){
+    return userPoint;
+  }
+
+
 
 
 
