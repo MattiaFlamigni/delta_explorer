@@ -177,7 +177,34 @@ class SupabaseDB {
     }
   }
 
+  Future<String> addPoints(int points, String userID) async{
 
+    int partialPoints = await getUserPoints(userID);
+    int finalPoints = partialPoints+points;
+
+    try{
+      await supabase.from("users").update({"points":finalPoints}).eq("id", userID);
+      print("PUNTI AGGIORNATI: $finalPoints");
+      return "punti aggiornati";
+    }catch(e){
+      print("errore: $e");
+    }
+    return "errore nell'aggiornamento dei punti";
+
+  }
+
+  Future<int> getUserPoints(String userID) async {
+    try {
+      final response = await supabase.from("users").select("points").eq("id", userID).single();
+      final points = response["points"];
+      print("PUNTI ATTUALI: $points");
+      return points;
+
+    }catch(e){
+      print("errore $e");
+    }
+    return -1;
+  }
 
   Future<List<Map<String, dynamic>>> getPOI() async {
     final supabaseClient = Supabase.instance.client;
