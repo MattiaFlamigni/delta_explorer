@@ -163,9 +163,10 @@ class _LensState extends State<Lens> {
             final suggestion = controller.getSuggestions()[index];
             final commonName =
             suggestion['taxon']?['preferred_common_name'];
+            final originalName = suggestion['taxon']?['name'];
             final imagePath = suggestion['taxon']?['default_photo']?['url'] as String?;
             final score = suggestion['vision_score'] as double?;
-            return drawCard(commonName??"N/A", score??0.00, imagePath??"");
+            return drawCard(commonName??"N/A",originalName, score??0.00, imagePath??"");
           },
         ),
       ],
@@ -173,36 +174,49 @@ class _LensState extends State<Lens> {
   }
 
 
-  Widget drawCard(String commonName, double score, String image_path){
-    return GestureDetector(
-      onTap: (){drawBottomSheet(image_path);},
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                commonName,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-                Text(
-                  'Probabilità: ${(score).toStringAsFixed(2)}%',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-            ],
+  Widget drawCard(String commonName,String originalName, double score, String image_path){
+    print("original name $originalName");
+    if(commonName!="N/A") {
+      return GestureDetector(
+        onTap: () async {
+          String desc = await controller.getDescription(originalName);
+          drawBottomSheet(image_path, desc);
+        },
+
+
+        child: Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if(commonName != "N/A")
+                  Text(
+                    commonName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                if(commonName != "N/A")
+                  Text(
+                    'Probabilità: ${(score).toStringAsFixed(2)}%',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    return const SizedBox.shrink();
   }
 
-  Future drawBottomSheet(String url){
+  Future drawBottomSheet(String url, String desc){
     return showModalBottomSheet(
+
+      isScrollControlled: true,
       enableDrag: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -238,6 +252,14 @@ class _LensState extends State<Lens> {
               ),
               SizedBox(height: 20),
               Image.network(url),
+              SizedBox(height: 20),
+              Text(
+                "Descrizione",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+
+              Text(desc)
+
             ],
           ),
         );

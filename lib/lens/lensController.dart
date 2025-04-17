@@ -85,4 +85,39 @@ class LensController {
     }
     return "";
   }
+
+  Future<String> _fetchWikipediaDescription(String title) async {
+    // Fai la richiesta a Wikipedia (con exintro per l'introduzione)
+    final response = await http.get(
+      Uri.parse(
+          "https://it.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&format=json&redirects=1&titles=${Uri.encodeComponent(title)}"
+      ),
+    );
+
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final pages = data['query']['pages'];
+
+
+      if (pages != null && pages.isNotEmpty) {
+        final page = pages.values.first; // Prendi la prima pagina
+
+        // Verifica se esiste un estratto
+        String extract = page['extract'] ?? "";
+        if (extract.isNotEmpty) {
+          // Truncare l'estratto a 500 caratteri
+          return extract.length > 500 ? extract.substring(0, 500) + '...' : extract;
+        }
+      }
+      return "Descrizione non disponibile";
+    } else {
+      return "Errore nella connessione";
+    }
+  }
+
+  Future<String> getDescription (String title) async {
+    String desc =  await _fetchWikipediaDescription(title);
+    return desc;
+  }
 }
