@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delta_explorer/constants/point.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -58,6 +59,8 @@ class ReportsController {
   }
 
   Future<String?> submitReport(String selectedCategory, File image, TextEditingController commentTextController) async {
+    String message ="";
+
     if (selectedCategory.isNotEmpty) {
       String? imageUrl;
 
@@ -78,7 +81,14 @@ class ReportsController {
         _auth.currentUser?.id
       );
 
-      return ("Segnalazione inviata con successo!");
+      if(_auth.currentUser!=null){
+        addPoints(Points.reports, _auth.currentUser!.id);
+        message = "Punti Aggiornati!";
+      }
+
+
+
+      return ("Segnalazione inviata con successo! $message");
     } else {
       return ("Seleziona una categoria");
     }
@@ -94,5 +104,14 @@ class ReportsController {
 
   bool getCanSendReport() {
     return _canSendReports;
+  }
+
+  Future <String> addPoints(int points, String userID) async {
+    try {
+      await _supabase.addPoints(points, userID);
+      return "Punti Aggiornati";
+    }catch(e){
+      return "errore: $e";
+    }
   }
 }

@@ -98,6 +98,7 @@ class _ReportsState extends State<Reports> {
             _commentTextController,
           );
           showSnackbar(response!);
+
           if (!mounted) return;
           Navigator.pop(context); // Chiude il dialogo di caricamento
           Navigator.pop(context); //torna alla mappa
