@@ -179,16 +179,32 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget badgeWidget(String imageAsset, String badgeName, double progress, String description, int threshold) {
+    bool isAchieved = progress >= 1;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SizedBox(
+        Container(
           width: 60,
           height: 60,
-          child: DashedCircularProgressBar.aspectRatio(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: isAchieved
+                ? Border.all(color: Colors.amber, width: 4)  // Bordo dorato per badge sbloccato
+                : null,
+            boxShadow: isAchieved
+                ? [BoxShadow(color: Colors.amber.withOpacity(0.7), blurRadius: 10, spreadRadius: 1)]
+                : [],
+          ),
+          child: isAchieved
+              ? Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Image.asset(imageAsset, fit: BoxFit.cover),
+          )
+              : DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
             valueNotifier: _valueNotifier,
-            progress: progress * 100,
+            progress: progress*100,
             startAngle: 225,
             sweepAngle: 270,
             foregroundColor: Colors.blue,
@@ -200,7 +216,7 @@ class _ProfileState extends State<Profile> {
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
                 onTap: () {
-                  bottomSheetBadge(description, progress * 10, threshold);
+                  bottomSheetBadge(description, progress * 100, threshold);
                 },
                 child: Image.asset(imageAsset, fit: BoxFit.cover),
               ),
@@ -210,7 +226,11 @@ class _ProfileState extends State<Profile> {
         const SizedBox(height: 5),
         Text(
           badgeName,
-          style: const TextStyle(fontSize: 10, color: Colors.black),
+          style: TextStyle(
+            fontSize: 10,
+            color: isAchieved ? Colors.amber[800] : Colors.black,
+            fontWeight: isAchieved ? FontWeight.bold : FontWeight.normal,
+          ),
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -218,6 +238,7 @@ class _ProfileState extends State<Profile> {
       ],
     );
   }
+
 
   loadBadge() async {
     var list = await controller.getBadge();
