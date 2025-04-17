@@ -15,7 +15,6 @@ class Reports extends StatefulWidget {
 
 class _ReportsState extends State<Reports> {
   final ReportsController controller = ReportsController();
-  final SupabaseDB _supabase = SupabaseDB();
   bool _isImagePickerActive = false;
   List<Map<String, dynamic>> _categoriesList = [];
   final TextEditingController _commentTextController = TextEditingController();
@@ -152,15 +151,12 @@ class _ReportsState extends State<Reports> {
   }
 
   Future<void> loadCategories() async {
-    try {
-      var categories = await _supabase.getData(table: "reports_category");
-      setState(() {
-        _categoriesList = categories;
-      });
-    } catch (e) {
-      showSnackbar("Errore nel caricamento delle categorie");
-    }
+    var list = await controller.loadCategories();
+    setState(() {
+      _categoriesList = list;
+    });
   }
+
 
   Future<void> _pickImage() async {
     if (_isImagePickerActive) return; // Impedisce duplicazioni
@@ -203,74 +199,4 @@ class _ReportsState extends State<Reports> {
       },
     );
   }
-
-  /*Future<void> updatePosition() async {
-    _position = await controller.getUserLocation();
-    if(_position==null) {
-      showSnackbar("GPS disabilitato o permessi non concessi");
-    }
-  }*/
-
-  /*Future<void> submitReport() async {
-    if (_selectedCategory.isNotEmpty) {
-      String? imageUrl;
-
-      if (_image != null) {
-        imageUrl = await controller.uploadImage(_image!);
-        if(imageUrl==null){
-          showSnackbar("errore nel caricamento dell'immagine");
-        }
-      }
-
-      GeoPoint geopoint = _position != null ? GeoPoint(_position!.latitude, _position!.longitude) : GeoPoint(0, 0);
-      await _supabase.addReports(imageUrl ?? "", _selectedCategory, _commentTextController.text, geopoint);
-
-      showSnackbar("Segnalazione inviata con successo!");
-    } else {
-      showSnackbar("Seleziona una categoria");
-    }
-  }*/
-
-  /*Future<String?> uploadImage(File image) async {
-    try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final String fullPath = await _supabase.supabase.storage.from('reports').upload(
-        '$fileName.png',
-        image,
-        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-      );
-      return fullPath;
-    } catch (e) {
-      showSnackbar("Errore nel caricamento dell'immagine");
-      print("errore nel caricamento: $e");
-      return null;
-    }
-  }*/
-
-  /*Future<Position?> getUserLocation() async {
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _canSendReports = false;
-        showSnackbar("GPS disabilitato");
-        return null;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission != LocationPermission.whileInUse && permission!=LocationPermission.always) {
-          _canSendReports = false;
-          showSnackbar("Permessi di localizzazione negati. Consenti per inviare");
-          return null;
-        }
-      }
-
-      return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    } catch (e) {
-      _canSendReports = false;
-      showSnackbar("Errore nel recupero della posizione");
-      return null;
-    }
-  }*/
 }

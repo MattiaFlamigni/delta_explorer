@@ -14,6 +14,12 @@ class ReportsController {
   Position? _position;
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
+
+  Future<List<Map<String, dynamic>>> loadCategories() async {
+
+      return await _supabase.getData(table: "reports_category");
+  }
+
   Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
