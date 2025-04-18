@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfileController{
   final SupabaseDB _db = SupabaseDB();
   final GoTrueClient _auth = Supabase.instance.client.auth;
+  List<Map<String, dynamic>> _badge = [];
   double numSpotted=0;
   double numReport=0;
   int userPoint = -1;
@@ -22,10 +23,10 @@ class ProfileController{
     await _auth.signOut();
   }
 
-  Future<List<Map<String, dynamic>>> getBadge()async{
+  Future<void> fetchBadge()async{
     List<Map<String, dynamic>> list = [];
     list = await _db.getData(table: "badge");
-    return list;
+    _badge = list;
   }
 
   Future<void> loadNumSpotted() async{
@@ -56,6 +57,10 @@ class ProfileController{
 
   int getUserPoint(){
     return userPoint;
+  }
+
+  List<Map<String, dynamic>> getBadges(){
+    return _badge;
   }
 
 

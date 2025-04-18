@@ -13,7 +13,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   ProfileController controller = ProfileController();
   final ValueNotifier<double> _valueNotifier = ValueNotifier(0);
-  List<Map<String, dynamic>> badge = [];
+
 
   @override
   void initState() {
@@ -28,7 +28,9 @@ class _ProfileState extends State<Profile> {
   Future<void> loadData() async {
     await controller.loadNumSpotted();
     await controller.loadNumReport();
-    await loadBadge();
+    controller.fetchBadge().then((_) {
+      setState(() {});
+    });
   }
 
   @override
@@ -124,12 +126,13 @@ class _ProfileState extends State<Profile> {
             mainAxisSpacing: 10.0,
             childAspectRatio: 0.85,
           ),
-          itemCount: badge.length,
+          itemCount: controller.getBadges().length,
           itemBuilder: (BuildContext context, int index) {
+            var item = controller.getBadges()[index];
             double? progres;
-            int goalBadge = badge[index]["threshold"];
+            int goalBadge = item["threshold"];
 
-            if (badge[index]["type"] == "spot") {
+            if (item["type"] == "spot") {
               progres = controller.getNumSpotted();
             } else {
               progres = controller.getNumReport();
@@ -138,11 +141,11 @@ class _ProfileState extends State<Profile> {
             return Container(
               alignment: Alignment.center,
               child: badgeWidget(
-                badge[index]["image_path"] ?? "",
-                badge[index]["title"] ?? "",
+                item["image_path"] ?? "",
+                item["title"] ?? "",
                 progres / goalBadge,
-                badge[index]["description"],
-                badge[index]["threshold"],
+                item["description"],
+                item["threshold"],
               ),
             );
           },
@@ -243,12 +246,6 @@ class _ProfileState extends State<Profile> {
   }
 
 
-  loadBadge() async {
-    var list = await controller.getBadge();
-    setState(() {
-      badge = list;
-    });
-  }
 
   Future bottomSheetBadge(String desc, double progres, int obiettivo) {
     return showModalBottomSheet(
