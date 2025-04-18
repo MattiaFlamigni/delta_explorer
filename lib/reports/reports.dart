@@ -1,10 +1,5 @@
-import 'dart:io';
-
-import 'package:delta_explorer/database/supabase.dart';
 import 'package:delta_explorer/reports/reportsController.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -15,22 +10,16 @@ class Reports extends StatefulWidget {
 
 class _ReportsState extends State<Reports> {
   final ReportsController controller = ReportsController();
-  bool _isImagePickerActive = false;
-  List<Map<String, dynamic>> _categoriesList = [];
+
   final TextEditingController _commentTextController = TextEditingController();
   String _selectedCategory = "";
-  File? _image;
-
-  //bool _canSendReports = true; // Stato che indica se il bottone invia è abilitato
-
-  final ImagePicker _picker = ImagePicker();
-
-  //Position? _position;
 
   @override
   void initState() {
     super.initState();
-    loadCategories();
+    controller.loadCategories().then((_) {
+      setState(() {});
+    });
   }
 
   @override
@@ -44,11 +33,15 @@ class _ReportsState extends State<Reports> {
           Padding(
             padding: const EdgeInsets.all(8),
             child: ElevatedButton(
-              onPressed: _pickImage,
+              onPressed: () async {
+                await controller.pickImage();
+                setState(() {});
+              },
               child: const Text("Scatta una foto"),
             ),
           ),
-          if (_image != null) showSelectedImage(),
+
+          if (controller.getImage() != null) showSelectedImage(),
           const Spacer(),
           Padding(
             padding: const EdgeInsets.only(bottom: 50),
@@ -65,12 +58,13 @@ class _ReportsState extends State<Reports> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
         ),
-        itemCount: _categoriesList.length,
+        itemCount: controller.getCategoryList().length,
         itemBuilder: (context, index) {
+          var cat = controller.getCategoryList()[index];
           return GestureDetector(
             onTap: () {
               setState(() {
-                _selectedCategory = _categoriesList[index]["title"];
+                _selectedCategory = cat["title"];
               });
             },
             child: cardCategory(index),
@@ -83,7 +77,7 @@ class _ReportsState extends State<Reports> {
   drawReportButton() {
     return ElevatedButton(
       onPressed: () async {
-        if (_image == null) {
+        if (controller.getImage() == null) {
           showSnackbar("Scatta una foto prima di inviare la segnalazione.");
           return;
         }
@@ -93,7 +87,7 @@ class _ReportsState extends State<Reports> {
           showLoadingDialog();
           var response = await controller.submitReport(
             _selectedCategory,
-            _image!,
+            controller.getImage()!,
             _commentTextController,
           );
           showSnackbar(response!);
@@ -115,7 +109,12 @@ class _ReportsState extends State<Reports> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ClipRect(
-        child: Image.file(_image!, width: 150, height: 150, fit: BoxFit.cover),
+        child: Image.file(
+          controller.getImage()!,
+          width: 150,
+          height: 150,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
@@ -131,16 +130,14 @@ class _ReportsState extends State<Reports> {
   }
 
   Card cardCategory(int index) {
+    var cat = controller.getCategoryList()[index];
     return Card(
-      color:
-          (_selectedCategory == _categoriesList[index]["title"])
-              ? Colors.red
-              : Colors.white,
+      color: (_selectedCategory == cat["title"]) ? Colors.red : Colors.white,
       child: Column(
         children: [
-          Text(_categoriesList[index]["title"]),
+          Text(cat["title"]),
           Image.asset(
-            'assets/${_categoriesList[index]["image_path"]}',
+            'assets/${cat["image_path"]}',
             fit: BoxFit.cover,
             width: 70,
             height: 70,
@@ -148,33 +145,6 @@ class _ReportsState extends State<Reports> {
         ],
       ),
     );
-  }
-
-  Future<void> loadCategories() async {
-    var list = await controller.loadCategories();
-    setState(() {
-      _categoriesList = list;
-    });
-  }
-
-
-  Future<void> _pickImage() async {
-    if (_isImagePickerActive) return; // Impedisce duplicazioni
-
-    _isImagePickerActive = true;
-
-    final permissionStatus = await Permission.camera.request();
-    if (permissionStatus.isGranted) {
-      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-      if (image != null) {
-        setState(() {
-          _image = File(image.path);
-        });
-      }
-    } else {
-      showSnackbar("Permesso fotocamera negato. Abilitalo nelle impostazioni.");
-    }
-    _isImagePickerActive = false;
   }
 
   void showSnackbar(String text) {

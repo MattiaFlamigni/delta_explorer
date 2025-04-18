@@ -4,20 +4,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/constants/point.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../database/supabase.dart';
 
 class ReportsController {
   final SupabaseDB _supabase = SupabaseDB();
   bool _canSendReports = true;
+  File? _image;
   Position? _position;
   final GoTrueClient _auth = Supabase.instance.client.auth;
+  bool _isImagePickerActive = false;
+  final ImagePicker _picker = ImagePicker();
+  List<Map<String, dynamic>> _categoriesList = [];
 
 
-  Future<List<Map<String, dynamic>>> loadCategories() async {
-
-      return await _supabase.getData(table: "reports_category");
+  Future<void> loadCategories() async {
+      List<Map<String, dynamic>> list = [];
+      list = await _supabase.getData(table: "reports_category");
+      _categoriesList = list;
   }
 
   Future<String?> uploadImage(File image) async {
@@ -120,4 +127,31 @@ class ReportsController {
       return "errore: $e";
     }
   }
+
+  File? getImage(){
+    return _image;
+  }
+
+  Future<String> pickImage() async {
+    if (_isImagePickerActive) return ""; // Impedisce duplicazioni
+
+    _isImagePickerActive = true;
+
+    final permissionStatus = await Permission.camera.request();
+    if (permissionStatus.isGranted) {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+          _image = File(image.path);
+      }
+    } else {
+      return "Permesso fotocamera negato. Abilitalo nelle impostazioni.";
+    }
+    _isImagePickerActive = false;
+    return "";
+  }
+
+  List<Map<String, dynamic>> getCategoryList(){
+    return _categoriesList;
+  }
+
 }
