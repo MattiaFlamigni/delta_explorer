@@ -323,4 +323,19 @@ class SupabaseDB {
   }
 
 
+  Future<List<Map<String, dynamic>>> global_weekStanding({bool week = false, bool month=false}) async {
+    List<Map<String, dynamic>> list = [];
+    String table = week ? "leaderboard_week":month ? "leaderboard_month":"leaderboard";
+    try{
+      print("tabella: $table");
+      var response = await supabase.from(table).select().limit(5);
+      list = response;
+      print("Classifica: $response");
+    }catch(e){
+      print("errore: $e");
+    }
+    return list;
+  }
+
+
 }

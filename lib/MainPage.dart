@@ -1,4 +1,5 @@
 import 'package:delta_explorer/profile/profile.dart';
+import 'package:delta_explorer/standings/standings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class _MainPageState extends State<MainPage> {
   int _selectedTab = 0;
 
   final List<Widget> _pages = [ Home(), Profile(),];
-  final List<String> _titles = ['Home', 'Profilo'];
+  final List<String> _titles = ['Home', 'Profilo', "Classifica"];
 
   void _changeTab(int index) {
     setState(() {
@@ -27,8 +28,11 @@ class _MainPageState extends State<MainPage> {
         return Home();
       case 1:
         return Profile();
+      case 2:
+        return Standings();
       default:
         return Home();
+
     }
   }
 
@@ -50,6 +54,10 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profilo',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.emoji_events),
+            label: 'Classifica',
           ),
         ],
       ),
