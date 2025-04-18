@@ -13,17 +13,26 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Map<String, dynamic>> curiosity = [];
-  List<Map<String, dynamic>> currentMeteo = [];
-  List<Map<String, dynamic>> spottedList = [];
+
+
+
   HomeController controller = HomeController();
 
   @override
   void initState() {
     super.initState();
-    fetchMeteo();
-    fetchCuriosity();
-    fetchSpotted();
+
+    controller.fetchSpotted().then((_) {
+      setState(() {});
+    });
+
+    controller.fetchMeteo().then((_) {
+      setState(() {});
+    });
+
+    controller.fetchCuriosity().then((_) {
+      setState(() {});
+    });
   }
 
   @override
@@ -87,15 +96,8 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> fetchMeteo() async {
-    final meteoData = await controller.getMeteo();
-    setState(() {
-      currentMeteo = meteoData;
-    });
-  }
-
   Widget showSpottedImages() {
-    if (spottedList.isEmpty) {
+    if (controller.getSpotted().isEmpty) {
       return Text("no data avaiable");
     }
 
@@ -103,9 +105,9 @@ class _HomeState extends State<Home> {
       height: 200, // imposta un'altezza fissa altrimenti non si vede
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: spottedList.length,
+        itemCount: controller.getSpotted().length,
         itemBuilder: (BuildContext context, int index) {
-          var current = spottedList[index];
+          var current = controller.getSpotted()[index];
           if (current["image_path"] != "") {
 
             return Padding(
@@ -131,14 +133,6 @@ class _HomeState extends State<Home> {
         },
       ),
     );
-  }
-
-  Future<void> fetchSpotted() async {
-    final list = await controller.getSpotted();
-    setState(() {
-      spottedList = list;
-    });
-    print("Lista spotted: $list");
   }
 
   Widget drawRowTitle(String text) {
@@ -238,14 +232,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> fetchCuriosity() async {
-    final List<Map<String, dynamic>> fetchedCuriosity =
-        await controller.getCuriosity();
-    setState(() {
-      curiosity = fetchedCuriosity;
-    });
-  }
-
   Widget drawChip(String text, Function(bool) function) {
     return FilterChip(label: Text(text), onSelected: function);
   }
@@ -340,9 +326,10 @@ class _HomeState extends State<Home> {
   Widget drawRowWithCard() {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      itemCount: curiosity.length,
+      itemCount: controller.getCuriosity().length,
       itemBuilder: (BuildContext context, int index) {
-        var current = curiosity[index];
+
+        var current = controller.getCuriosity()[index];
         return drawCard(current);
       },
     );
@@ -500,15 +487,15 @@ class _HomeState extends State<Home> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Image.network("https:${currentMeteo[0]["icona"]}"),
+                  Image.network("https:${controller.getMeteo()[0]["icona"]}"),
                   Text(
-                    "${currentMeteo[0]["temp"]}°",
+                    "${controller.getMeteo()[0]["temp"]}°",
                     style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               Text(
-                "${currentMeteo[0]["condition"]}",
+                "${controller.getMeteo()[0]["condition"]}",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
@@ -526,7 +513,7 @@ class _HomeState extends State<Home> {
                       Text(
                         NumberFormat(
                           "#0",
-                        ).format(currentMeteo[0]["windSpeed"] * 1.6),
+                        ).format(controller.getMeteo()[0]["windSpeed"] * 1.6),
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -538,7 +525,7 @@ class _HomeState extends State<Home> {
                       Icon(Icons.water_drop_outlined, color: Colors.blue),
                       SizedBox(height: 5),
                       Text(
-                        "${currentMeteo[0]["humidity"]}%",
+                        "${controller.getMeteo()[0]["humidity"]}%",
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -550,7 +537,7 @@ class _HomeState extends State<Home> {
                       FaIcon(FontAwesomeIcons.cloudRain, color: Colors.blue),
                       SizedBox(height: 5),
                       Text(
-                        "${currentMeteo[0]["rain"]}mm",
+                        "${controller.getMeteo()[0]["rain"]}mm",
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],
@@ -565,7 +552,7 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        "${currentMeteo[0]["windDirection"]}",
+                        "${controller.getMeteo()[0]["windDirection"]}",
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                     ],

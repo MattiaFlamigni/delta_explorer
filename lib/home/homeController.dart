@@ -3,14 +3,17 @@ import 'package:weatherapi/weatherapi.dart';
 import '../database/supabase.dart';
 
 class HomeController{
-  final WeatherRequest wr = WeatherRequest('9e7aac68e41b4e53877132202250804');
-  final SupabaseDB db = SupabaseDB();
+  final WeatherRequest _wr = WeatherRequest('9e7aac68e41b4e53877132202250804');
+  final SupabaseDB _db = SupabaseDB();
+  List<Map<String, dynamic>> _curiosity = [];
+  List<Map<String, dynamic>> _spottedList = [];
+  List<Map<String, dynamic>> _currentMeteo = [];
 
 
 
-  Future<List<Map<String, dynamic>>>getMeteo() async {
+  Future<void>fetchMeteo() async {
     List<Map<String, dynamic>> meteoCondition = [];
-    var meteo = await wr.getRealtimeWeatherByLocation(44.95, 12.41);
+    var meteo = await _wr.getRealtimeWeatherByLocation(44.95, 12.41);
 
     meteoCondition.add({
       "temp": meteo.current.tempC,
@@ -21,8 +24,7 @@ class HomeController{
       "condition": meteo.current.condition.text,
       "windDirection": meteo.current.windDir,
     });
-
-    return meteoCondition;
+    _currentMeteo = meteoCondition;
   }
 
   String getMainImageDescription() {
@@ -35,19 +37,33 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
   }
 
 
-  Future<List<Map<String, dynamic>>> getCuriosity() async {
-    var cur = await db.getData(table: "curiosity");
-    return cur;
+  Future<void> fetchCuriosity() async {
+    var cur = await _db.getData(table: "curiosity");
+    _curiosity = cur;
   }
 
-  Future<List<Map<String, dynamic>>> getSpotted() async {
+  Future<void> fetchSpotted() async {
 
-    var spotted = await db.getData(table: "spotted", limit: 3);
+    var spotted = await _db.getData(table: "spotted", limit: 3);
     spotted.shuffle();
     spotted= spotted.sublist(0,2);
-    return spotted;
+    _spottedList=spotted;
 
   }
+
+  List<Map<String, dynamic>> getCuriosity(){
+    return _curiosity;
+  }
+
+  List<Map<String, dynamic>> getSpotted(){
+    return _spottedList;
+  }
+
+  List<Map<String, dynamic>> getMeteo(){
+    return _currentMeteo;
+  }
+
+
 
 
 }
