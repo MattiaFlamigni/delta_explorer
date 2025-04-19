@@ -41,5 +41,9 @@ class StandingController{
     return reportPoints;
   }
 
+  getAuthUser(){
+    return _db.supabase.auth.currentUser!.id;
+}
+
 
 }

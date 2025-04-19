@@ -10,37 +10,89 @@ class Standings extends StatefulWidget {
 }
 
 class _StandingsState extends State<Standings> {
-  StandingController controller = StandingController();
+  final StandingController controller = StandingController();
 
   @override
   void initState() {
     super.initState();
-    controller.fetchGlobal_Week().then((_) {
-      setState(() {});
-    });
-    controller.fetchPoints().then((_){
-      setState(() {});
-    });
+    controller.fetchGlobal_Week().then((_) => setState(() {}));
+    controller.fetchPoints().then((_) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Column(
         children: [
           const SizedBox(height: 10),
-          rowChip(),
+          rowChip(controller, () => setState(() {})),
           const SizedBox(height: 10),
-          Expanded(child: drawStanding()),
-          detailsPoint(TypePoints.spotted),
-          detailsPoint(TypePoints.reports)
+          Expanded(child: drawStanding(controller)),
+          detailsPoint(controller, TypePoints.spotted),
+          detailsPoint(controller, TypePoints.reports),
+          drawAddButton(context)
         ],
       ),
     );
   }
 
-  Widget detailsPoint(String type) {
+
+  Widget drawAddButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        showAddFriendModal(context);
+      },
+      label: const Text("Aggiungi Amico"),
+      icon: const Icon(Icons.person_add),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(   // <-- Rettangolare
+          borderRadius: BorderRadius.circular(8),  // se metti 0 è completamente squadrato
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        backgroundColor: Colors.blueAccent, // Colore sfondo
+        foregroundColor: Colors.white,      // Colore testo e icona
+      ),
+    );
+  }
+
+  Widget drawStanding(StandingController controller) {
+    final standings = controller.getStanding();
+
+    if (standings.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView.builder(
+      itemCount: standings.length,
+      itemBuilder: (BuildContext context, int index) {
+        final item = standings[index];
+        final name =
+        item["userID"] == controller.getAuthUser() ? "TU" : "Sconosciuto";
+        final points = item["total"] ?? 0;
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundColor:
+            index == 0
+                ? Colors.amber
+                : index == 1
+                ? Colors.grey
+                : index == 2
+                ? Colors.brown
+                : Colors.blueGrey,
+            child: Text(
+              "${index + 1}",
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          trailing: Text("$points pts", style: const TextStyle(fontSize: 16)),
+        );
+      },
+    );
+  }
+
+  Widget detailsPoint(StandingController controller, String type) {
     IconData icon;
     int points = 0;
 
@@ -58,37 +110,30 @@ class _StandingsState extends State<Standings> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Card(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor: Colors.blueAccent,
             child: Icon(icon, color: Colors.white),
           ),
           title: Text(
-            type == TypePoints.spotted ? "Punti Avvistamenti" :
-            type == TypePoints.reports ? "Punti Segnalazioni" :
-            "Punti",
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            type == TypePoints.spotted
+                ? "Punti Avvistamenti"
+                : type == TypePoints.reports
+                ? "Punti Segnalazioni"
+                : "Punti",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           trailing: Text(
             "$points pts",
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 18, color: Colors.black87),
           ),
         ),
       ),
     );
   }
 
-  Widget rowChip() {
-    String selected="";
+  Widget rowChip(StandingController controller, VoidCallback refresh) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
@@ -97,69 +142,92 @@ class _StandingsState extends State<Standings> {
           label: const Text("Globale"),
           onSelected: (b) async {
             await controller.fetchGlobal_Week();
-            setState(() {});
+            refresh();
           },
         ),
         FilterChip(
-
           label: const Text("Settimanale"),
           onSelected: (b) async {
-            await controller.fetchGlobal_Week(week:true);
-            setState(() {});
+            await controller.fetchGlobal_Week(week: true);
+            refresh();
           },
         ),
         FilterChip(
           label: const Text("Mensile"),
           onSelected: (b) async {
-            await controller.fetchGlobal_Week(month:true);
-            setState(() {});
+            await controller.fetchGlobal_Week(month: true);
+            refresh();
           },
         ),
         FilterChip(
           label: const Text("Amici"),
-          onSelected: (b) {},
+          onSelected: (b) {
+            // Logica amici da implementare
+          },
         ),
       ],
     );
   }
 
-  Widget drawStanding() {
-    final standings = controller.getStanding();
+  void showAddFriendModal(BuildContext context) {
+    final TextEditingController friendController = TextEditingController();
 
-    if (standings.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: standings.length,
-      itemBuilder: (BuildContext context, int index) {
-        final item = standings[index];
-        final name = item["username"] ?? "Sconosciuto";
-        final points = item["total"] ?? 0;
-
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundColor: index == 0
-                ? Colors.amber
-                : index == 1
-                ? Colors.grey
-                : index == 2
-                ? Colors.brown
-                : Colors.blueGrey,
-            child: Text(
-              "${index + 1}",
-              style: const TextStyle(color: Colors.white),
-            ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // permette al modal di estendersi sopra la tastiera
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-          trailing: Text(
-            "$points pts",
-            style: const TextStyle(fontSize: 16),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // lascia che il contenuto si adatti
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Aggiungi un amico",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: friendController,
+                    decoration: const InputDecoration(
+                      labelText: 'ID Amico o Nome',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {   //TODO
+                      final friend = friendController.text.trim();
+                      if (friend.isNotEmpty) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Amico "$friend" aggiunto!')),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.person_add),
+                    label: const Text("Aggiungi"),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
     );
   }
+
+
 }
+
+
+
