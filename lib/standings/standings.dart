@@ -205,12 +205,13 @@ class _StandingsState extends State<Standings> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
-                    onPressed: () {   //TODO
+                    onPressed: () async {   //TODO
                       final friend = friendController.text.trim();
                       if (friend.isNotEmpty) {
+                        String res = await controller.addFriend(friendController.text);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Amico "$friend" aggiunto!')),
+                          SnackBar(content: Text(res)),
                         );
                       }
                     },

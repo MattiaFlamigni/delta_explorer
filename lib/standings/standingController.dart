@@ -1,19 +1,19 @@
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
 
-class StandingController{
+class StandingController {
   List<Map<String, dynamic>> _standing = [];
   final SupabaseDB _db = SupabaseDB();
-  int spottedPoints=0;
-  int reportPoints=0;
+  int spottedPoints = 0;
+  int reportPoints = 0;
 
-  fetchGlobal_Week({bool week = false, bool month=false}) async{
+  fetchGlobal_Week({bool week = false, bool month = false}) async {
     var list = await _db.global_weekStanding(week: week, month: month);
     print("$list");
     _standing = list;
   }
 
-  getStanding(){
+  getStanding() {
     return _standing;
   }
 
@@ -33,17 +33,27 @@ class StandingController{
     await _computeSpottedPoints();
   }
 
-  int getSpottedPoints(){
+  int getSpottedPoints() {
     return spottedPoints;
   }
 
-  int getReportPoints(){
+  int getReportPoints() {
     return reportPoints;
   }
 
-  getAuthUser(){
+  getAuthUser() {
     return _db.supabase.auth.currentUser!.id;
-}
+  }
 
+  Future<String> addFriend(String username) async {
+    if (await _checkFriend(username)) {
+      await _db.addFriends(_db.supabase.auth.currentUser!.id, username);
+      return "Amico aggiunto con successo";
+    }
+    return "Amico non trovato";
+  }
 
+  Future<bool> _checkFriend(String username) async {
+    return await _db.existFriend(username);
+  }
 }

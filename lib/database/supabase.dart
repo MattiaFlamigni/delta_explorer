@@ -216,7 +216,6 @@ class SupabaseDB {
     return -1;
   }
 
-
   Future<List<Map<String, dynamic>>> getPOI() async {
     final supabaseClient = Supabase.instance.client;
     List<Map<String, dynamic>> poiList = [];
@@ -352,6 +351,35 @@ class SupabaseDB {
       print("errore: $e");
     }
     return tot;
+  }
+
+  Future<void> addFriends(String userID, String friendUsername)async {
+    String friendID = await getIDfromUsername(friendUsername);
+
+    try {
+      await supabase.from("friends").insert({
+        "id": userID,
+        "friendID": friendID
+      });
+    }catch(e){
+      print("errore: $e");
+    }
+  }
+
+  Future<String> getIDfromUsername(String username) async{
+    var response= await supabase.from("users").select("id").eq("username", username).single();
+    return response["id"];
+  }
+
+  Future<bool> existFriend(String username) async{
+    var response = await supabase.from("users").select().eq("username", username);
+    if(response.isNotEmpty){
+      return true;
+    }
+    return false;
+
+
+
   }
 
 
