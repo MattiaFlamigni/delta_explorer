@@ -1,3 +1,4 @@
+import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/standings/standingController.dart';
 import 'package:flutter/material.dart';
 
@@ -17,22 +18,71 @@ class _StandingsState extends State<Standings> {
     controller.fetchGlobal_Week().then((_) {
       setState(() {});
     });
+    controller.fetchPoints().then((_){
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Classifica"),
-        centerTitle: true,
-      ),
+
       body: Column(
         children: [
           const SizedBox(height: 10),
           rowChip(),
           const SizedBox(height: 10),
           Expanded(child: drawStanding()),
+          detailsPoint(TypePoints.spotted),
+          detailsPoint(TypePoints.reports)
         ],
+      ),
+    );
+  }
+
+  Widget detailsPoint(String type) {
+    IconData icon;
+    int points = 0;
+
+    if (type == TypePoints.spotted) {
+      icon = Icons.visibility;
+      points = controller.spottedPoints;
+    } else if (type == TypePoints.reports) {
+      icon = Icons.report;
+      points = controller.reportPoints;
+    } else {
+      icon = Icons.help_outline;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Colors.blueAccent,
+            child: Icon(icon, color: Colors.white),
+          ),
+          title: Text(
+            type == TypePoints.spotted ? "Punti Avvistamenti" :
+            type == TypePoints.reports ? "Punti Segnalazioni" :
+            "Punti",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          trailing: Text(
+            "$points pts",
+            style: const TextStyle(
+              fontSize: 18,
+              color: Colors.black87,
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -322,7 +322,6 @@ class SupabaseDB {
     }
   }
 
-
   Future<List<Map<String, dynamic>>> global_weekStanding({bool week = false, bool month=false}) async {
     List<Map<String, dynamic>> list = [];
     String table = week ? "leaderboard_week":month ? "leaderboard_month":"leaderboard";
@@ -336,6 +335,26 @@ class SupabaseDB {
     }
     return list;
   }
+
+  Future<int> getTypePoints(String type) async {
+
+    var tot = -1;
+
+    try{
+
+      var response = await supabase.from("points").select("numPoints").eq("userID", supabase.auth.currentUser!.id).eq("type", type);
+      for(var row in response){
+        tot+=(row["numPoints"] as int);
+      }
+
+      print("totale: $tot");
+    }catch(e){
+      print("errore: $e");
+    }
+    return tot;
+  }
+
+
 
 
 }
