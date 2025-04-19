@@ -11,17 +11,33 @@ class StandingController {
     var list = await _db.global_weekStanding(week: week, month: month);
     print("$list");
     _standing = list;
+
+    await aggiungiUsername();
   }
 
-  Future<void> friendStanding() async{
+  Future<void> aggiungiUsername() async {
+    for (int i = 0; i < _standing.length; i++) {
+      if (_standing[i].containsKey("userID")) {
+        final String userId = _standing[i]["userID"];
+        final String username = await getUsernamefromId(userId);
+        _standing[i]["username"] = username;
+      }
+    }
+  }
+
+  Future<String> getUsernamefromId(String userID) async {
+    print("username trovato: ${_db.getUsernameFromID(userID)}");
+    return _db.getUsernameFromID(userID);
+  }
+
+  Future<void> friendStanding() async {
     _standing = await _db.friendsStanding(_db.supabase.auth.currentUser!.id);
   }
 
   getStanding() {
+    print("STANDING: $_standing");
     return _standing;
   }
-
-
 
   Future<void> _computeSpottedPoints() async {
     int points = await _db.getTypePoints(TypePoints.spotted);

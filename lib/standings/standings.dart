@@ -30,12 +30,11 @@ class _StandingsState extends State<Standings> {
           Expanded(child: drawStanding(controller)),
           detailsPoint(controller, TypePoints.spotted),
           detailsPoint(controller, TypePoints.reports),
-          drawAddButton(context)
+          drawAddButton(context),
         ],
       ),
     );
   }
-
 
   Widget drawAddButton(BuildContext context) {
     return ElevatedButton.icon(
@@ -45,12 +44,15 @@ class _StandingsState extends State<Standings> {
       label: const Text("Aggiungi Amico"),
       icon: const Icon(Icons.person_add),
       style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(   // <-- Rettangolare
-          borderRadius: BorderRadius.circular(8),  // se metti 0 è completamente squadrato
+        shape: RoundedRectangleBorder(
+          // <-- Rettangolare
+          borderRadius: BorderRadius.circular(
+            8,
+          ), // se metti 0 è completamente squadrato
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         backgroundColor: Colors.blueAccent, // Colore sfondo
-        foregroundColor: Colors.white,      // Colore testo e icona
+        foregroundColor: Colors.white, // Colore testo e icona
       ),
     );
   }
@@ -65,29 +67,34 @@ class _StandingsState extends State<Standings> {
     return ListView.builder(
       itemCount: standings.length,
       itemBuilder: (BuildContext context, int index) {
-
         final item = standings[index];
         print("ID CARICATO: ${item["userID"]}");
         final name =
-        item["userID"] == controller.getAuthUser() ? "TU" : item["username"]??"sconosciuto";
+            item["userID"] == controller.getAuthUser()
+                ? "TU"
+                : item["username"] ?? "sconosciuto";
+
         final points = item["total"] ?? item["points"];
 
         return ListTile(
           leading: CircleAvatar(
             backgroundColor:
-            index == 0
-                ? Colors.amber
-                : index == 1
-                ? Colors.grey
-                : index == 2
-                ? Colors.brown
-                : Colors.blueGrey,
+                index == 0
+                    ? Colors.amber
+                    : index == 1
+                    ? Colors.grey
+                    : index == 2
+                    ? Colors.brown
+                    : Colors.blueGrey,
             child: Text(
               "${index + 1}",
               style: const TextStyle(color: Colors.white),
             ),
           ),
-          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           trailing: Text("$points pts", style: const TextStyle(fontSize: 16)),
         );
       },
@@ -212,11 +219,13 @@ class _StandingsState extends State<Standings> {
                     onPressed: () async {
                       final friend = friendController.text.trim();
                       if (friend.isNotEmpty) {
-                        String res = await controller.addFriend(friendController.text);
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(res)),
+                        String res = await controller.addFriend(
+                          friendController.text,
                         );
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(res)));
                       }
                     },
                     icon: const Icon(Icons.person_add),
@@ -230,9 +239,4 @@ class _StandingsState extends State<Standings> {
       },
     );
   }
-
-
 }
-
-
-
