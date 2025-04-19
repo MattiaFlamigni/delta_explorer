@@ -1,5 +1,6 @@
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:gotrue/src/types/user.dart';
 
 class StandingController {
   List<Map<String, dynamic>> _standing = [];
@@ -78,5 +79,9 @@ class StandingController {
 
   Future<bool> _checkFriend(String username) async {
     return await _db.existFriend(username);
+  }
+
+  User? isUserAuth(){
+    return _db.supabase.auth.currentUser;
   }
 }
