@@ -65,10 +65,12 @@ class _StandingsState extends State<Standings> {
     return ListView.builder(
       itemCount: standings.length,
       itemBuilder: (BuildContext context, int index) {
+
         final item = standings[index];
+        print("ID CARICATO: ${item["userID"]}");
         final name =
-        item["userID"] == controller.getAuthUser() ? "TU" : "Sconosciuto";
-        final points = item["total"] ?? 0;
+        item["userID"] == controller.getAuthUser() ? "TU" : item["username"]??"sconosciuto";
+        final points = item["total"] ?? item["points"];
 
         return ListTile(
           leading: CircleAvatar(
@@ -163,6 +165,8 @@ class _StandingsState extends State<Standings> {
           label: const Text("Amici"),
           onSelected: (b) {
             // Logica amici da implementare
+            controller.friendStanding();
+            refresh();
           },
         ),
       ],
@@ -174,7 +178,7 @@ class _StandingsState extends State<Standings> {
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // permette al modal di estendersi sopra la tastiera
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -187,7 +191,7 @@ class _StandingsState extends State<Standings> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // lascia che il contenuto si adatti
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
@@ -199,13 +203,13 @@ class _StandingsState extends State<Standings> {
                   TextField(
                     controller: friendController,
                     decoration: const InputDecoration(
-                      labelText: 'ID Amico o Nome',
+                      labelText: 'username',
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
-                    onPressed: () async {   //TODO
+                    onPressed: () async {
                       final friend = friendController.text.trim();
                       if (friend.isNotEmpty) {
                         String res = await controller.addFriend(friendController.text);

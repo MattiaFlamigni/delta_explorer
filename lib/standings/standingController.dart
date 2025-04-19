@@ -13,9 +13,15 @@ class StandingController {
     _standing = list;
   }
 
+  Future<void> friendStanding() async{
+    _standing = await _db.friendsStanding(_db.supabase.auth.currentUser!.id);
+  }
+
   getStanding() {
     return _standing;
   }
+
+
 
   Future<void> _computeSpottedPoints() async {
     int points = await _db.getTypePoints(TypePoints.spotted);
@@ -42,6 +48,7 @@ class StandingController {
   }
 
   getAuthUser() {
+    print("ID CORRENTE: ${_db.supabase.auth.currentUser!.id}");
     return _db.supabase.auth.currentUser!.id;
   }
 

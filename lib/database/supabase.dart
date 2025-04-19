@@ -180,12 +180,18 @@ class SupabaseDB {
 
   Future<String> addPoints(int points, String userID, String type) async{
 
+    /*VENGONO AGGIUNTI SIA A POINTS SIA A USERS (PER CLASSIFICA AMICI RAPIDA)*/
     try{
       await supabase.from("points").insert({
         "userID" : userID,
         "numPoints":points,
         "type" : type,
       });
+
+      int actualPoint = await getUserPoints(supabase.auth.currentUser!.id);
+      await supabase.from("users").update({"points":actualPoint}).eq("id", supabase.auth.currentUser!.id);
+
+
 
       return "punti aggiornati";
     }catch(e){
@@ -337,7 +343,7 @@ class SupabaseDB {
 
   Future<int> getTypePoints(String type) async {
 
-    var tot = -1;
+    var tot = 0;
 
     try{
 
@@ -361,9 +367,51 @@ class SupabaseDB {
         "id": userID,
         "friendID": friendID
       });
+
+      // Aggiungi l'amicizia da B a A (l'amico vede anche A come amico)
+      await supabase.from("friends").insert({
+        "id": friendID,
+        "friendID": userID,
+      });
     }catch(e){
       print("errore: $e");
     }
+  }
+
+  Future<List<String>> getFriends(String userID) async {
+    try {
+      var response = await supabase.from("friends").select("friendID").eq("id", userID);
+      print("AMICI: $response");
+      // Estrai solo gli ID
+      return response.map<String>((item) => item["friendID"] as String).toList();
+    } catch (e) {
+      print("errore: $e");
+    }
+    return [];
+  }
+
+  Future<List<Map<String, dynamic>>> friendsStanding(String userID) async {
+    List<String> friendsIDs = await getFriends(userID);
+    friendsIDs.add(userID);  // Aggiungi anche te stesso
+
+    final response = await supabase
+        .from("users")
+        .select("id, username, points")
+        .inFilter("id", friendsIDs)
+        .order("points", ascending: false);
+
+    print("CLASSIFICA AMICI: $response");
+    return response;
+  }
+
+  Future<String> getUsernameFromID(String userID) async{
+    try{
+      var res = await supabase.from("users").select("username").eq("id", userID).single();
+      return res["username"];
+    }catch(e){
+      print("errore: $e");
+    }
+    return "";
   }
 
   Future<String> getIDfromUsername(String username) async{
