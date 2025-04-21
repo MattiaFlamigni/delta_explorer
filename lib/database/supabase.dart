@@ -170,13 +170,32 @@ class SupabaseDB {
     }
   }
 
-  Future<void> addUser(User user) async{
+  Future<void> addUser(User user, String username) async {
     try {
-      await supabase.from("users").insert({"id": user.id});
-    }catch(e){
+
+        await supabase.from("users").insert({
+          "id": user.id,
+          "username": username,
+        });
+        print("Nuovo utente inserito: $username");
+
+    } catch (e) {
       print("ERRORE: $e");
     }
   }
+
+  Future<bool> existUser(String username) async {
+    final response = await supabase
+        .from("users")
+        .select("username")
+        .eq("username", username)
+        .maybeSingle();
+
+    print("RISPOSTA USER: $response");
+
+    return response != null? false : true;
+  }
+
 
   Future<String> addPoints(int points, String userID, String type) async{
 

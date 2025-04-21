@@ -14,6 +14,8 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
   TextEditingController();
+  final TextEditingController _usernameController =
+  TextEditingController();
   LoginController controller = LoginController();
 
   bool _loading = false;
@@ -63,6 +65,9 @@ class _RegisterFormState extends State<RegisterForm> {
                 SizedBox(height: 40),
                 // Email TextField
                 _buildTextField(_emailController, 'Email', false),
+                SizedBox(height: 16),
+                //username
+                _buildTextField(_usernameController, 'username', false),
                 SizedBox(height: 16),
                 // Password TextField
                 _buildTextField(_passwordController, 'Password', true),
@@ -154,9 +159,14 @@ class _RegisterFormState extends State<RegisterForm> {
       showSnackbar("La password deve essere almeno 6 caratteri");
       return;
     }
+    if (_usernameController.text.isEmpty) {
+      showSnackbar("Inserire Username");
+      return;
+    }
     var res = await controller.signUpNewUser(
       _emailController.text,
       _passwordController.text,
+      _usernameController.text
     );
 
     if (res == "Registrazione avvenuta con successo") {
