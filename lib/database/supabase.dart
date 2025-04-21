@@ -196,6 +196,10 @@ class SupabaseDB {
     return response != null? false : true;
   }
 
+  Future<List<Map<String, dynamic>>> getUserFriends(String userID) async{
+    var response = await supabase.from("friends").select("friendID");
+    return response;
+  }
 
   Future<String> addPoints(int points, String userID, String type) async{
 

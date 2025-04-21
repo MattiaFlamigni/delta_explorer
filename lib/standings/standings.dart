@@ -15,6 +15,7 @@ class _StandingsState extends State<Standings> {
 
   @override
   void initState() {
+    controller.getFriends();
     super.initState();
     controller.fetchGlobal_Week().then((_) => setState(() {}));
     controller.fetchPoints().then((_) => setState(() {}));

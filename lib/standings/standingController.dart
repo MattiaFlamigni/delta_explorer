@@ -8,6 +8,19 @@ class StandingController {
   int spottedPoints = 0;
   int reportPoints = 0;
 
+
+  Future<List<String>> getFriends() async{
+    List<String> username = [];
+    var response = await  _db.getFriends(_db.supabase.auth.currentUser!.id);
+    print("RISPOSTA: $response");
+    for(var res in response){
+      username.add(await _db.getUsernameFromID(res));
+    }
+
+    print("USERNAME: $username");
+    return response;
+  }
+
   fetchGlobal_Week({bool week = false, bool month = false}) async {
     var list = await _db.global_weekStanding(week: week, month: month);
     print("$list");
