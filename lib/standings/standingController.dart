@@ -4,12 +4,28 @@ import 'package:gotrue/src/types/user.dart';
 
 class StandingController {
   List<Map<String, dynamic>> _standing = [];
+  List<String> _friends = [];
   final SupabaseDB _db = SupabaseDB();
   int spottedPoints = 0;
   int reportPoints = 0;
 
 
-  Future<List<String>> getFriends() async{
+  Future<String>deleteFriends(String username) async{
+    try{
+      var id = await _db.getIDfromUsername(username);
+      await _db.removeFriend(id);
+      _friends.contains(username) ? _friends.remove(username):null;
+      return "Amico eliminato";
+    }catch(e){
+      return "error: $e";
+    }
+  }
+
+  List<String> getFriends(){
+    return _friends;
+  }
+
+  Future<void> loadFriends() async{
     List<String> username = [];
     var response = await  _db.getFriends(_db.supabase.auth.currentUser!.id);
     print("RISPOSTA: $response");
@@ -18,7 +34,7 @@ class StandingController {
     }
 
     print("USERNAME: $username");
-    return response;
+    _friends = username;
   }
 
   fetchGlobal_Week({bool week = false, bool month = false}) async {
@@ -85,6 +101,7 @@ class StandingController {
   Future<String> addFriend(String username) async {
     if (await _checkFriend(username)) {
       await _db.addFriends(_db.supabase.auth.currentUser!.id, username);
+      _friends.add(username);
       return "Amico aggiunto con successo";
     }
     return "Amico non trovato";

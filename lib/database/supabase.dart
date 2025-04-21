@@ -63,6 +63,10 @@ class SupabaseDB {
     }
   }
 
+  Future<void>removeFriend(String friendID) async{
+    await supabase.from("friends").delete().eq("friendID", friendID);
+  }
+  
   Future<void> addReports(String image_path, String type, String comment, GeoPoint geopoint, String? userID) async{
     try {
       await supabase.from("reports").insert({

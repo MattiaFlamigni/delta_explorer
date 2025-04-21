@@ -15,7 +15,7 @@ class _StandingsState extends State<Standings> {
 
   @override
   void initState() {
-    controller.getFriends();
+    controller.loadFriends();
     super.initState();
     controller.fetchGlobal_Week().then((_) => setState(() {}));
     controller.fetchPoints().then((_) => setState(() {}));
@@ -33,7 +33,15 @@ class _StandingsState extends State<Standings> {
             Expanded(child: drawStanding(controller)),
             detailsPoint(controller, TypePoints.spotted),
             detailsPoint(controller, TypePoints.reports),
-            drawAddButton(context),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 10,
+              children: [
+                drawAddButton(context),
+                drawShowButton(context),
+              ],
+            )
+
           ],
         ),
       );
@@ -103,6 +111,27 @@ class _StandingsState extends State<Standings> {
         showAddFriendModal(context);
       },
       label: const Text("Aggiungi Amico"),
+      icon: const Icon(Icons.person_add),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          // <-- Rettangolare
+          borderRadius: BorderRadius.circular(
+            8,
+          ), // se metti 0 è completamente squadrato
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        backgroundColor: Colors.blueAccent, // Colore sfondo
+        foregroundColor: Colors.white, // Colore testo e icona
+      ),
+    );
+  }
+
+  Widget drawShowButton(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        showFriendModal(context);
+      },
+      label: const Text("Visualizza Amici"),
       icon: const Icon(Icons.person_add),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
@@ -300,4 +329,77 @@ class _StandingsState extends State<Standings> {
       },
     );
   }
+
+  void showFriendModal(BuildContext context) {
+    final TextEditingController friendController = TextEditingController();
+    final friends = controller.getFriends();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "I Tuoi Amici",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              if (friends.isEmpty)
+                const Text(
+                  "Non hai ancora amici aggiunti!",
+                  style: TextStyle(fontSize: 16),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: friends.length,
+                    separatorBuilder: (context, index) => const Divider(),
+                    itemBuilder: (BuildContext context, int index) {
+                      final friend = friends[index];
+                      return ListTile(
+                        leading: const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
+                        title: Text(
+                          friend,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () async {
+
+                            await controller.deleteFriends(friend);
+                            setState(() {controller.getFriends();});
+                            Navigator.pop(context);
+                            showFriendModal(context); // ricarica la lista
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 }
