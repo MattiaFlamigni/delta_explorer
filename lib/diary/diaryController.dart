@@ -34,6 +34,10 @@ class DiaryController{
     return images;
   }
 
+  removeImage(XFile image){
+    images.remove(image);
+  }
+
   void startTracking() async {
     final permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
