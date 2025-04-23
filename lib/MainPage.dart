@@ -1,3 +1,4 @@
+import 'package:delta_explorer/diary/diary.dart';
 import 'package:delta_explorer/profile/profile.dart';
 import 'package:delta_explorer/standings/standings.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +15,7 @@ class _MainPageState extends State<MainPage> {
   int _selectedTab = 0;
 
   final List<Widget> _pages = [ Home(), Profile(),];
-  final List<String> _titles = ['Home', 'Profilo', "Classifica"];
+  final List<String> _titles = ['Home', "Classifica",  "Diario", 'Profilo' ];
 
   void _changeTab(int index) {
     setState(() {
@@ -27,9 +28,12 @@ class _MainPageState extends State<MainPage> {
       case 0:
         return Home();
       case 1:
-        return Profile();
-      case 2:
         return Standings();
+
+      case 2:
+        return Diary();
+      case 3:
+        return Profile();
       default:
         return Home();
 
@@ -44,6 +48,7 @@ class _MainPageState extends State<MainPage> {
       body: _getPage(_selectedTab),
 
     bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
         currentIndex: _selectedTab,
         onTap: _changeTab,
         items: const [
@@ -51,13 +56,18 @@ class _MainPageState extends State<MainPage> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profilo',
-          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events),
             label: 'Classifica',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.app_registration_outlined),
+            label: 'Diario',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profilo',
           ),
         ],
       ),
