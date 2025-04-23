@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/constants/point.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseDB {
@@ -455,6 +456,37 @@ class SupabaseDB {
 
 
 
+  }
+
+  Future<String> addPercorso(String titolo, String descrizione, String userID) async{
+    var response = await supabase.from("percorsi").insert({
+      "titolo":titolo,
+      "descrizione":descrizione,
+      "userID":userID
+    }).select("id").single();
+
+    return response["id"].toString();
+  }
+
+  Future<void> addCoord(List<Position> posizioni, String idPercorso) async {
+    final supabase = Supabase.instance.client;
+
+    // Costruisci la lista di mappe
+    final coordinate = posizioni.map((pos) => {
+      'idPercorso': idPercorso,  // foreign key al percorso
+      'lat': pos.latitude,
+      'lon': pos.longitude,
+
+    }).toList();
+
+    // Inserisci tutte le coordinate in Supabase
+    final response = await supabase.from("coordinate").insert(coordinate);
+
+    if (response.error != null) {
+      print("Errore inserimento coordinate: ${response.error!.message}");
+    } else {
+      print("Coordinate inserite con successo!");
+    }
   }
 
 

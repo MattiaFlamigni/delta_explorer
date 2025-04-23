@@ -91,11 +91,11 @@ class _DiaryState extends State<Diary> {
 
   Widget drawStatus(){
     return Text(
-      controller.getStatus() ? "[Registrando percorso]" : "[In pausa]",
+      controller.isRecording() ? "[Registrando percorso]" : "[In pausa]",
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: controller.getStatus() ? Colors.green : Colors.grey,
+        color: controller.isRecording() ? Colors.green : Colors.grey,
       ),
     );
   }
@@ -103,7 +103,21 @@ class _DiaryState extends State<Diary> {
   Widget drawToggleStatus(){
     return ElevatedButton(
       onPressed: () {
+        if(titoloController.text.isEmpty){
+          showSnackbar("Aggiungi il titolo");
+          return;
+        }
+
+
         setState(() {
+
+          if(controller.isRecording()){ //la registrazione si ferma
+            controller.stopTracking();
+            controller.addTrip(titoloController.text, descrizioneController.text);
+          }else{
+            controller.startTracking();
+          }
+
           controller.changeStatus();
         });
       },
@@ -115,8 +129,22 @@ class _DiaryState extends State<Diary> {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       ),
       child: Text(
-        controller.getStatus() ? "Termina registrazione" : "Avvia registrazione",
+        controller.isRecording() ? "Termina registrazione" : "Avvia registrazione",
         style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        backgroundColor: Colors.blueAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
     );
   }
