@@ -1,23 +1,21 @@
+import 'dart:async';
+
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:async';
 
-class DiaryController{
+class DiaryController {
   bool _registrando = false;
   List<XFile> images = [];
   List<Position> percorso = [];
   Timer? _timer;
   SupabaseDB _db = SupabaseDB();
 
-
-
-
-  bool isRecording(){
+  bool isRecording() {
     return _registrando;
   }
 
-  void changeStatus(){
+  void changeStatus() {
     _registrando = !_registrando;
   }
 
@@ -30,17 +28,27 @@ class DiaryController{
     }
   }
 
-  getImages(){
+  Future<void> pickImageFromCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+
+    if (image != null) {
+      images.add(image);
+    }
+  }
+
+  getImages() {
     return images;
   }
 
-  removeImage(XFile image){
+  removeImage(XFile image) {
     images.remove(image);
   }
 
   void startTracking() async {
     final permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       print("Permessi non concessi");
       return;
     }
@@ -60,19 +68,18 @@ class DiaryController{
     _timer?.cancel();
   }
 
-  Future<String>addTrip(String titolo, String descrizione) async{
-    try{
-      var idPercorso =  await _db.addPercorso(titolo, descrizione, _db.supabase.auth.currentUser!.id);
+  Future<String> addTrip(String titolo, String descrizione) async {
+    try {
+      var idPercorso = await _db.addPercorso(
+        titolo,
+        descrizione,
+        _db.supabase.auth.currentUser!.id,
+      );
       await _db.addCoord(percorso, idPercorso);
       return "ok";
-    }catch(e){
+    } catch (e) {
       print("errore: $e");
       return "errore $e";
     }
-
   }
-
-
-
-
 }
