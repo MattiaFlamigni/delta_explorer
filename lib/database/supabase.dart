@@ -489,6 +489,11 @@ class SupabaseDB {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getTrip(String userID) async {
+    var trip = await supabase.from("percorsi").select().eq("userID", userID);
+    return trip;
+  }
+
 
 
 

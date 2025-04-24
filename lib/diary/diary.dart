@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:delta_explorer/diary/diaryController.dart';
+import 'package:delta_explorer/diary/trip.dart';
 import 'package:flutter/material.dart';
 
 class Diary extends StatefulWidget {
@@ -229,8 +230,9 @@ class _DiaryState extends State<Diary> {
         padding: const EdgeInsets.only(bottom: 24),
         child: OutlinedButton.icon(
           onPressed: () {
-            // Vai alla pagina dei viaggi passati
-            print("Vai alla pagina dei miei viaggi");
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => Trip()),
+            );
           },
           icon: const Icon(Icons.history),
           label: const Text("I Miei Viaggi"),

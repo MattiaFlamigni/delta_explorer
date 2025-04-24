@@ -8,6 +8,7 @@ class DiaryController {
   bool _registrando = false;
   List<XFile> images = [];
   List<Position> percorso = [];
+  List<Map<String, dynamic>> tripPassati = [];
   Timer? _timer;
   SupabaseDB _db = SupabaseDB();
 
@@ -81,5 +82,14 @@ class DiaryController {
       print("errore: $e");
       return "errore $e";
     }
+  }
+
+  Future<void> fetchTrip() async{
+    var trip = await _db.getTrip(_db.supabase.auth.currentUser!.id);
+    tripPassati = trip;
+  }
+
+  List<Map<String, dynamic>>getTripPassati(){
+    return  tripPassati;
   }
 }
