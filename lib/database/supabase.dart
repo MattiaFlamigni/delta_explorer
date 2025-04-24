@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/constants/point.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -493,7 +492,6 @@ class SupabaseDB {
     var trip = await supabase.from("percorsi").select().eq("userID", userID);
     return trip;
   }
-
 
 
 

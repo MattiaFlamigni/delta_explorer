@@ -1,4 +1,5 @@
 import 'package:delta_explorer/diary/diaryController.dart';
+import 'package:delta_explorer/diary/tripDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Per formattare le date
 
@@ -63,7 +64,9 @@ class _TripState extends State<Trip> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0), side: BorderSide(color: Colors.grey, width: 1.5)),
       child: InkWell(
         onTap: () {
-
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => TripDetails(trip: tripData)),
+          );
           print("Hai toccato il viaggio: ${tripData['titolo']}");
 
         },

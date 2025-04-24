@@ -6,11 +6,11 @@ import 'package:image_picker/image_picker.dart';
 
 class DiaryController {
   bool _registrando = false;
-  List<XFile> images = [];
-  List<Position> percorso = [];
-  List<Map<String, dynamic>> tripPassati = [];
+  final List<XFile> _images = []; //lista di immagini che l'utente carica mentre registra viaggio
+  final List<Position> _percorso = []; //vengono inserite le coordinate in fase di registazione per poi essere salvate sul db
+  List<Map<String, dynamic>> _tripPassati = []; //lista dei viaggi passati ottenuti dal db
   Timer? _timer;
-  SupabaseDB _db = SupabaseDB();
+  final SupabaseDB _db = SupabaseDB();
 
   bool isRecording() {
     return _registrando;
@@ -25,7 +25,7 @@ class DiaryController {
     final List<XFile> selectedImages = await picker.pickMultiImage();
 
     if (selectedImages.isNotEmpty) {
-      images.addAll(selectedImages);
+      _images.addAll(selectedImages);
     }
   }
 
@@ -34,16 +34,16 @@ class DiaryController {
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
     if (image != null) {
-      images.add(image);
+      _images.add(image);
     }
   }
 
   getImages() {
-    return images;
+    return _images;
   }
 
   removeImage(XFile image) {
-    images.remove(image);
+    _images.remove(image);
   }
 
   void startTracking() async {
@@ -58,14 +58,14 @@ class DiaryController {
       Position pos = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      percorso.add(pos);
+      _percorso.add(pos);
       print("Nuova posizione: ${pos.latitude}, ${pos.longitude}");
     });
   }
 
   void stopTracking() {
     print("stop posizione");
-    print(percorso);
+    print(_percorso);
     _timer?.cancel();
   }
 
@@ -76,7 +76,7 @@ class DiaryController {
         descrizione,
         _db.supabase.auth.currentUser!.id,
       );
-      await _db.addCoord(percorso, idPercorso);
+      await _db.addCoord(_percorso, idPercorso);
       return "ok";
     } catch (e) {
       print("errore: $e");
@@ -86,10 +86,13 @@ class DiaryController {
 
   Future<void> fetchTrip() async{
     var trip = await _db.getTrip(_db.supabase.auth.currentUser!.id);
-    tripPassati = trip;
+    _tripPassati = trip;
   }
 
   List<Map<String, dynamic>>getTripPassati(){
-    return  tripPassati;
+    return  _tripPassati;
   }
+
+
+
 }
