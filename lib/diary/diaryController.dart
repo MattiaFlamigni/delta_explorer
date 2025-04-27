@@ -32,8 +32,6 @@ class DiaryController {
     }
   }
 
-
-
   Future<void> pickImageFromCamera() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);

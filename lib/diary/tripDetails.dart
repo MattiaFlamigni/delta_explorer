@@ -1,7 +1,9 @@
 import 'package:delta_explorer/diary/detailsController.dart';
 import 'package:delta_explorer/diary/diaryController.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
 
 class TripDetails extends StatefulWidget {
@@ -21,9 +23,14 @@ class _TripDetailsState extends State<TripDetails> {
   @override
   void initState() {
     super.initState();
+
     controller.fetchImagesPaths(widget.trip["titolo"]).then((_) {
       setState(() {
+      });
+    });
 
+    controller.fetchCoord(widget.trip["id"]).then((_) {
+      setState(() {
       });
     });
   }
@@ -37,12 +44,6 @@ class _TripDetailsState extends State<TripDetails> {
     final String descrizione = widget.trip["descrizione"] ?? "Nessuna descrizione";
     final DateTime dataCreazione = DateTime.tryParse(widget.trip["created_at"] ?? "") ?? DateTime.now();
 
-
-    /*final List<String> imageUrls = [ //TODO GESTIONE GALLERIA
-      'https://via.placeholder.com/300/FFC107/000000?Text=Foto+1',
-      'https://via.placeholder.com/300/4CAF50/FFFFFF?Text=Foto+2',
-      'https://via.placeholder.com/300/2196F3/FFFFFF?Text=Foto+3',
-    ];*/
 
     return Scaffold(
       appBar: AppBar(
@@ -69,10 +70,65 @@ class _TripDetailsState extends State<TripDetails> {
               const SizedBox(height: 8.0),
               drawGallery(controller.getImages()),
               const SizedBox(height: 24.0),
+
             ],
+            drawTripInfo("Il tuo percorso",theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+            drawTripMap(controller.getCoord())
 
           ],
         ),
+      ),
+    );
+  }
+
+
+  Widget drawTripMap(List<Map<String, dynamic>> coords) {
+    if (coords.isEmpty) {
+      return const Center(child: Text("Nessun percorso disponibile."));
+    }
+
+    List<LatLng> points = coords.map((coord) {
+      return LatLng(coord["lat"], coord["lon"]);
+    }).toList();
+
+    return SizedBox(
+      height: 300, // puoi cambiare l'altezza
+      child: FlutterMap(
+        options: MapOptions(
+          center: points.first,
+          zoom: 15,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c'],
+          ),
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: points,
+                strokeWidth: 4.0,
+                color: Colors.blue,
+              ),
+            ],
+          ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                width: 40,
+                height: 40,
+                point: points.first,
+                child: const Icon(Icons.flag, color: Colors.green, size: 40),
+              ),
+              Marker(
+                width: 40,
+                height: 40,
+                point: points.last,
+                child: const Icon(Icons.flag, color: Colors.red, size: 40),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

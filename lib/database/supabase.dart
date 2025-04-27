@@ -440,6 +440,8 @@ class SupabaseDB {
     }
     return "";
   }
+  
+  
 
   Future<String> getIDfromUsername(String username) async{
     var response= await supabase.from("users").select("id").eq("username", username).single();
@@ -492,6 +494,9 @@ class SupabaseDB {
 
 
 
+  Future<List<Map<String, dynamic>>> getCoordByTripId(int tripId) async{
+    return await supabase.from("coordinate").select().eq("idPercorso", tripId);
+  }
 
   Future<void> addCoord(List<Position> posizioni, int idPercorso) async {
     final supabase = Supabase.instance.client;
