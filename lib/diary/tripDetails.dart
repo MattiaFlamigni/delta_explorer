@@ -1,3 +1,5 @@
+import 'package:delta_explorer/diary/detailsController.dart';
+import 'package:delta_explorer/diary/diaryController.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -13,12 +15,19 @@ class TripDetails extends StatefulWidget {
 
 class _TripDetailsState extends State<TripDetails> {
 
+  DetailsController controller = DetailsController();
 
 
   @override
   void initState() {
     super.initState();
+    controller.fetchImagesPaths(widget.trip["titolo"]).then((_) {
+      setState(() {
+
+      });
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +38,11 @@ class _TripDetailsState extends State<TripDetails> {
     final DateTime dataCreazione = DateTime.tryParse(widget.trip["created_at"] ?? "") ?? DateTime.now();
 
 
-    final List<String> imageUrls = [ //TODO GESTIONE GALLERIA
+    /*final List<String> imageUrls = [ //TODO GESTIONE GALLERIA
       'https://via.placeholder.com/300/FFC107/000000?Text=Foto+1',
       'https://via.placeholder.com/300/4CAF50/FFFFFF?Text=Foto+2',
       'https://via.placeholder.com/300/2196F3/FFFFFF?Text=Foto+3',
-    ];
+    ];*/
 
     return Scaffold(
       appBar: AppBar(
@@ -54,11 +63,11 @@ class _TripDetailsState extends State<TripDetails> {
             const SizedBox(height: 16.0),
             drawTripInfo(descrizione,theme.textTheme.bodyLarge!),
             const SizedBox(height: 24.0),
-            if (imageUrls.isNotEmpty) ...[
+            if (controller.getImages().isNotEmpty) ...[
               drawTripInfo("Galleria",theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
 
               const SizedBox(height: 8.0),
-              drawGallery(imageUrls),
+              drawGallery(controller.getImages()),
               const SizedBox(height: 24.0),
             ],
 
@@ -77,7 +86,7 @@ class _TripDetailsState extends State<TripDetails> {
     );
   }
 
-  Widget drawGallery(List<String> imageUrls){
+  Widget drawGallery(List<Map<String, dynamic>> imageUrls){
     return SizedBox(
       height: 120,
       child: ListView.builder(
@@ -89,7 +98,8 @@ class _TripDetailsState extends State<TripDetails> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.network(
-                imageUrls[index],
+                "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${imageUrls[index]["image_path"]}",
+
                 width: 120,
                 height: 120,
                 fit: BoxFit.cover,

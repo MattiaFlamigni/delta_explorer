@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DiaryController {
   bool _registrando = false;
   final List<XFile> _images = []; //lista di immagini che l'utente carica mentre registra viaggio
   final List<Position> _percorso = []; //vengono inserite le coordinate in fase di registazione per poi essere salvate sul db
   List<Map<String, dynamic>> _tripPassati = []; //lista dei viaggi passati ottenuti dal db
+  List<String?> image_paths = []; //lista dei path salvati sullo storage
   Timer? _timer;
   final SupabaseDB _db = SupabaseDB();
 
@@ -28,6 +31,8 @@ class DiaryController {
       _images.addAll(selectedImages);
     }
   }
+
+
 
   Future<void> pickImageFromCamera() async {
     final ImagePicker picker = ImagePicker();
@@ -69,7 +74,7 @@ class DiaryController {
     _timer?.cancel();
   }
 
-  Future<String> addTrip(String titolo, String descrizione) async {
+  Future<int> addTrip(String titolo, String descrizione) async {
     try {
       var idPercorso = await _db.addPercorso(
         titolo,
@@ -77,10 +82,11 @@ class DiaryController {
         _db.supabase.auth.currentUser!.id,
       );
       await _db.addCoord(_percorso, idPercorso);
-      return "ok";
+      
+      return idPercorso;
     } catch (e) {
       print("errore: $e");
-      return "errore $e";
+      return 0;
     }
   }
 
@@ -91,6 +97,41 @@ class DiaryController {
 
   List<Map<String, dynamic>>getTripPassati(){
     return  _tripPassati;
+  }
+
+  Future<List<String?>> uploadImages(int idPercorso) async {
+
+    for (var image in _images) {
+      String fileName = DateTime
+          .now()
+          .millisecondsSinceEpoch
+          .toString();
+      try {
+        // Converti XFile in File usando il suo percorso
+        File file = File(image.path);
+        final String fullPath = await _db.supabase.storage
+            .from('trip')
+            .upload(
+          '$fileName.png',
+          file,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
+        image_paths.add(fullPath);
+
+        _db.addTripImages(idPercorso, fullPath);
+      } catch (e) {
+        print("Errore durante l'upload di ${image.name}: $e");
+        image_paths.add(null);
+      }
+    }
+    
+    
+
+    return image_paths;
+  }
+
+  List<String?> getImagesPaths(){
+    return image_paths;
   }
 
 

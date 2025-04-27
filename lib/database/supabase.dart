@@ -457,36 +457,59 @@ class SupabaseDB {
 
   }
 
-  Future<String> addPercorso(String titolo, String descrizione, String userID) async{
+  Future<int> addPercorso(String titolo, String descrizione, String userID) async{
     var response = await supabase.from("percorsi").insert({
       "titolo":titolo,
       "descrizione":descrizione,
       "userID":userID
     }).select("id").single();
 
-    return response["id"].toString();
+    return response["id"] as int;
   }
 
-  Future<void> addCoord(List<Position> posizioni, String idPercorso) async {
+  Future<void> addTripImages(int idViaggio, String imagePath) async {
+    print("IDVIAGGIO: $idViaggio");
+    try {
+      await supabase.from('tripImages').insert({
+        'idViaggio': idViaggio,
+        'image_path': imagePath,
+      });
+      print('Inserimento riuscito.');
+    } catch (e) {
+      print('Eccezione durante l\'inserimento: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getImagesUrl(String title) async {
+    var id = await fetchTripIdFromTitle(title);  // id è un int
+    return await supabase.from("tripImages").select().eq("idViaggio", id); // correggi il nome della colonna
+  }
+
+  Future<int> fetchTripIdFromTitle(String title) async {
+    var response = await supabase.from("percorsi").select("id").eq("titolo", title).single();
+    return response["id"] as int; // ritorna direttamente un int
+  }
+
+
+
+
+  Future<void> addCoord(List<Position> posizioni, int idPercorso) async {
     final supabase = Supabase.instance.client;
 
-    // Costruisci la lista di mappe
     final coordinate = posizioni.map((pos) => {
       'idPercorso': idPercorso,  // foreign key al percorso
       'lat': pos.latitude,
       'lon': pos.longitude,
-
     }).toList();
 
-    // Inserisci tutte le coordinate in Supabase
-    final response = await supabase.from("coordinate").insert(coordinate);
-
-    if (response.error != null) {
-      print("Errore inserimento coordinate: ${response.error!.message}");
-    } else {
+    try {
+      await supabase.from("coordinate").insert(coordinate);
       print("Coordinate inserite con successo!");
+    } catch (e) {
+      print("Errore durante inserimento coordinate: $e");
     }
   }
+
 
   Future<List<Map<String, dynamic>>> getTrip(String userID) async {
     var trip = await supabase.from("percorsi").select().eq("userID", userID);

@@ -16,6 +16,8 @@ class _DiaryState extends State<Diary> {
   final TextEditingController titoloController = TextEditingController();
   final TextEditingController descrizioneController = TextEditingController();
 
+
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -189,23 +191,31 @@ class _DiaryState extends State<Diary> {
   Widget _drawToggleButton() {
     final isRecording = controller.isRecording();
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         if (titoloController.text.isEmpty) {
           _showSnackbar("Aggiungi il titolo");
           return;
         }
-        setState(() {
+        setState(() {});
           if (isRecording) {
             controller.stopTracking();
-            controller.addTrip(
+            var idPercorso = await controller.addTrip(
               titoloController.text,
               descrizioneController.text,
             );
+
+            controller.uploadImages(idPercorso);
+
           } else {
             controller.startTracking();
           }
           controller.changeStatus();
-        });
+
+          setState(() {
+
+          });
+
+
       },
       style: ElevatedButton.styleFrom(
         backgroundColor:
