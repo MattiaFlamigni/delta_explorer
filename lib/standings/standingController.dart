@@ -6,8 +6,8 @@ class StandingController {
   List<Map<String, dynamic>> _standing = [];
   List<String> _friends = [];
   final SupabaseDB _db = SupabaseDB();
-  int spottedPoints = 0;
-  int reportPoints = 0;
+  int _spottedPoints = 0;
+  int _reportPoints = 0;
 
 
   Future<String>deleteFriends(String username) async{
@@ -72,12 +72,12 @@ class StandingController {
   Future<void> _computeSpottedPoints() async {
     int points = await _db.getTypePoints(TypePoints.spotted);
     print("pointsController: $points");
-    spottedPoints = points;
+    _spottedPoints = points;
   }
 
   Future<void> _computeReportPoints() async {
     int points = await _db.getTypePoints(TypePoints.reports);
-    reportPoints = points;
+    _reportPoints = points;
   }
 
   Future<void> fetchPoints() async {
@@ -86,11 +86,11 @@ class StandingController {
   }
 
   int getSpottedPoints() {
-    return spottedPoints;
+    return _spottedPoints;
   }
 
   int getReportPoints() {
-    return reportPoints;
+    return _reportPoints;
   }
 
   getAuthUser() {

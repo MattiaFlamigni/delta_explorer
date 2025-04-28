@@ -98,7 +98,13 @@ class _StandingsState extends State<Standings> {
     final standings = controller.getStanding();
 
     if (standings.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Column(
+        children: [
+          const Center(child: CircularProgressIndicator()),
+          Text("Classifica non disponibile")
+        ],
+      );
+
     }
 
     return ListView.builder(
@@ -144,10 +150,10 @@ class _StandingsState extends State<Standings> {
 
     if (type == TypePoints.spotted) {
       icon = Icons.visibility;
-      points = controller.spottedPoints;
+      points = controller.getSpottedPoints();
     } else if (type == TypePoints.reports) {
       icon = Icons.report;
-      points = controller.reportPoints;
+      points = controller.getReportPoints();
     } else {
       icon = Icons.help_outline;
     }
