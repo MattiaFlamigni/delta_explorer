@@ -19,6 +19,9 @@ class DiaryController {
   Timer? _timer;
   final SupabaseDB _db = SupabaseDB();
 
+  bool isUserLog(){
+    return _db.supabase.auth.currentUser!=null;
+  }
 
   void deleteImages() {
     _images.clear();
