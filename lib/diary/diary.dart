@@ -227,6 +227,13 @@ class _DiaryState extends State<Diary> {
             descrizioneController.text,
           );
           controller.uploadImages(idPercorso);
+          titoloController.clear();
+          descrizioneController.clear();
+          controller.deleteImages();
+          setState(() {
+
+          });
+
         } else {
           controller.startTracking();
         }

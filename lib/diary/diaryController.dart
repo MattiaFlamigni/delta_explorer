@@ -15,6 +15,10 @@ class DiaryController {
   Timer? _timer;
   final SupabaseDB _db = SupabaseDB();
 
+  void deleteImages(){
+    _images.clear();
+  }
+
   bool isRecording() {
     return _registrando;
   }
