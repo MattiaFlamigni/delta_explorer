@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:delta_explorer/components/loginRequest.dart';
 import 'package:delta_explorer/diary/diaryController.dart';
 import 'package:delta_explorer/diary/trip.dart';
 import 'package:flutter/material.dart';
@@ -19,71 +20,76 @@ class _DiaryState extends State<Diary> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      body: Container( // Sfondo leggero
-        color: Colors.grey[100],
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.flight_takeoff, size: 32, color: theme.colorScheme.primary),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Nuova Avventura",
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+    if(controller.isUserLog()) {
+      return Scaffold(
+        body: Container( // Sfondo leggero
+          color: Colors.grey[100],
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.flight_takeoff, size: 32, color: theme
+                              .colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Nuova Avventura",
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    _drawTextField(
-                      titoloController,
-                      "Titolo dell'avventura",
-                      Icons.title,
-                    ),
-                    const SizedBox(height: 16),
-                    _drawTextField(
-                      descrizioneController,
-                      "Racconta la tua avventura...",
-                      Icons.description,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Foto della tua avventura",
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    _drawImagesGrid(),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _drawAddPhotoButton("Scatta Foto", true),
-                        _drawAddPhotoButton("Aggiungi Foto", false),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    _drawStatusIndicator(),
-                    const SizedBox(height: 24),
-                    _drawToggleButton(),
-                    SizedBox(height: 80),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      _drawTextField(
+                        titoloController,
+                        "Titolo dell'avventura",
+                        Icons.title,
+                      ),
+                      const SizedBox(height: 16),
+                      _drawTextField(
+                        descrizioneController,
+                        "Racconta la tua avventura...",
+                        Icons.description,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        "Foto della tua avventura",
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      _drawImagesGrid(),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _drawAddPhotoButton("Scatta Foto", true),
+                          _drawAddPhotoButton("Aggiungi Foto", false),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      _drawStatusIndicator(),
+                      const SizedBox(height: 24),
+                      _drawToggleButton(),
+                      SizedBox(height: 80),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            _drawMyTripsButton(context),
-          ],
+              _drawMyTripsButton(context),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }else{
+      return requestLogin();
+    }
   }
 
   Widget _drawTextField(
