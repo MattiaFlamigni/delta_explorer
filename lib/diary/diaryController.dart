@@ -19,6 +19,11 @@ class DiaryController {
     _images.clear();
   }
 
+  Future<void> deleteTrip(int tripId) async{
+    await _db.deleteTrip(tripId);
+    await fetchTrip();
+  }
+
   bool isRecording() {
     return _registrando;
   }

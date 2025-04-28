@@ -493,6 +493,9 @@ class SupabaseDB {
   }
 
 
+  Future<void>deleteTrip(int tripId) async{
+    await supabase.from("percorsi").delete().eq("id", tripId);
+  }
 
   Future<List<Map<String, dynamic>>> getCoordByTripId(int tripId) async{
     return await supabase.from("coordinate").select().eq("idPercorso", tripId);
