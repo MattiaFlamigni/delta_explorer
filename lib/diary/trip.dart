@@ -1,4 +1,5 @@
 import 'package:delta_explorer/diary/diaryController.dart';
+import 'package:delta_explorer/diary/tripController.dart';
 import 'package:delta_explorer/diary/tripDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Per formattare le date
@@ -11,7 +12,7 @@ class Trip extends StatefulWidget {
 }
 
 class _TripState extends State<Trip> {
-  DiaryController controller = DiaryController();
+  TripController controller = TripController();
 
   @override
   void initState() {

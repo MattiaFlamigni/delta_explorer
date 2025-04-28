@@ -459,11 +459,12 @@ class SupabaseDB {
 
   }
 
-  Future<int> addPercorso(String titolo, String descrizione, String userID) async{
+  Future<int> addPercorso(String titolo, String descrizione, String userID, double distanza) async{
     var response = await supabase.from("percorsi").insert({
       "titolo":titolo,
       "descrizione":descrizione,
-      "userID":userID
+      "userID":userID,
+      "distanza" : distanza,
     }).select("id").single();
 
     return response["id"] as int;

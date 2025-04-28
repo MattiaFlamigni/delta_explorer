@@ -5,6 +5,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../util.dart';
+
 class TripDetails extends StatefulWidget {
   final Map<String, dynamic> trip;
 
@@ -140,7 +142,8 @@ class _TripDetailsState extends State<TripDetails> {
               children: [
                 Icon(Icons.directions_run, color: theme.colorScheme.secondary),
                 const SizedBox(width: 8.0),
-                Text("${controller.calculateTotalDistance(controller.getCoord()).toStringAsFixed(2)} km", style: theme.textTheme.bodyLarge),
+                //Text("${calculateTotalDistance(controller.getCoord()).toStringAsFixed(2)} km", style: theme.textTheme.bodyLarge),
+                Text(widget.trip["distanza"].toString().length>4?widget.trip["distanza"].toString().substring(0,4) : widget.trip["distanza"].toString() )
               ],
             ),
             const SizedBox(height: 32.0),

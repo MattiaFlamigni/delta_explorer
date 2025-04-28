@@ -6,22 +6,22 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../util.dart';
+
 class DiaryController {
   bool _registrando = false;
-  final List<XFile> _images = []; //lista di immagini che l'utente carica mentre registra viaggio
-  final List<Position> _percorso = []; //vengono inserite le coordinate in fase di registazione per poi essere salvate sul db
-  List<Map<String, dynamic>> _tripPassati = []; //lista dei viaggi passati ottenuti dal db
+  final List<XFile> _images =
+      []; //lista di immagini che l'utente carica mentre registra viaggio
+  final List<Position> _percorso =
+      []; //vengono inserite le coordinate in fase di registazione per poi essere salvate sul db
+
   List<String?> image_paths = []; //lista dei path salvati sullo storage
   Timer? _timer;
   final SupabaseDB _db = SupabaseDB();
 
-  void deleteImages(){
-    _images.clear();
-  }
 
-  Future<void> deleteTrip(int tripId) async{
-    await _db.deleteTrip(tripId);
-    await fetchTrip();
+  void deleteImages() {
+    _images.clear();
   }
 
   bool isRecording() {
@@ -82,14 +82,16 @@ class DiaryController {
   }
 
   Future<int> addTrip(String titolo, String descrizione) async {
+    var distanza = calculateTotalDistanceFromPositions(_percorso);
     try {
       var idPercorso = await _db.addPercorso(
         titolo,
         descrizione,
         _db.supabase.auth.currentUser!.id,
+        distanza,
       );
       await _db.addCoord(_percorso, idPercorso);
-      
+
       return idPercorso;
     } catch (e) {
       print("errore: $e");
@@ -97,32 +99,22 @@ class DiaryController {
     }
   }
 
-  Future<void> fetchTrip() async{
-    var trip = await _db.getTrip(_db.supabase.auth.currentUser!.id);
-    _tripPassati = trip;
-  }
-
-  List<Map<String, dynamic>>getTripPassati(){
-    return  _tripPassati;
-  }
-
   Future<List<String?>> uploadImages(int idPercorso) async {
-
     for (var image in _images) {
-      String fileName = DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString();
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       try {
         // Converti XFile in File usando il suo percorso
         File file = File(image.path);
         final String fullPath = await _db.supabase.storage
             .from('trip')
             .upload(
-          '$fileName.png',
-          file,
-          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-        );
+              '$fileName.png',
+              file,
+              fileOptions: const FileOptions(
+                cacheControl: '3600',
+                upsert: false,
+              ),
+            );
         image_paths.add(fullPath);
 
         _db.addTripImages(idPercorso, fullPath);
@@ -131,16 +123,11 @@ class DiaryController {
         image_paths.add(null);
       }
     }
-    
-    
 
     return image_paths;
   }
 
-  List<String?> getImagesPaths(){
+  List<String?> getImagesPaths() {
     return image_paths;
   }
-
-
-
 }
