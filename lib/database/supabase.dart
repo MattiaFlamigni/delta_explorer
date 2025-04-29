@@ -440,8 +440,7 @@ class SupabaseDB {
     }
     return "";
   }
-  
-  
+
 
   Future<String> getIDfromUsername(String username) async{
     var response= await supabase.from("users").select("id").eq("username", username).single();

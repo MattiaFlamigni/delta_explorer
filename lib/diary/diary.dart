@@ -217,6 +217,9 @@ class _DiaryState extends State<Diary> {
     );
   }
 
+
+
+
   Widget _drawToggleButton() {
     final isRecording = controller.isRecording();
     return ElevatedButton.icon(

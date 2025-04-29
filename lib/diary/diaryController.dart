@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -94,6 +95,9 @@ class DiaryController {
         distanza,
       );
       await _db.addCoord(_percorso, idPercorso);
+
+      //aggiugno i punti alla tabella
+      _db.addPoints(distanza.toInt()*Points.tripPerKm, _db.supabase.auth.currentUser!.id, TypePoints.trip);
 
       return idPercorso;
     } catch (e) {

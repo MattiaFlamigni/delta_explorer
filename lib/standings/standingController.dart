@@ -8,6 +8,7 @@ class StandingController {
   final SupabaseDB _db = SupabaseDB();
   int _spottedPoints = 0;
   int _reportPoints = 0;
+  int _tripPoints = 0;
 
 
   Future<String>deleteFriends(String username) async{
@@ -69,20 +70,27 @@ class StandingController {
     return _standing;
   }
 
-  Future<void> _computeSpottedPoints() async {
-    int points = await _db.getTypePoints(TypePoints.spotted);
-    print("pointsController: $points");
-    _spottedPoints = points;
-  }
-
-  Future<void> _computeReportPoints() async {
-    int points = await _db.getTypePoints(TypePoints.reports);
-    _reportPoints = points;
+  Future<void> _computePoints(String type) async {
+    int points = await _db.getTypePoints(type);
+    switch (type) {
+      case TypePoints.spotted:
+        _spottedPoints = points;
+        print("pointsController: $points");
+        break;
+      case TypePoints.reports:
+        _reportPoints = points;
+        break;
+      case TypePoints.trip:
+        _tripPoints = points;
+        print("tripPoints: $points");
+        break;
+    }
   }
 
   Future<void> fetchPoints() async {
-    await _computeReportPoints();
-    await _computeSpottedPoints();
+    _computePoints(TypePoints.trip);
+    _computePoints(TypePoints.reports);
+    _computePoints(TypePoints.spotted);
   }
 
   int getSpottedPoints() {
@@ -91,6 +99,10 @@ class StandingController {
 
   int getReportPoints() {
     return _reportPoints;
+  }
+
+  int getTripPoints(){
+    return _tripPoints;
   }
 
   getAuthUser() {
@@ -114,4 +126,6 @@ class StandingController {
   User? isUserAuth(){
     return _db.supabase.auth.currentUser;
   }
+
+
 }

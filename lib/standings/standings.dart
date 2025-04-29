@@ -34,6 +34,7 @@ class _StandingsState extends State<Standings> {
             Expanded(child: drawStanding(controller)),
             detailsPoint(controller, TypePoints.spotted),
             detailsPoint(controller, TypePoints.reports),
+            detailsPoint(controller, TypePoints.trip),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 10,
@@ -154,7 +155,10 @@ class _StandingsState extends State<Standings> {
     } else if (type == TypePoints.reports) {
       icon = Icons.report;
       points = controller.getReportPoints();
-    } else {
+    } else if(type == TypePoints.trip){
+      icon = Icons.directions_walk;
+      points = controller.getTripPoints();
+    }else{
       icon = Icons.help_outline;
     }
 
@@ -173,7 +177,7 @@ class _StandingsState extends State<Standings> {
                 ? "Punti Avvistamenti"
                 : type == TypePoints.reports
                 ? "Punti Segnalazioni"
-                : "Punti",
+                : "Punti viaggi",
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           trailing: Text(
