@@ -39,10 +39,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profilo'),
-        backgroundColor: Colors.green,
-      ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -103,9 +100,9 @@ class _ProfileState extends State<Profile> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _levelItem("Novizio", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level1, controller.getUserPoint() >= ThresholdLevel.level1),
+            _levelItem("Novizio", "assets/level/novizio.png", controller.getUserPoint().toDouble() / ThresholdLevel.level1, controller.getUserPoint() >= ThresholdLevel.level1),
             const SizedBox(width: 10),
-            _levelItem("Apprendista", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level2, controller.getUserPoint() >= ThresholdLevel.level2),
+            _levelItem("Apprendista", "assets/level/apprendista.png", controller.getUserPoint().toDouble() / ThresholdLevel.level2, controller.getUserPoint() >= ThresholdLevel.level2),
             const SizedBox(width: 10),
             _levelItem("Esperto", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level3, controller.getUserPoint() >= ThresholdLevel.level3),
             const SizedBox(width: 10),
