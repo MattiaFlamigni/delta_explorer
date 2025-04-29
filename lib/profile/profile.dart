@@ -1,4 +1,5 @@
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
+import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/login/login.dart';
 import 'package:delta_explorer/profile/profileController.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,14 @@ class _ProfileState extends State<Profile> {
 
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLoginStatus();
+      controller.fetchUserPoint();
     });
     loadData();
-    controller.fetchUserPoint();
+
   }
 
   Future<void> loadData() async {
@@ -97,20 +99,81 @@ class _ProfileState extends State<Profile> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Livelli', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.15, "Livello 1")),
+            _levelItem("Novizio", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level1, controller.getUserPoint() >= ThresholdLevel.level1),
             const SizedBox(width: 10),
-            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.25, "Livello 2")),
+            _levelItem("Apprendista", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level2, controller.getUserPoint() >= ThresholdLevel.level2),
             const SizedBox(width: 10),
-            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.35, "Livello 3")),
+            _levelItem("Esperto", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level3, controller.getUserPoint() >= ThresholdLevel.level3),
             const SizedBox(width: 10),
-            Expanded(child: progressIndicator("assets/resources/abbandono.png", 0.0, "Livello 4")),
+            _levelItem("Master", "assets/resources/abbandono.png", controller.getUserPoint().toDouble() / ThresholdLevel.level4, controller.getUserPoint() >= ThresholdLevel.level4),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _levelItem(String title, String imageAsset, double progress, bool isAchieved) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 60,
+              height: 60,
+              child: DashedCircularProgressBar.aspectRatio(
+                aspectRatio: 1,
+                valueNotifier: _valueNotifier,
+                progress: progress * 100,
+                startAngle: 225,
+                sweepAngle: 270,
+                foregroundColor: isAchieved ? Colors.green : Colors.grey,
+                backgroundColor: const Color(0xffeeeeee),
+                foregroundStrokeWidth: 4,
+                backgroundStrokeWidth: 4,
+                animation: true,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(
+                    imageAsset,
+                    fit: BoxFit.cover,
+                    color: isAchieved ? null : Colors.grey[400], // Opacizza se non raggiunto
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isAchieved ? Colors.black87 : Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -168,7 +231,7 @@ class _ProfileState extends State<Profile> {
           child: DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
             valueNotifier: _valueNotifier,
-            progress: progress,
+            progress: progress*100,
             startAngle: 225,
             sweepAngle: 270,
             foregroundColor: Colors.green,
