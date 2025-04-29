@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:delta_explorer/diary/TrackPosition.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,18 +11,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../util.dart';
 
 class DiaryController {
-  bool _registrando = false;
-  final List<XFile> _images =
-      []; //lista di immagini che l'utente carica mentre registra viaggio
-  final List<Position> _percorso =
-      []; //vengono inserite le coordinate in fase di registazione per poi essere salvate sul db
+  final tracker = TrackPosition(); // singleton
 
-  List<String?> image_paths = []; //lista dei path salvati sullo storage
-  Timer? _timer;
+
+  final List<XFile> _images = []; // immagini caricate durante la registrazione
+  List<String?> image_paths = []; // path salvati nello storage
+
   final SupabaseDB _db = SupabaseDB();
 
-  bool isUserLog(){
-    return _db.supabase.auth.currentUser!=null;
+  bool isUserLog() {
+    return _db.supabase.auth.currentUser != null;
   }
 
   void deleteImages() {
@@ -29,12 +28,17 @@ class DiaryController {
   }
 
   bool isRecording() {
-    return _registrando;
+    return tracker.isRecording();
   }
 
-  void changeStatus() {
-    _registrando = !_registrando;
+  getTitleController(){
+    return tracker.getTitleController();
   }
+  getDescController(){
+    return tracker.getDescController();
+  }
+
+
 
   Future<void> pickImagesFromGallery() async {
     final ImagePicker picker = ImagePicker();
@@ -54,54 +58,49 @@ class DiaryController {
     }
   }
 
-  getImages() {
+  List<XFile> getImages() {
     return _images;
   }
 
-  removeImage(XFile image) {
+  void removeImage(XFile image) {
     _images.remove(image);
   }
 
-  void startTracking() async {
-    final permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      print("Permessi non concessi");
-      return;
-    }
+  Future<void> startTracking()async {
+    await tracker.startTracking();
 
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      Position pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      _percorso.add(pos);
-      print("Nuova posizione: ${pos.latitude}, ${pos.longitude}");
-    });
   }
 
   void stopTracking() {
-    print("stop posizione");
-    print(_percorso);
-    _timer?.cancel();
+    tracker.stopTracking();
+
   }
 
   Future<int> addTrip(String titolo, String descrizione) async {
-    var distanza = calculateTotalDistanceFromPositions(_percorso);
+    final percorso = tracker.getPercorso(); // preleva posizioni tracciate
+    final distanza = calculateTotalDistanceFromPositions(percorso);
+
     try {
-      var idPercorso = await _db.addPercorso(
+      final userId = _db.supabase.auth.currentUser!.id;
+
+      final idPercorso = await _db.addPercorso(
         titolo,
         descrizione,
-        _db.supabase.auth.currentUser!.id,
+        userId,
         distanza,
       );
-      await _db.addCoord(_percorso, idPercorso);
 
-      //aggiugno i punti alla tabella
-      _db.addPoints(distanza.toInt()*Points.tripPerKm, _db.supabase.auth.currentUser!.id, TypePoints.trip);
+      await _db.addCoord(percorso, idPercorso);
+
+      _db.addPoints(
+        distanza.toInt() * Points.tripPerKm,
+        userId,
+        TypePoints.trip,
+      );
 
       return idPercorso;
     } catch (e) {
-      print("errore: $e");
+      print("Errore durante l'aggiunta del viaggio: $e");
       return 0;
     }
   }
@@ -110,20 +109,19 @@ class DiaryController {
     for (var image in _images) {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       try {
-        // Converti XFile in File usando il suo percorso
         File file = File(image.path);
         final String fullPath = await _db.supabase.storage
             .from('trip')
             .upload(
-              '$fileName.png',
-              file,
-              fileOptions: const FileOptions(
-                cacheControl: '3600',
-                upsert: false,
-              ),
-            );
-        image_paths.add(fullPath);
+          '$fileName.png',
+          file,
+          fileOptions: const FileOptions(
+            cacheControl: '3600',
+            upsert: false,
+          ),
+        );
 
+        image_paths.add(fullPath);
         _db.addTripImages(idPercorso, fullPath);
       } catch (e) {
         print("Errore durante l'upload di ${image.name}: $e");

@@ -14,8 +14,7 @@ class Diary extends StatefulWidget {
 
 class _DiaryState extends State<Diary> {
   DiaryController controller = DiaryController();
-  final TextEditingController titoloController = TextEditingController();
-  final TextEditingController descrizioneController = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +46,13 @@ class _DiaryState extends State<Diary> {
                       ),
                       const SizedBox(height: 32),
                       _drawTextField(
-                        titoloController,
+                        controller.getTitleController(),
                         "Titolo dell'avventura",
                         Icons.title,
                       ),
                       const SizedBox(height: 16),
                       _drawTextField(
-                        descrizioneController,
+                        controller.getDescController(),
                         "Racconta la tua avventura...",
                         Icons.description,
                         maxLines: 3,
@@ -224,29 +223,32 @@ class _DiaryState extends State<Diary> {
     final isRecording = controller.isRecording();
     return ElevatedButton.icon(
       onPressed: () async {
-        if (titoloController.text.isEmpty) {
+        if (controller.getTitleController().text.isEmpty) {
           _showSnackbar("Aggiungi il titolo");
           return;
         }
         setState(() {});
+        print("sta registrando??????? ${controller.isRecording()}");
         if (isRecording) {
+          print("STOP");
           controller.stopTracking();
           var idPercorso = await controller.addTrip(
-            titoloController.text,
-            descrizioneController.text,
+            controller.getTitleController().text,
+            controller.getDescController().text,
           );
           controller.uploadImages(idPercorso);
-          titoloController.clear();
-          descrizioneController.clear();
+          controller.getTitleController().clear();
+          controller.getDescController().clear();
           controller.deleteImages();
           setState(() {
 
           });
 
         } else {
-          controller.startTracking();
+          await controller.startTracking();
+          print("sta registrando??????? [si]${controller.isRecording()}");
         }
-        controller.changeStatus();
+
         setState(() {});
       },
       style: ElevatedButton.styleFrom(
