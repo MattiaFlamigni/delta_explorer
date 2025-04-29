@@ -7,6 +7,7 @@ class ProfileController{
   List<Map<String, dynamic>> _badge = [];
   double numSpotted=0;
   double numReport=0;
+  double numKm = 0;
   int userPoint = -1;
 
 
@@ -42,12 +43,22 @@ class ProfileController{
     numReport = num.toDouble();
   }
 
+  Future<void> loadNumKM() async{
+    double num = await _db.getTotKm(_db.supabase.auth.currentUser!.id);
+    print("num km: $num");
+    numKm = num;
+  }
+
   double getNumSpotted()  {
     return numSpotted;
   }
 
   double getNumReport(){
     return numReport;
+  }
+
+  double getNumKm(){
+    return numKm;
   }
 
   Future<void> fetchUserPoint() async {
@@ -62,6 +73,8 @@ class ProfileController{
   List<Map<String, dynamic>> getBadges(){
     return _badge;
   }
+
+
 
 
 

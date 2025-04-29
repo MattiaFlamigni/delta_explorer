@@ -28,6 +28,7 @@ class _ProfileState extends State<Profile> {
   Future<void> loadData() async {
     await controller.loadNumSpotted();
     await controller.loadNumReport();
+    await controller.loadNumKM();
     controller.fetchBadge().then((_) {
       setState(() {});
     });
@@ -65,6 +66,7 @@ class _ProfileState extends State<Profile> {
         drawDoubleTextRow("Punti Guadagnati", controller.getUserPoint().toString()),
         drawDoubleTextRow("Contributi", controller.getNumSpotted().toInt().toString()),
         drawDoubleTextRow("Segnalazioni", controller.getNumReport().toInt().toString()),
+        drawDoubleTextRow("KM percorsi", controller.getNumKm().toString().length>4?controller.getNumKm().toString().substring(0,4) : controller.getNumKm().toString() ),
 
       ],
     );
@@ -134,8 +136,10 @@ class _ProfileState extends State<Profile> {
 
             if (item["type"] == "spot") {
               progres = controller.getNumSpotted();
-            } else {
+            } else if(item["type"] == "report") {
               progres = controller.getNumReport();
+            }else{
+              progres = controller.getNumKm();
             }
 
             return Container(

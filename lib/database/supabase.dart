@@ -525,5 +525,16 @@ class SupabaseDB {
   }
 
 
+  Future<double>getTotKm(String userId) async {
+    double tot = 0;
+    var response = await supabase.from("percorsi").select().eq("userID", userId);
+    for(var row in response){
+      tot += row["distanza"];
+    }
+
+    return tot;
+  }
+
+
 
 }
