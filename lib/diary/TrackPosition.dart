@@ -24,7 +24,7 @@ class TrackPosition {
 
   Future<void> startTracking() async {
     if (_registrando) return;
-
+    _percorso.clear();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       print("Servizi di localizzazione disabilitati");
@@ -71,6 +71,4 @@ class TrackPosition {
   bool isRecording() => _registrando;
 
   List<Position> getPercorso() => List.unmodifiable(_percorso);
-
-  void clearPercorso() => _percorso.clear();
 }
