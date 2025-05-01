@@ -1,4 +1,3 @@
-import 'package:delta_explorer/diary/diaryController.dart';
 import 'package:delta_explorer/diary/tripController.dart';
 import 'package:delta_explorer/diary/tripDetails.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +33,7 @@ class _TripState extends State<Trip> {
       ),
       body:
           controller.getTripPassati().isEmpty
-              ? Center(
-                child: Text(
-                  "Nessun viaggio ancora registrato.",
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-                ),
-              )
+              ? noTripView()
               : ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: controller.getTripPassati().length,
@@ -53,7 +45,17 @@ class _TripState extends State<Trip> {
     );
   }
 
-  Widget _drawTripCard(Map<String, dynamic> tripData) {
+  Widget noTripView() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Text(
+        "Nessun viaggio ancora registrato.",
+        style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget showTripInfo(Map<String, dynamic> tripData) {
     final theme = Theme.of(context);
     final DateTime? createdAt =
         tripData['created_at'] != null
@@ -63,7 +65,40 @@ class _TripState extends State<Trip> {
         createdAt != null
             ? DateFormat('dd/MM/yyyy HH:mm').format(createdAt)
             : 'Data sconosciuta';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          tripData['titolo'] ?? "Nessun titolo",
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        Text(
+          tripData['descrizione'] ?? "Nessuna descrizione",
+          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 12.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              formattedDate,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ],
+    );
+  }
 
+  Widget _drawTripCard(Map<String, dynamic> tripData) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(
@@ -84,39 +119,7 @@ class _TripState extends State<Trip> {
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tripData['titolo'] ?? "Nessun titolo",
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    tripData['descrizione'] ?? "Nessuna descrizione",
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[700],
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        formattedDate,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right, color: Colors.grey),
-                    ],
-                  ),
-                ],
-              ),
+              child: showTripInfo(tripData),
             ),
           ),
           Positioned(
@@ -125,7 +128,6 @@ class _TripState extends State<Trip> {
             child: IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
               onPressed: () {
-                // TODO: Implementa la logica per eliminare il viaggio
                 print(
                   "Richiesta di eliminazione per il viaggio: ${tripData['id']}",
                 );
@@ -161,7 +163,6 @@ class _TripState extends State<Trip> {
               style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
               child: const Text('Elimina'),
               onPressed: () async {
-                // TODO: Chiama la funzione nel controller per eliminare il viaggio dal database
                 await controller.deleteTrip(tripId);
 
                 setState(() {});
