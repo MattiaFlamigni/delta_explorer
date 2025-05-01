@@ -1,5 +1,6 @@
 
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:delta_explorer/discoverPoi/discover.dart';
 import 'package:delta_explorer/lens/lens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
@@ -88,6 +89,7 @@ class _MapsState extends State<Maps> {
           drawFloatingButton(Icons.pets, "avvistamento!", Spotted()), //flaoting button per spotted e reports
           drawFloatingButton(Icons.report, "segnalazione", Reports()),
           drawFloatingButton(Icons.report, "scopri", Lens()),
+          drawFloatingButton(Icons.place_rounded, "POI", Discover())
 
         ],
       ),
