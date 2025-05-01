@@ -121,7 +121,7 @@ class _LoginFormState extends State<LoginForm> {
           );
           if (res == "Ok") {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Profile()),
+              MaterialPageRoute(builder: (context) => MainPage()),
             );
           } else {
             showSnackbar(res);
