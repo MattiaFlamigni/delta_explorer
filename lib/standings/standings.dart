@@ -1,6 +1,5 @@
 import 'package:delta_explorer/components/loginRequest.dart';
 import 'package:delta_explorer/constants/point.dart';
-import 'package:delta_explorer/login/login.dart';
 import 'package:delta_explorer/standings/standingController.dart';
 import 'package:flutter/material.dart';
 
@@ -290,7 +289,6 @@ class _StandingsState extends State<Standings> {
   }
 
   void showFriendModal(BuildContext context) {
-    final TextEditingController friendController = TextEditingController();
     final friends = controller.getFriends();
 
     showModalBottomSheet(
