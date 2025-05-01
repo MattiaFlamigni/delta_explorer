@@ -18,8 +18,7 @@ class _RegisterFormState extends State<RegisterForm> {
   TextEditingController();
   LoginController controller = LoginController();
 
-  bool _loading = false;
-  String _errorMessage = '';
+  final bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
