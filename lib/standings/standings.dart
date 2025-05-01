@@ -269,6 +269,8 @@ class _StandingsState extends State<Standings> {
                         String res = await controller.addFriend(
                           friendController.text,
                         );
+
+                        if (!context.mounted) return;
                         Navigator.pop(context);
                         ScaffoldMessenger.of(
                           context,
@@ -343,6 +345,7 @@ class _StandingsState extends State<Standings> {
                           onPressed: () async {
 
                             await controller.deleteFriends(friend);
+                            if (!context.mounted) return;
                             setState(() {controller.getFriends();});
                             Navigator.pop(context);
                             showFriendModal(context); // ricarica la lista
