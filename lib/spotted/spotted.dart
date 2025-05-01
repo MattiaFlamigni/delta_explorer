@@ -1,13 +1,7 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/constants/point.dart';
-import 'package:delta_explorer/database/supabase.dart';
 import 'package:delta_explorer/spotted/spottedController.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class Spotted extends StatefulWidget {
@@ -118,7 +112,9 @@ class _SpottedState extends State<Spotted> {
     return ElevatedButton(
       onPressed: () async {
         await controller.updatePosition(context);
+
         if (controller.canSendReports) {
+
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -134,11 +130,13 @@ class _SpottedState extends State<Spotted> {
             ),
           );
 
+
           await controller.uploadSpot(context);
           if (!mounted) return;
           Navigator.pop(context); // Chiude il dialogo di caricamento
           Navigator.pop(context); // Torna alla mappa
         } else {
+
           controller.showSnackbar(context, "Permessi non abilitati - Attivali per inviare");
         }
       },
