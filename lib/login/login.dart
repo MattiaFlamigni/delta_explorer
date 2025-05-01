@@ -1,10 +1,7 @@
 import 'package:delta_explorer/MainPage.dart';
 import 'package:delta_explorer/login/loginController.dart';
 import 'package:delta_explorer/login/registration.dart';
-import 'package:delta_explorer/profile/profile.dart';
 import 'package:flutter/material.dart';
-
-import '../home/home.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -18,7 +15,7 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
   LoginController controller = LoginController();
 
-  bool _loading = false;
+  final bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +117,7 @@ class _LoginFormState extends State<LoginForm> {
             _passwordController.text,
           );
           if (res == "Ok") {
+
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => MainPage()),
             );
