@@ -164,8 +164,8 @@ class _TripState extends State<Trip> {
               child: const Text('Elimina'),
               onPressed: () async {
                 await controller.deleteTrip(tripId);
-
                 setState(() {});
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
             ),
