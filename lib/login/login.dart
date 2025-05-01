@@ -43,24 +43,7 @@ class _LoginFormState extends State<LoginForm> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Benvenuto!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'Accedi per continuare',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
+                drawHeadPage(),
                 SizedBox(height: 40),
                 // Email TextField
                 _buildTextField(_emailController, 'Email', false),
@@ -78,6 +61,30 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
+  Widget drawHeadPage(){
+    return Column(
+      children: [
+        Text(
+          'Benvenuto!',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Accedi per continuare',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white70,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildTextField(TextEditingController controller, String label, bool obscure) {
     return TextField(

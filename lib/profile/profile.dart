@@ -24,7 +24,6 @@ class _ProfileState extends State<Profile> {
       controller.fetchUserPoint();
     });
     loadData();
-
   }
 
   Future<void> loadData() async {
