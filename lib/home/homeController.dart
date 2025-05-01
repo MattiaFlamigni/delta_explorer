@@ -8,6 +8,7 @@ class HomeController{
   List<Map<String, dynamic>> _curiosity = [];
   List<Map<String, dynamic>> _spottedList = [];
   List<Map<String, dynamic>> _currentMeteo = [];
+  bool _isLoading = true;
 
 
 
@@ -36,10 +37,15 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
 ''';
   }
 
+  bool isLoading(){
+    return _isLoading;
+  }
+
 
   Future<void> fetchCuriosity() async {
     var cur = await _db.getData(table: "curiosity");
     _curiosity = cur;
+    _isLoading = false; //ultima funzione chiamata in initState, si puo mostrare UI a utente
   }
 
   Future<void> fetchSpotted() async {
@@ -52,7 +58,8 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
   }
 
   List<Map<String, dynamic>> getCuriosity(){
-    return _curiosity;
+    _curiosity.shuffle();
+    return _curiosity.sublist(0,5);
   }
 
   List<Map<String, dynamic>> getSpotted(){
