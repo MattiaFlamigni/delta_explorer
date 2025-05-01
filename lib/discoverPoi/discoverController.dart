@@ -1,10 +1,8 @@
 import 'dart:math';
 
 import 'package:delta_explorer/database/supabase.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'dart:convert';
 
 class DiscoverController {
   final SupabaseDB _db = SupabaseDB();
