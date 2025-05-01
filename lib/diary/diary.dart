@@ -31,32 +31,8 @@ class _DiaryState extends State<Diary> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.flight_takeoff, size: 32, color: theme
-                              .colorScheme.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            "Nuova Avventura",
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      _drawTextField(
-                        controller.getTitleController(),
-                        "Titolo dell'avventura",
-                        Icons.title,
-                      ),
-                      const SizedBox(height: 16),
-                      _drawTextField(
-                        controller.getDescController(),
-                        "Racconta la tua avventura...",
-                        Icons.description,
-                        maxLines: 3,
-                      ),
+                      drawTitlePage(),
+                      drawForm(),
                       const SizedBox(height: 24),
                       Text(
                         "Foto della tua avventura",
@@ -65,13 +41,7 @@ class _DiaryState extends State<Diary> {
                       const SizedBox(height: 12),
                       _drawImagesGrid(),
                       const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _drawAddPhotoButton("Scatta Foto", true),
-                          _drawAddPhotoButton("Aggiungi Foto", false),
-                        ],
-                      ),
+                      drawRowButton(),
                       const SizedBox(height: 32),
                       _drawStatusIndicator(),
                       const SizedBox(height: 24),
@@ -87,8 +57,56 @@ class _DiaryState extends State<Diary> {
         ),
       );
     }else{
-      return requestLogin();
+      return requestLogin(); //se utente non loggato invita a farlo
     }
+  }
+
+  Widget drawRowButton(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _drawAddPhotoButton("Scatta Foto", true),
+        _drawAddPhotoButton("Aggiungi Foto", false),
+      ],
+    );
+  }
+
+  Widget drawTitlePage(){
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(Icons.flight_takeoff, size: 32, color: theme
+            .colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          "Nuova Avventura",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget drawForm(){
+    return Column(
+      children: [
+        const SizedBox(height: 32),
+        _drawTextField(
+          controller.getTitleController(),
+          "Titolo dell'avventura",
+          Icons.title,
+        ),
+        const SizedBox(height: 16),
+        _drawTextField(
+          controller.getDescController(),
+          "Racconta la tua avventura...",
+          Icons.description,
+          maxLines: 3,
+        ),
+      ],
+    );
+
   }
 
   Widget _drawTextField(
