@@ -13,7 +13,7 @@ class LensController {
 
 
   final String _api = //TODO: questo sarebbe di sessione, andrebbe modificato. ho mandato ticket a inaturalist
-      "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5MTMyODMwLCJleHAiOjE3NDQ5NjE1ODd9.8qeHTzOVezOv08ZcarhvFlNnw9kZIDbzN9M-nL1rtgY4EkA_KFdaUopnYm2a-gMss0OjNHQ1VXTHsp5s0YrkiQ";
+      "eyJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjo5MTMyODMwLCJleHAiOjE3NDYyNTY2ODZ9.3f-CBre3Heoq6ue_NdPUPx3VV8Tc2JDdbSXPBxAAmqqUdk5HbWCDr2u4JyeVyXSj0NRZyPBkgwqVkm2ZyZPY5A";
 
   List<Map<String, dynamic>> getSuggestions() {
     return _suggestions;
