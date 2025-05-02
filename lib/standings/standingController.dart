@@ -1,6 +1,8 @@
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:flutter/material.dart';
 import 'package:gotrue/src/types/user.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StandingController {
   List<Map<String, dynamic>> _standing = [];
@@ -9,8 +11,12 @@ class StandingController {
   int _spottedPoints = 0;
   int _reportPoints = 0;
   int _tripPoints = 0;
+  final GoTrueClient _auth = Supabase.instance.client.auth;
 
 
+  currentUserId(){
+    return _auth.currentUser!.id;
+  }
   Future<String>deleteFriends(String username) async{
     try{
       var id = await _db.getIDfromUsername(username);
@@ -126,6 +132,8 @@ class StandingController {
   User? isUserAuth(){
     return _db.supabase.auth.currentUser;
   }
+
+
 
 
 }

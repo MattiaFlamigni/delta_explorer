@@ -264,7 +264,7 @@ class _StandingsState extends State<Standings> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       final friend = friendController.text.trim();
-                      if (friend.isNotEmpty) {
+                      if (friend.isNotEmpty && friend!= await controller.getUsernamefromId(controller.currentUserId())) {
                         String res = await controller.addFriend(
                           friendController.text,
                         );
@@ -274,6 +274,12 @@ class _StandingsState extends State<Standings> {
                         ScaffoldMessenger.of(
                           context,
                         ).showSnackBar(SnackBar(content: Text(res)));
+                      }else{
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text("Username non valido")));
                       }
                     },
                     icon: const Icon(Icons.person_add),
