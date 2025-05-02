@@ -2,7 +2,6 @@ import 'package:delta_explorer/gallery/galleryController.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
-
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
 
@@ -22,85 +21,114 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   // Funzione per mostrare l'immagine a schermo intero
-  void _showFullScreenImage(BuildContext context, String imageUrl, int index, List<Map<String, dynamic>> allImages) {
+  void _showFullScreenImage(
+    BuildContext context,
+    String imageUrl,
+    int index,
+    List<Map<String, dynamic>> allImages,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FullScreenGallery(
-          initialIndex: index,
-          imageUrls: allImages.where((img) => img["image_path"]?.isNotEmpty == true).map((img) => "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${img["image_path"]}").toList(),
-        ),
+        builder:
+            (context) => FullScreenGallery(
+              initialIndex: index,
+              imageUrls:
+                  allImages
+                      .where((img) => img["image_path"]?.isNotEmpty == true)
+                      .map(
+                        (img) =>
+                            "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${img["image_path"]}",
+                      )
+                      .toList(),
+            ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final validImages = controller.getSpottedList().where((img) => img["image_path"]?.isNotEmpty == true).toList();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Galleria')),
       body: Padding(
-        padding: const EdgeInsets.all(8.0), // Aggiunge un po' di spazio intorno alla griglia
-        child: validImages.isEmpty
-            ? const Center(child: Text("Nessuna immagine disponibile."))
-            : GridView.builder(
-          itemCount: validImages.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8, // Aumenta la spaziatura tra le immagini
-            mainAxisSpacing: 8,
-          ),
-          itemBuilder: (context, index) {
-            var imagePath = validImages[index]["image_path"];
-            final imageUrl = "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/$imagePath";
+        padding: const EdgeInsets.all(8.0),
+        child:
+            controller.getSpottedList().isEmpty
+                ? const Center(child: Text("Nessuna immagine disponibile."))
+                : drawGridImages(),
+      ),
+    );
+  }
 
-            return GestureDetector(
-              onTap: () {
-                _showFullScreenImage(context, imageUrl, index, controller.getSpottedList());
-              },
-              child: Stack(
-                children: [
-                  Hero(
-                    tag: 'image_$index',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: FadeInImage.memoryNetwork(
-                        placeholder: kTransparentImage, // Usa kTransparentImage o un Uint8List vuoto
-                        image: imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        imageErrorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                          );
-                        },
-                        placeholderErrorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  // Opzionale: Aggiungere un leggero overlay o un'icona al tocco
-                ],
-              ),
+  Widget drawGridImages() {
+    return GridView.builder(
+      itemCount: controller.getSpottedList().length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemBuilder: (context, index) {
+        var imagePath = controller.getSpottedList()[index]["image_path"];
+        final imageUrl =
+            "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/$imagePath";
+
+        return GestureDetector(
+          onTap: () {
+            _showFullScreenImage(
+              context,
+              imageUrl,
+              index,
+              controller.getSpottedList(),
             );
           },
-        ),
-      ),
+          child: Stack(
+            children: [
+              Hero(
+                tag: 'image_$index',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: showImage(imageUrl),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget showImage(String imageUrl) {
+    return FadeInImage.memoryNetwork(
+      placeholder: kTransparentImage,
+      // Usa kTransparentImage o un Uint8List vuoto
+      image: imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      imageErrorBuilder: (context, error, stackTrace) {
+        return const Center(
+          child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+        );
+      },
+      placeholderErrorBuilder: (context, error, stackTrace) {
+        return const Center(
+          child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+        );
+      },
     );
   }
 }
 
-// Widget per la visualizzazione a schermo intero con possibilità di scorrere
 class FullScreenGallery extends StatefulWidget {
   final int initialIndex;
   final List<String> imageUrls;
 
-  const FullScreenGallery({super.key, required this.initialIndex, required this.imageUrls});
+  const FullScreenGallery({
+    super.key,
+    required this.initialIndex,
+    required this.imageUrls,
+  });
 
   @override
   State<FullScreenGallery> createState() => _FullScreenGalleryState();
@@ -144,12 +172,17 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // Chiude la visualizzazione a schermo intero al tap
+                  Navigator.pop(
+                    context,
+                  ); // Chiude la visualizzazione a schermo intero al tap
                 },
                 child: Hero(
-                  tag: 'image_$_currentPageIndex', // Usa l'indice corrente per il tag Hero
-                  child: InteractiveViewer( // Permette lo zoom e il pan
-                    panEnabled: false, // Disabilita il pan orizzontale se usi PageView
+                  tag: 'image_$_currentPageIndex',
+                  // Usa l'indice corrente per il tag Hero
+                  child: InteractiveViewer(
+                    // Permette lo zoom e il pan
+                    panEnabled: false,
+                    // Disabilita il pan orizzontale se usi PageView
                     boundaryMargin: const EdgeInsets.all(double.infinity),
                     minScale: 0.5,
                     maxScale: 5.0,
@@ -159,10 +192,20 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
                       loadingBuilder: (context, child, loadingProgress) {
                         return loadingProgress == null
                             ? child
-                            : const Center(child: CircularProgressIndicator(color: Colors.white));
+                            : const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            );
                       },
                       errorBuilder: (context, error, stackTrace) {
-                        return const Center(child: Icon(Icons.broken_image, size: 80, color: Colors.white));
+                        return const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 80,
+                            color: Colors.white,
+                          ),
+                        );
                       },
                     ),
                   ),

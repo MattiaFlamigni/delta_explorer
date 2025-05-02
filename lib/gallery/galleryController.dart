@@ -12,6 +12,6 @@ class galleryController{
   }
 
   List<Map<String,dynamic>> getSpottedList(){
-    return _spottedList;
+    return _spottedList.where((img) => img["image_path"]?.isNotEmpty == true).toList();
   }
 }
