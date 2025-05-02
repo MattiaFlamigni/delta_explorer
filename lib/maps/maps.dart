@@ -185,6 +185,7 @@ class _MapsState extends State<Maps> {
 
       if (_isSameLocation(geoPoint, tappedPoint)) {
         showModalBottomSheet(
+
           context: context,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -225,46 +226,156 @@ class _MapsState extends State<Maps> {
     }
 
     for (var poi in spottedList) {
-      GeoPoint geoPoint = GeoPoint(
-        latitude: poi["location"]["latitude"],
-        longitude: poi["location"]["longitude"],
-      );
+      print("VEDIAMOLO $poi");
 
-      if (_isSameLocation(geoPoint, tappedPoint)) {
-        showModalBottomSheet(
-          context: context,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (context) {
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    poi["category"],
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(poi["subCategory"]),
-                  SizedBox(height: 20),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text("Chiudi"),
-                    ),
-                  ),
-                ],
-              ),
+      // Verifica che 'position' esista ed è un oggetto (Map)
+      if (poi.containsKey("position") && poi["position"] is Map) {
+        var latitude = poi["position"]["lat"];
+        var longitude = poi["position"]["lng"];
+
+        // Debugging: stampa i valori di latitude e longitude
+        print("Latitudine: $latitude, Longitudine: $longitude");
+
+        // Controlla se latitude e longitude sono effettivamente numeri (double)
+        if (latitude != null && longitude != null) {
+          if (latitude is double && longitude is double) {
+            GeoPoint geoPoint = GeoPoint(
+              latitude: latitude,
+              longitude: longitude,
             );
-          },
-        );
-        break; // Interrompe il ciclo non appena trova una corrispondenza
+
+            if (_isSameLocation(geoPoint, tappedPoint)) {
+              showModalBottomSheet(
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (context) {
+                  return Container(    //TODO: mostrare immagine scattata
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, 4), // Shadow position
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView( // Aggiungi questo per abilitare lo scrolling
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Titolo tipologia
+                          Text(
+                            "Tipologia",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+
+                          // Immagine con bordo arrotondato e gestione overflow
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12), // Bordo arrotondato
+                            child: Image.network(
+                              "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${poi["image_path"]}",
+                              fit: BoxFit.cover,
+                              width: double.infinity,  // Occupa tutta la larghezza disponibile
+                              height: 200,  // Imposta un'altezza fissa per evitare overflow
+                            ),
+                          ),
+                          SizedBox(height: 16),
+
+                          // Tipologia di punto
+                          Text(
+                            poi["type"] ?? "N/A",  // Gestire caso "null"
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+
+                          // Divider
+                          Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          SizedBox(height: 16),
+
+                          // Titolo commento
+                          Text(
+                            "Commento",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+
+                          // Commento
+                          Text(
+                            poi["comment"] ?? "Nessun commento disponibile",  // Gestire caso "null"
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 20),
+
+                          // Bottone per chiudere
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,  // Colore di sfondo
+                                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),  // Bottone arrotondato
+                                ),
+                                shadowColor: Colors.blue.withOpacity(0.3),
+                                elevation: 5,
+                              ),
+                              child: Text(
+                                "Chiudi",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+              // Interrompe il ciclo non appena trova una corrispondenza
+            }
+          } else {
+            print("Errore: La latitudine o longitudine non sono double. Latitudine: $latitude, Longitudine: $longitude");
+          }
+        } else {
+          print("Errore: La latitudine o longitudine sono nulli. Latitudine: $latitude, Longitudine: $longitude");
+        }
+      } else {
+        print("Errore: La posizione non è un oggetto valido con 'lat' e 'lng'. Poi: $poi");
       }
     }
+
+
+
+
   }
 
   // Controlla se due punti sono molto vicini
@@ -310,29 +421,46 @@ class _MapsState extends State<Maps> {
 
 
     for (var spotted in spottedList) {
-      if (spotted.containsKey("category")) {
-        if (true) {
+      print("Analizzando elemento: $spotted");
+
+      if (spotted.containsKey("type")) {
+        final position = spotted["position"];
+
+        if (position is Map && position.containsKey("lat") && position.containsKey("lng")) {
+          final lat = position["lat"];
+          final lng = position["lng"];
+
+          print("Coordinate trovate: lat=$lat, lng=$lng");
+
           GeoPoint geoPoint = GeoPoint(
-            latitude: spotted["location"]["latitude"],
-            longitude: spotted["location"]["longitude"],
+            latitude: lat,
+            longitude: lng,
           );
 
-          await controller.addMarker(
-            geoPoint,
-
-            markerIcon: MarkerIcon(
-              iconWidget: Transform.rotate(
-                angle: 3.1416,
-                // 180 gradi in radianti, altrimenti viene capovolta....
-                child: Icon(Icons.place_outlined, color: Colors.blue, size: 30),
+          try {
+            await controller.addMarker(
+              geoPoint,
+              markerIcon: MarkerIcon(
+                iconWidget: Transform.rotate(
+                  angle: 3.1416, // 180 gradi in radianti
+                  child: Icon(Icons.place_outlined, color: Colors.blue, size: 30),
+                ),
               ),
-            ),
-          );
+            );
+            print("Marker aggiunto con successo per lat=$lat, lng=$lng");
+          } catch (e) {
+            print("Errore durante l'aggiunta del marker: $e");
+          }
 
           setState(() {});
+        } else {
+          print("Coordinate mancanti o formato errato per l'elemento: $spotted");
         }
+      } else {
+        print("Categoria mancante per l'elemento: $spotted");
       }
     }
+
 
     // Forza l'aggiornamento della UI per vedere i marker
     setState(() {});

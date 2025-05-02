@@ -306,7 +306,7 @@ class SupabaseDB {
 
     try {
       final response = await Supabase.instance.client
-          .from('spotted')
+          .from('reports')
           .select('*')
           .gte('data', todayStart.toIso8601String())
           .lt('data', todayEnd.toIso8601String());
@@ -322,14 +322,30 @@ class SupabaseDB {
         Map<String, dynamic> spottedData = Map<String, dynamic>.from(item); // Converti dynamic in Map<String, dynamic>
 
         // Decodifica il campo 'location'
-        if (spottedData.containsKey('location') && spottedData['location'] != null) {
+        final pos = spottedData['position'];
+
+        if (pos is String) {
           try {
-            Map<String, dynamic> location = jsonDecode(spottedData['location']);
-            spottedData['location'] = location; // Sostituisci la stringa JSON con la mappa decodificata
+            final decoded = jsonDecode(pos);
+            if (decoded is Map && decoded.containsKey('lat') && decoded.containsKey('lng')) {
+              spottedData['position'] = decoded;
+            } else {
+              print("Stringa JSON valida ma formato non riconosciuto: $decoded");
+            }
           } catch (e) {
-            print("Errore durante la decodifica di 'location': $e");
+            print("Errore nel parsing JSON string di 'position': $e");
           }
+        } else if (pos is List && pos.length >= 2) {
+          spottedData['position'] = {
+            'lat': pos[0],
+            'lng': pos[1],
+          };
+
+          print("SPOTTATO: $spottedData");
+        } else {
+          print("Formato 'position' non riconosciuto o incompleto: $pos");
         }
+
 
         print("Documento trovato: ${spottedData}");
         spottedList.add(spottedData);
