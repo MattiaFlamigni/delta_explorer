@@ -12,7 +12,7 @@ class HomeController{
 
 
 
-  Future<void>fetchMeteo() async {
+  Future<void>_fetchMeteo() async {
     List<Map<String, dynamic>> meteoCondition = [];
     var meteo = await _wr.getRealtimeWeatherByLocation(44.95, 12.41);
 
@@ -42,19 +42,25 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
   }
 
 
-  Future<void> fetchCuriosity() async {
+  Future<void> _fetchCuriosity() async {
     var cur = await _db.getData(table: "curiosity");
     _curiosity = cur;
     _isLoading = false; //ultima funzione chiamata in initState, si puo mostrare UI a utente
   }
 
-  Future<void> fetchSpotted() async {
+  Future<void> _fetchSpotted() async {
 
     var spotted = await _db.getData(table: "spotted", limit: 3);
     spotted.shuffle();
     spotted= spotted.sublist(0,2);
     _spottedList=spotted;
 
+  }
+
+  Future<void> fetchData({bool meteo = true})async{
+    if (meteo) await _fetchMeteo();
+    await _fetchSpotted();
+    await _fetchCuriosity();
   }
 
   List<Map<String, dynamic>> getCuriosity(){

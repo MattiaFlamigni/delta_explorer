@@ -19,17 +19,10 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
 
-    controller.fetchSpotted().then((_) {
+    controller.fetchData().then((_) {
       setState(() {});
     });
 
-    controller.fetchMeteo().then((_) {
-      setState(() {});
-    });
-
-    controller.fetchCuriosity().then((_) {
-      setState(() {});
-    });
   }
 
   @override
@@ -48,36 +41,41 @@ class _HomeState extends State<Home> {
               label: Text("MAP"),
             ),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                drawHeaderImageWithText(),
+          body: RefreshIndicator(
+            onRefresh: () async { await controller.fetchData(meteo: false); setState(() {
 
-                //mostra un immagine con testo in sovraimpressione
-                buildSpottedSection(),
+            }); },
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  drawHeaderImageWithText(),
 
-                /*Disegna una riga scrollabile di card contente curiosita e dati*/
-                drawRowTitle("CURIOSITA E DATI"),
-                const SizedBox(height: 10),
-                SizedBox(height: 150, child: drawRowWithCard()),
+                  //mostra un immagine con testo in sovraimpressione
+                  buildSpottedSection(),
 
-                /*Sezione informazioni con chip e bottomsheet*/
-                drawRowTitle("INFORMAZIONI"),
-                drawRowChip(),
+                  /*Disegna una riga scrollabile di card contente curiosita e dati*/
+                  drawRowTitle("CURIOSITA E DATI"),
+                  const SizedBox(height: 10),
+                  SizedBox(height: 150, child: drawRowWithCard()),
 
-                drawInfoSection(
-                  Icons.place_rounded,
-                  "Indirizzo",
-                  "Provincia di Ferrara",
-                ),
-                drawInfoSection(
-                  Icons.access_time_rounded,
-                  "Orari",
-                  "24 ore su 24",
-                ),
-                SizedBox(height: 100),
-              ],
+                  /*Sezione informazioni con chip e bottomsheet*/
+                  drawRowTitle("INFORMAZIONI"),
+                  drawRowChip(),
+
+                  drawInfoSection(
+                    Icons.place_rounded,
+                    "Indirizzo",
+                    "Provincia di Ferrara",
+                  ),
+                  drawInfoSection(
+                    Icons.access_time_rounded,
+                    "Orari",
+                    "24 ore su 24",
+                  ),
+                  SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         );
