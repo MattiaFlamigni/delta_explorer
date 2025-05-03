@@ -551,6 +551,18 @@ class SupabaseDB {
     return tot;
   }
 
+  Future<void> incrementVerifiedReport(int reportId) async{
+    //recupero il valore
+    var response = await supabase.from("reports").select().eq("id", reportId).single();
+    int num = response["verified"];
+
+    print("NUMERO OTTENUTO: $num");
+    
+    var response2 = await supabase.from("reports").update({"verified" : num+1}).eq("id", reportId);
+
+  }
+
+
 
 
 

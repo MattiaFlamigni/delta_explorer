@@ -22,9 +22,10 @@ class _MapsState extends State<Maps> {
   late MapController controller;
   //Firebase firebase = Firebase();
   SupabaseDB supabase = SupabaseDB();
+  bool isPressed = false;
 
   List<Map<String, dynamic>> poiListD = List.empty();
-  List<Map<String, dynamic>> spottedList = List.empty();
+  List<Map<String, dynamic>> reportList = List.empty();
   Set<String> selectedCategories = {};
   Set<String> categories = {};
 
@@ -225,13 +226,13 @@ class _MapsState extends State<Maps> {
       }
     }
 
-    for (var poi in spottedList) {
-      print("VEDIAMOLO $poi");
+    for (var report in reportList) {
+
 
       // Verifica che 'position' esista ed è un oggetto (Map)
-      if (poi.containsKey("position") && poi["position"] is Map) {
-        var latitude = poi["position"]["lat"];
-        var longitude = poi["position"]["lng"];
+      if (report.containsKey("position") && report["position"] is Map) {
+        var latitude = report["position"]["lat"];
+        var longitude = report["position"]["lng"];
 
         // Debugging: stampa i valori di latitude e longitude
         print("Latitudine: $latitude, Longitudine: $longitude");
@@ -285,7 +286,7 @@ class _MapsState extends State<Maps> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12), // Bordo arrotondato
                             child: Image.network(
-                              "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${poi["image_path"]}",
+                              "https://cvperzyahqhkdcjjtqvm.supabase.co/storage/v1/object/public/${report["image_path"]}",
                               fit: BoxFit.cover,
                               width: double.infinity,  // Occupa tutta la larghezza disponibile
                               height: 200,  // Imposta un'altezza fissa per evitare overflow
@@ -295,7 +296,7 @@ class _MapsState extends State<Maps> {
 
                           // Tipologia di punto
                           Text(
-                            poi["type"] ?? "N/A",  // Gestire caso "null"
+                            report["type"] ?? "N/A",  // Gestire caso "null"
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.black87,
@@ -323,13 +324,17 @@ class _MapsState extends State<Maps> {
 
                           // Commento
                           Text(
-                            poi["comment"] ?? "Nessun commento disponibile",  // Gestire caso "null"
+                            report["comment"] ?? "Nessun commento disponibile",  // Gestire caso "null"
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.black54,
                             ),
                           ),
                           SizedBox(height: 20),
+
+                          confirmReport(report["id"]),
+                          SizedBox(height: 12),
+
 
                           // Bottone per chiudere
                           Center(
@@ -369,11 +374,44 @@ class _MapsState extends State<Maps> {
           print("Errore: La latitudine o longitudine sono nulli. Latitudine: $latitude, Longitudine: $longitude");
         }
       } else {
-        print("Errore: La posizione non è un oggetto valido con 'lat' e 'lng'. Poi: $poi");
+        print("Errore: La posizione non è un oggetto valido con 'lat' e 'lng'. Poi: $report");
       }
     }
 
 
+
+
+  }
+
+  Widget confirmReport(int reportID){
+
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () {
+
+          setState(() {
+            isPressed = !isPressed;
+          });
+          // TODO: logica di conferma (es. invia conferma alla tua API)
+
+          supabase.incrementVerifiedReport(reportID);
+        },
+        icon: Icon(Icons.check_circle, color: Colors.white),
+        label: isPressed ? Text("segnalazione inviata") : Text(
+          "Conferma segnalazione",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          shadowColor: Colors.green.withOpacity(0.3),
+          elevation: 5,
+        ),
+      ),
+    );
 
 
   }
@@ -420,11 +458,11 @@ class _MapsState extends State<Maps> {
     }
 
 
-    for (var spotted in spottedList) {
-      print("Analizzando elemento: $spotted");
+    for (var report in reportList) {
+      print("Analizzando elemento: $report");
 
-      if (spotted.containsKey("type")) {
-        final position = spotted["position"];
+      if (report.containsKey("type")) {
+        final position = report["position"];
 
         if (position is Map && position.containsKey("lat") && position.containsKey("lng")) {
           final lat = position["lat"];
@@ -454,10 +492,10 @@ class _MapsState extends State<Maps> {
 
           setState(() {});
         } else {
-          print("Coordinate mancanti o formato errato per l'elemento: $spotted");
+          print("Coordinate mancanti o formato errato per l'elemento: $report");
         }
       } else {
-        print("Categoria mancante per l'elemento: $spotted");
+        print("Categoria mancante per l'elemento: $report");
       }
     }
 
@@ -473,7 +511,7 @@ class _MapsState extends State<Maps> {
     setState(() {
       poiListD = list;
       categories = poiListD.map((poi) => poi["category"] as String).toSet();
-      spottedList = list2;
+      reportList = list2;
 
     });
   }
