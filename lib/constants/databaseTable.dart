@@ -14,3 +14,9 @@ class DatabaseTable{
   static const String users = "users";
 
 }
+
+class DatabaseBucket{
+  static const String reports = "reports";
+  static const String spotted = "spotted";
+  static const String trip = "trip";
+}
