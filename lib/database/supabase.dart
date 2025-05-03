@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delta_explorer/constants/point.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../constants/databaseTable.dart';
 
 class SupabaseDB {
   final supabase = Supabase.instance.client;
@@ -86,7 +89,7 @@ class SupabaseDB {
 
   Future<void> removeFriend(String friendID) async {
     try {
-      await supabase.from("friends").delete().eq("friendID", friendID);
+      await supabase.from(DatabaseTable.friends).delete().eq("friendID", friendID);
     } catch (e) {
       print("error: $e");
     }
@@ -100,7 +103,7 @@ class SupabaseDB {
     String? userID,
   ) async {
     try {
-      await supabase.from("reports").insert({
+      await supabase.from(DatabaseTable.reports).insert({
         'data': DateTime.now().toIso8601String(),
         'image_path': image_path,
         'comment': comment,
@@ -123,7 +126,7 @@ class SupabaseDB {
     String? userID,
   ) async {
     try {
-      await supabase.from('spotted').insert({
+      await supabase.from(DatabaseTable.spotted).insert({
         'data':
             DateTime.now()
                 .toLocal()
@@ -191,7 +194,7 @@ class SupabaseDB {
     // Inserisci ogni POI nel database
     for (var poi in pois) {
       try {
-        final response = await supabaseClient.from('poi').insert({
+        final response = await supabaseClient.from(DatabaseTable.poi).insert({
           'location': poi['location'],
           'title': poi['title'],
           'description': poi['description'],
@@ -211,7 +214,7 @@ class SupabaseDB {
 
   Future<void> addUser(User user, String username) async {
     try {
-      await supabase.from("users").insert({
+      await supabase.from(DatabaseTable.users).insert({
         "id": user.id,
         "username": username,
       });
@@ -224,7 +227,7 @@ class SupabaseDB {
   Future<bool> existUser(String username) async {
     final response =
         await supabase
-            .from("users")
+            .from(DatabaseTable.users)
             .select("username")
             .eq("username", username)
             .maybeSingle();
@@ -237,7 +240,7 @@ class SupabaseDB {
   Future<String> addPoints(int points, String userID, String type) async {
     /*VENGONO AGGIUNTI SIA A POINTS SIA A USERS (PER CLASSIFICA AMICI RAPIDA)*/
     try {
-      await supabase.from("points").insert({
+      await supabase.from(DatabaseTable.points).insert({
         "userID": userID,
         "numPoints": points,
         "type": type,
@@ -245,7 +248,7 @@ class SupabaseDB {
 
       int actualPoint = await getUserPoints(supabase.auth.currentUser!.id);
       await supabase
-          .from("users")
+          .from(DatabaseTable.users)
           .update({"points": actualPoint})
           .eq("id", supabase.auth.currentUser!.id);
 
@@ -259,7 +262,7 @@ class SupabaseDB {
   Future<int> getUserPoints(String userID) async {
     try {
       final response = await supabase
-          .from("points")
+          .from(DatabaseTable.points)
           .select("numPoints")
           .eq("userID", userID);
 
@@ -281,7 +284,7 @@ class SupabaseDB {
     List<Map<String, dynamic>> poiList = [];
 
     try {
-      final response = await supabaseClient.from('poi').select();
+      final response = await supabaseClient.from(DatabaseTable.poi).select();
       poiList = response;
     } catch (e) {
       print("Errore nella lettura dei dati: $e");
@@ -291,7 +294,7 @@ class SupabaseDB {
   }
 
   Future<List<Map<String, dynamic>>> getData({
-    String table = "poi",
+    String table = DatabaseTable.poi,
     int limit = 0,
   }) async {
     List<Map<String, dynamic>> poiList = [];
@@ -335,7 +338,7 @@ class SupabaseDB {
 
     try {
       final response = await Supabase.instance.client
-          .from('reports')
+          .from(DatabaseTable.reports)
           .select('*')
           .gte('data', todayStart.toIso8601String())
           .lt('data', todayEnd.toIso8601String());
@@ -431,7 +434,7 @@ class SupabaseDB {
 
     try {
       var response = await supabase
-          .from("points")
+          .from(DatabaseTable.points)
           .select("numPoints")
           .eq("userID", supabase.auth.currentUser!.id)
           .eq("type", type);
@@ -450,13 +453,13 @@ class SupabaseDB {
     String friendID = await getIDfromUsername(friendUsername);
 
     try {
-      await supabase.from("friends").insert({
+      await supabase.from(DatabaseTable.friends).insert({
         "id": userID,
         "friendID": friendID,
       });
 
       // Aggiungi l'amicizia da B a A (l'amico vede anche A come amico)
-      await supabase.from("friends").insert({
+      await supabase.from(DatabaseTable.friends).insert({
         "id": friendID,
         "friendID": userID,
       });
@@ -468,7 +471,7 @@ class SupabaseDB {
   Future<List<String>> getFriends(String userID) async {
     try {
       var response = await supabase
-          .from("friends")
+          .from(DatabaseTable.friends)
           .select("friendID")
           .eq("id", userID);
       print("AMICI: $response");
@@ -487,7 +490,7 @@ class SupabaseDB {
     friendsIDs.add(userID); // Aggiungi anche te stesso
 
     final response = await supabase
-        .from("users")
+        .from(DatabaseTable.users)
         .select("id, username, points")
         .inFilter("id", friendsIDs)
         .order("points", ascending: false);
@@ -500,7 +503,7 @@ class SupabaseDB {
     try {
       var res =
           await supabase
-              .from("users")
+              .from(DatabaseTable.users)
               .select("username")
               .eq("id", userID)
               .single();
@@ -515,7 +518,7 @@ class SupabaseDB {
     try {
       var response =
           await supabase
-              .from("users")
+              .from(DatabaseTable.users)
               .select("id")
               .eq("username", username)
               .single();
@@ -529,7 +532,7 @@ class SupabaseDB {
   Future<bool> existFriend(String username) async {
     try {
       var response = await supabase
-          .from("users")
+          .from(DatabaseTable.users)
           .select()
           .eq("username", username);
       if (response.isNotEmpty) {
@@ -550,7 +553,7 @@ class SupabaseDB {
   ) async {
     var response =
         await supabase
-            .from("percorsi")
+            .from(DatabaseTable.percorsi)
             .insert({
               "titolo": titolo,
               "descrizione": descrizione,
@@ -579,7 +582,7 @@ class SupabaseDB {
   Future<List<Map<String, dynamic>>> getImagesUrl(String title) async {
     var id = await fetchTripIdFromTitle(title); // id è un int
     return await supabase
-        .from("tripImages")
+        .from(DatabaseTable.tripImages)
         .select()
         .eq("idViaggio", id); // correggi il nome della colonna
   }
@@ -587,7 +590,7 @@ class SupabaseDB {
   Future<int> fetchTripIdFromTitle(String title) async {
     var response =
         await supabase
-            .from("percorsi")
+            .from(DatabaseTable.percorsi)
             .select("id")
             .eq("titolo", title)
             .single();
@@ -595,11 +598,11 @@ class SupabaseDB {
   }
 
   Future<void> deleteTrip(int tripId) async {
-    await supabase.from("percorsi").delete().eq("id", tripId);
+    await supabase.from(DatabaseTable.percorsi).delete().eq("id", tripId);
   }
 
   Future<List<Map<String, dynamic>>> getCoordByTripId(int tripId) async {
-    return await supabase.from("coordinate").select().eq("idPercorso", tripId);
+    return await supabase.from(DatabaseTable.coordinate).select().eq("idPercorso", tripId);
   }
 
   Future<void> addCoord(List<Position> posizioni, int idPercorso) async {
@@ -617,7 +620,7 @@ class SupabaseDB {
             .toList();
 
     try {
-      await supabase.from("coordinate").insert(coordinate);
+      await supabase.from(DatabaseTable.coordinate).insert(coordinate);
       print("Coordinate inserite con successo!");
     } catch (e) {
       print("Errore durante inserimento coordinate: $e");
@@ -626,7 +629,7 @@ class SupabaseDB {
 
   Future<List<Map<String, dynamic>>> getTrip(String userID) async {
     try {
-      var trip = await supabase.from("percorsi").select().eq("userID", userID);
+      var trip = await supabase.from(DatabaseTable.percorsi).select().eq("userID", userID);
       return trip;
     } catch (e) {
       print("error: $e");
@@ -639,7 +642,7 @@ class SupabaseDB {
 
     try {
       var response = await supabase
-          .from("percorsi")
+          .from(DatabaseTable.percorsi)
           .select()
           .eq("userID", userId);
       for (var row in response) {
@@ -657,14 +660,14 @@ class SupabaseDB {
     //recupero il valore
     try {
       var response =
-          await supabase.from("reports").select().eq("id", reportId).single();
+          await supabase.from(DatabaseTable.reports).select().eq("id", reportId).single();
       int num = response["verified"];
 
       print("NUMERO OTTENUTO: $num");
 
       //incremento +1
       await supabase
-          .from("reports")
+          .from(DatabaseTable.reports)
           .update({"verified": num + 1})
           .eq("id", reportId);
     } catch (e) {

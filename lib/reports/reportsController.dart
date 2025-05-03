@@ -8,10 +8,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../constants/databaseTable.dart';
 import '../database/supabase.dart';
 
 class ReportsController {
-  final SupabaseDB _supabase = SupabaseDB();
+  final SupabaseDB _db = SupabaseDB();
   bool _canSendReports = true;
   File? _image;
   Position? _position;
@@ -23,15 +24,15 @@ class ReportsController {
 
   Future<void> loadCategories() async {
       List<Map<String, dynamic>> list = [];
-      list = await _supabase.getData(table: "reports_category");
+      list = await _db.getData(table: DatabaseTable.reports_category);
       _categoriesList = list;
   }
 
   Future<String?> uploadImage(File image) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final String fullPath = await _supabase.supabase.storage
-          .from('reports')
+      final String fullPath = await _db.supabase.storage
+          .from(DatabaseTable.reports)
           .upload(
             '$fileName.png',
             image,
@@ -41,7 +42,7 @@ class ReportsController {
     } catch (e) {
       return null;
     }
-  }
+  }  //TODO: spostare nel database???
 
   Future<Position?> getUserLocation() async {
     try {
@@ -86,7 +87,7 @@ class ReportsController {
           _position != null
               ? GeoPoint(_position!.latitude, _position!.longitude)
               : GeoPoint(0, 0);
-      await _supabase.addReports(
+      await _db.addReports(
         imageUrl,
         selectedCategory,
         commentTextController.text,
@@ -121,7 +122,7 @@ class ReportsController {
 
   Future <String> addPoints(int points, String userID) async {
     try {
-      await _supabase.addPoints(points, userID, TypePoints.reports);
+      await _db.addPoints(points, userID, TypePoints.reports);
       return "Punti Aggiornati";
     }catch(e){
       return "errore: $e";
