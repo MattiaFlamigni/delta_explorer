@@ -9,9 +9,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SpottedController {
-  final SupabaseDB supabase = SupabaseDB();
-  final TextEditingController commentTextController = TextEditingController();
-  final ImagePicker picker = ImagePicker();
+  final SupabaseDB _supabase = SupabaseDB();
+  final TextEditingController _commentTextController = TextEditingController();
+
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
   List<Map<String, dynamic>> categoriesList = [];
@@ -23,10 +23,14 @@ class SpottedController {
   int numSpotted = 1;
   Position? position;
 
+  TextEditingController getCommentTextController(){
+    return _commentTextController;
+  }
+
   Future<void> loadCategories(
     Function(List<Map<String, dynamic>>) onLoaded,
   ) async {
-    var categories = await supabase.getData(table: "categorie_animali");
+    var categories = await _supabase.getData(table: "categorie_animali");
     categoriesList = categories;
     onLoaded(categoriesList);
   }
@@ -48,10 +52,10 @@ class SpottedController {
             ? GeoPoint(position!.latitude, position!.longitude)
             : GeoPoint(0, 0);
 
-    await supabase.addSpotted(
+    await _supabase.addSpotted(
       imageUrl ?? "",
       selectedCategory,
-      commentTextController.text,
+      _commentTextController.text,
       selectedSubcategory,
       geopoint,
       userID,
@@ -62,12 +66,12 @@ class SpottedController {
       if (image != null) {
         addPoints(
           Points.spottedPhoto,
-          supabase.supabase.auth.currentUser!.id,
+          _supabase.supabase.auth.currentUser!.id,
         );
       } else {
         addPoints(
           Points.spotted,
-          supabase.supabase.auth.currentUser!.id,
+          _supabase.supabase.auth.currentUser!.id,
         );
       }
     }
@@ -77,7 +81,7 @@ class SpottedController {
 
   Future<String?> uploadImage(File image) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    final String fullPath = await supabase.supabase.storage
+    final String fullPath = await _supabase.supabase.storage
         .from('spotted')
         .upload(
           '$fileName.png',
@@ -126,6 +130,6 @@ class SpottedController {
   }
 
   void addPoints(int points, String userID) async {
-    await supabase.addPoints(points, userID, TypePoints.spotted);
+    await _supabase.addPoints(points, userID, TypePoints.spotted);
   }
 }

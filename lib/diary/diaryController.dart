@@ -11,11 +11,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../util.dart';
 
 class DiaryController {
-  final tracker = TrackPosition(); // singleton
+  final _tracker = TrackPosition(); // singleton
 
 
   final List<XFile> _images = []; // immagini caricate durante la registrazione
-  List<String?> image_paths = []; // path salvati nello storage
+  List<String?> _image_paths = []; // path salvati nello storage
 
   final SupabaseDB _db = SupabaseDB();
 
@@ -28,14 +28,14 @@ class DiaryController {
   }
 
   bool isRecording() {
-    return tracker.isRecording();
+    return _tracker.isRecording();
   }
 
   getTitleController(){
-    return tracker.getTitleController();
+    return _tracker.getTitleController();
   }
   getDescController(){
-    return tracker.getDescController();
+    return _tracker.getDescController();
   }
 
 
@@ -67,17 +67,17 @@ class DiaryController {
   }
 
   Future<void> startTracking()async {
-    await tracker.startTracking();
+    await _tracker.startTracking();
 
   }
 
   void stopTracking() {
-    tracker.stopTracking();
+    _tracker.stopTracking();
 
   }
 
   Future<int> addTrip(String titolo, String descrizione) async {
-    final percorso = tracker.getPercorso(); // preleva posizioni tracciate
+    final percorso = _tracker.getPercorso(); // preleva posizioni tracciate
     final distanza = calculateTotalDistanceFromPositions(percorso);
 
     try {
@@ -121,18 +121,18 @@ class DiaryController {
           ),
         );
 
-        image_paths.add(fullPath);
+        _image_paths.add(fullPath);
         _db.addTripImages(idPercorso, fullPath);
       } catch (e) {
         print("Errore durante l'upload di ${image.name}: $e");
-        image_paths.add(null);
+        _image_paths.add(null);
       }
     }
 
-    return image_paths;
+    return _image_paths;
   }
 
   List<String?> getImagesPaths() {
-    return image_paths;
+    return _image_paths;
   }
 }

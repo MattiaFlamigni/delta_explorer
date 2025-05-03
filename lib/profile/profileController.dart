@@ -5,10 +5,10 @@ class ProfileController{
   final SupabaseDB _db = SupabaseDB();
   final GoTrueClient _auth = Supabase.instance.client.auth;
   List<Map<String, dynamic>> _badge = [];
-  double numSpotted=0;
-  double numReport=0;
-  double numKm = 0;
-  int userPoint = -1;
+  double _numSpotted=0;
+  double _numReport=0;
+  double _numKm = 0;
+  int _userPoint = -1;
 
 
   bool isUserLogged(){
@@ -33,41 +33,41 @@ class ProfileController{
   Future<void> loadNumSpotted() async{
 
     int num = await _db.countRowFromTableWhereUser("spotted", _auth.currentUser!.id) ?? 0;
-    numSpotted = num.toDouble();
+    _numSpotted = num.toDouble();
 
   }
 
   Future<void> loadNumReport() async{
     int num = await _db.countRowFromTableWhereUser("reports", _auth.currentUser!.id) ?? 0;
     print("num report: $num");
-    numReport = num.toDouble();
+    _numReport = num.toDouble();
   }
 
   Future<void> loadNumKM() async{
     double num = await _db.getTotKm(_db.supabase.auth.currentUser!.id);
     print("num km: $num");
-    numKm = num;
+    _numKm = num;
   }
 
   double getNumSpotted()  {
-    return numSpotted;
+    return _numSpotted;
   }
 
   double getNumReport(){
-    return numReport;
+    return _numReport;
   }
 
   double getNumKm(){
-    return numKm;
+    return _numKm;
   }
 
   Future<void> fetchUserPoint() async {
     int point =  await  _db.getUserPoints(_auth.currentUser!.id);
-    userPoint = point;
+    _userPoint = point;
   }
 
   int getUserPoint(){
-    return userPoint;
+    return _userPoint;
   }
 
   List<Map<String, dynamic>> getBadges(){

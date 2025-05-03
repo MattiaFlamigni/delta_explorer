@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginController{
   final GoTrueClient _auth = Supabase.instance.client.auth;
-  final SupabaseDB db = SupabaseDB();
+  final SupabaseDB _db = SupabaseDB();
 
 
 
@@ -17,7 +17,7 @@ class LoginController{
   }
 
   Future<String> signUpNewUser(String email, String password, String username) async {
-    if(await db.existUser(username)) {
+    if(await _db.existUser(username)) {
       try {
         print("Tentativo di registrazione con l'email: $email");
         final AuthResponse res = await Supabase.instance.client.auth.signUp(
@@ -31,7 +31,7 @@ class LoginController{
         if (user != null) {
           print("Utente registrato con successo: ${user.email}");
           //aggiungo l'id alla tabella del database pubblico ; points=0
-          await db.addUser(user, username); //TODO: STRING?
+          await _db.addUser(user, username); //TODO: STRING?
           return "Registrazione avvenuta con successo";
         } else {
           print("Utente non trovato dopo la registrazione.");

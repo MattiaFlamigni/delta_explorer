@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 
 class DiscoverController {
   final SupabaseDB _db = SupabaseDB();
-  List<dynamic>poi=[];
+  List<dynamic>_poi=[];
 
   Future<Position> getUserLocation() async {
     bool serviceEnabled;
@@ -69,10 +69,10 @@ class DiscoverController {
       return distance <= radius;
     }).toList();
 
-    poi = nearbyPois;
+    _poi = nearbyPois;
   }
 
   getNearPoiList(){
-    return poi;
+    return _poi;
   }
 }

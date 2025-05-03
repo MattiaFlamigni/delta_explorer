@@ -13,6 +13,7 @@ class Spotted extends StatefulWidget {
 
 class _SpottedState extends State<Spotted> {
   final SpottedController controller = SpottedController();
+  final ImagePicker picker = ImagePicker();
 
   @override
   void initState() {
@@ -71,7 +72,7 @@ class _SpottedState extends State<Spotted> {
 
   Widget buildTextFormField() {
     return TextFormField(
-      controller: controller.commentTextController,
+      controller: controller.getCommentTextController(),
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Commenti',
@@ -189,7 +190,7 @@ class _SpottedState extends State<Spotted> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await controller.picker.pickImage(source: ImageSource.camera);
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         controller.image = File(pickedFile.path);
