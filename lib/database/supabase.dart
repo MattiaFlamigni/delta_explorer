@@ -682,11 +682,11 @@ class SupabaseDB {
 
 
 
-  Future<String?> uploadPNGImage(File image) async {
+  Future<String?> uploadPNGImage(File image, String bucket) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       final String fullPath = await supabase.storage
-          .from(DatabaseTable.reports)
+          .from(bucket)
           .upload(
         '$fileName.png',
         image,
