@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:delta_explorer/constants/point.dart';
@@ -672,6 +673,28 @@ class SupabaseDB {
           .eq("id", reportId);
     } catch (e) {
       print("error: $e");
+    }
+  }
+
+
+
+
+
+
+
+  Future<String?> uploadPNGImage(File image) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final String fullPath = await supabase.storage
+          .from(DatabaseTable.reports)
+          .upload(
+        '$fileName.png',
+        image,
+        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+      );
+      return fullPath;
+    } catch (e) {
+      return null;
     }
   }
 }

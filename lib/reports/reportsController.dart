@@ -28,21 +28,6 @@ class ReportsController {
       _categoriesList = list;
   }
 
-  Future<String?> uploadImage(File image) async {
-    try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final String fullPath = await _db.supabase.storage
-          .from(DatabaseTable.reports)
-          .upload(
-            '$fileName.png',
-            image,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-          );
-      return fullPath;
-    } catch (e) {
-      return null;
-    }
-  }  //TODO: spostare nel database???
 
   Future<Position?> getUserLocation() async {
     try {
@@ -78,7 +63,7 @@ class ReportsController {
     if (selectedCategory.isNotEmpty) {
       String? imageUrl;
 
-      imageUrl = await uploadImage(image);
+      imageUrl = await _db.uploadPNGImage(image);
       if (imageUrl == null) {
         return ("errore nel caricamento dell'immagine");
       }
