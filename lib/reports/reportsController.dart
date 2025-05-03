@@ -63,7 +63,7 @@ class ReportsController {
     if (selectedCategory.isNotEmpty) {
       String? imageUrl;
 
-      imageUrl = await _db.uploadPNGImage(image);
+      imageUrl = await _db.uploadPNGImage(image, DatabaseBucket.reports);
       if (imageUrl == null) {
         return ("errore nel caricamento dell'immagine");
       }
