@@ -239,7 +239,6 @@ class _HomeState extends State<Home> {
               ),
             );
           }
-          return Text("no data");
         },
       ),
     );
@@ -291,7 +290,7 @@ class _HomeState extends State<Home> {
           },
         );
       },
-      child: Expanded(child: drawCard(current)),
+      child: drawCard(current),
     );
   }
 

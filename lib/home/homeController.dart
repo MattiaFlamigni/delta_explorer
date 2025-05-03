@@ -69,7 +69,7 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
   }
 
   List<Map<String, dynamic>> getSpotted(){
-    return _spottedList;
+    return _spottedList.where((img) => img["image_path"]?.isNotEmpty == true).toList();
   }
 
   List<Map<String, dynamic>> getMeteo(){
