@@ -163,9 +163,9 @@ class _RegisterFormState extends State<RegisterForm> {
       return;
     }
     var res = await controller.signUpNewUser(
-      _emailController.text,
-      _passwordController.text,
-      _usernameController.text
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+      _usernameController.text.trim()
     );
 
     if (res == "Registrazione avvenuta con successo") {
