@@ -225,7 +225,7 @@ class SupabaseDB {
     }
   }
 
-  Future<bool> existUser(String username) async {
+  Future<bool> isUsernameAvailable(String username) async {
     final response =
         await supabase
             .from(DatabaseTable.users)

@@ -17,7 +17,7 @@ class LoginController{
   }
 
   Future<String> signUpNewUser(String email, String password, String username) async {
-    if(await _db.existUser(username)) {
+    if(await _db.isUsernameAvailable(username)) {
       try {
         print("Tentativo di registrazione con l'email: $email");
         final AuthResponse res = await Supabase.instance.client.auth.signUp(
