@@ -1,5 +1,7 @@
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
+import 'package:delta_explorer/MainPage.dart';
 import 'package:delta_explorer/constants/point.dart';
+import 'package:delta_explorer/home/home.dart';
 import 'package:delta_explorer/login/login.dart';
 import 'package:delta_explorer/profile/profileController.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +51,9 @@ class _ProfileState extends State<Profile> {
             drawPersonalNumbers(),
             const SizedBox(height: 20),
             drawBadgeRow(),
+            const SizedBox(height: 20),
+            drawSignOutButton()
+
           ],
         ),
       ),
@@ -361,4 +366,27 @@ class _ProfileState extends State<Profile> {
       },
     );
   }
+
+  Widget drawSignOutButton() {
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () {
+          controller.signOut();
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => MainPage()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          backgroundColor: Colors.green,
+          elevation: 4,
+          shadowColor: Colors.greenAccent,
+        ),
+        icon: const Icon(Icons.logout, color: Colors.white),
+        label: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 16)),
+      ),
+    );
+  }
+
 }
