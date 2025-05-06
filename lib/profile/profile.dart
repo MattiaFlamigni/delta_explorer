@@ -259,8 +259,8 @@ class _ProfileState extends State<Profile> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          width: 60,
-          height: 60,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: isAchieved
@@ -292,7 +292,7 @@ class _ProfileState extends State<Profile> {
                 onTap: () {
                   bottomSheetBadge(description, progress * 100, threshold);
                 },
-                child: Image.asset(imageAsset, fit: BoxFit.cover),
+                child: ClipOval(child: Image.asset(imageAsset, fit: BoxFit.cover)),
               ),
             ),
           ),
