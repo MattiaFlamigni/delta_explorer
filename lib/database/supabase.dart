@@ -719,6 +719,21 @@ class SupabaseDB {
     }
   }
 
+  Future<void> saveQuizResult(int accuracy, int duration, int skipped, int incorrect, int score)async{
+    try{
+      await supabase.from(DatabaseTable.quizScore).insert({
+        "accuracy" : accuracy,
+        "duration" : duration,
+        "skipped" : skipped,
+        "incorrect":incorrect,
+        "score":score,
+        "userID":supabase.auth.currentUser!.id,
+      });
+
+    }catch(e){
+      print("error: $e");
+    }
+  }
 
   /*only for populate database*/
   Future<void> insertQuestionQuiz(String question, List<Map<String, dynamic>>options) async{

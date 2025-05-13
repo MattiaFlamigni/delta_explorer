@@ -1,7 +1,13 @@
 import 'package:delta_explorer/quiz/quizController.dart';
 import 'package:flutter/material.dart';
-import 'package:quick_quiz/quick_quiz.dart';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../quick_quiz/pages/quiz.dart';
+
+
+
+
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -74,7 +80,7 @@ class _QuizScreenState extends State<QuizScreen> {
       appBar: AppBar(
         title: const Text('Quiz'),
       ),
-      body: isLoading? Text("loading") : QuizPage(quiz: controller.buildQuiz())
+      body: isLoading? Text("loading") : QuizPage(quiz: controller.buildQuiz() )
     );
   }
 

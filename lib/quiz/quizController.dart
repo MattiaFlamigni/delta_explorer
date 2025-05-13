@@ -1,6 +1,11 @@
 import 'package:delta_explorer/constants/quiz.dart';
 import 'package:delta_explorer/database/supabase.dart';
-import 'package:quick_quiz/quick_quiz.dart';
+
+import '../quick_quiz/Model/quiz_model.dart';
+
+
+
+
 
 class QuizController{
   final SupabaseDB _db = SupabaseDB();
@@ -23,7 +28,6 @@ class QuizController{
   }
 
   Future<void> buildQuestionModel() async {
-
     _questionModel.clear();
     int correctIndex = -1;
 
@@ -45,6 +49,11 @@ class QuizController{
 
     }
   }
+
+  Future<void>saveResult(int accuracy, int duration, int skipped, int incorrect, int score) async{
+    await _db.saveQuizResult(accuracy, duration, skipped, incorrect, score);
+  }
+
 
 
 
