@@ -29,26 +29,37 @@ class QuizController{
 
   Future<void> buildQuestionModel() async {
     _questionModel.clear();
-    int correctIndex = -1;
 
-    for(var question in _questions){
-      List<String> option = [];
-      var response = await  _db.getAnswers(question["id"]);
-      print("response: $response");
-      for(int i=0; i<response.length; i++){
-        option.add(response[i]["answer"]);
-        if(response[i]["correct"]){
-          correctIndex = i;
+    for (var question in _questions) {
+      List<String> options = [];
+      String? correctAnswer;
+
+      var response = await _db.getAnswers(question["id"]);
+
+
+      for (var answer in response) {
+        options.add(answer["answer"]);
+        if (answer["correct"] == true) {
+          correctAnswer = answer["answer"];
         }
       }
 
+
+      options.shuffle();
+
+      // Trova il nuovo indice della risposta corretta
+      int correctIndex = options.indexOf(correctAnswer!);
+
       _questionModel.add(
-        QuestionModel(question: question["question"], options: option, correctAnswerIndex: correctIndex)
-
+        QuestionModel(
+          question: question["question"],
+          options: options,
+          correctAnswerIndex: correctIndex,
+        ),
       );
-
     }
   }
+
 
   Future<void>saveResult(int accuracy, int duration, int skipped, int incorrect, int score) async{
     await _db.saveQuizResult(accuracy, duration, skipped, incorrect, score);
