@@ -108,7 +108,7 @@ class _QuizStartScreenState extends State<QuizStartScreen> {
   @override
   void initState() {
     super.initState();
-    controller.fetchPastQuiz(single: true).then((_) {
+    controller.fetchPastQuiz().then((_) {
       setState(() {
         isDataLoaded = true;
       });
