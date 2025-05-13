@@ -12,6 +12,8 @@ class DatabaseTable{
   static const String spotted = "spotted";
   static const String tripImages = "tripImages";
   static const String users = "users";
+  static const String questionsQuiz = "questionsQuiz";
+  static const String answer = "answer";
 
 }
 

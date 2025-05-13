@@ -697,4 +697,46 @@ class SupabaseDB {
       return null;
     }
   }
+
+  Future<List<Map<String, dynamic>>> getQuestions() async {
+    try {
+      var response = await supabase.from(DatabaseTable.questionsQuiz).select();
+      return response;
+    }catch(e){
+      print("error: $e");
+      return [];
+    }
+  }
+  
+  Future<List<Map<String, dynamic>>> getAnswers(int questionId) async{
+    try {
+      var response = await supabase.from(DatabaseTable.answer).select().eq(
+          "questionID", questionId);
+      return response;
+    }catch(e){
+      print("errore: $e");
+      return[];
+    }
+  }
+
+
+  /*only for populate database*/
+  Future<void> insertQuestionQuiz(String question, List<Map<String, dynamic>>options) async{
+    try{
+      var responseQuestion = await supabase.from(DatabaseTable.questionsQuiz).insert({"question":question}).select().single();
+      var questionID = responseQuestion["id"];
+      for(var option in options){
+        await supabase.from(DatabaseTable.answer).insert({
+          "answer":option["answer"],
+          "correct": option["correct"],
+          "questionID":questionID
+        });
+      }
+
+
+
+    }catch(e){
+      print("errore: $e");
+    }
+  }
 }
