@@ -734,6 +734,28 @@ class SupabaseDB {
       print("error: $e");
     }
   }
+  
+  Future<List<Map<String, dynamic>>> getPastQuiz({bool single=false})async{
+    var response;
+    try{
+      if(single==false) {
+        var response = await supabase.from(DatabaseTable.quizScore).select().eq(
+            "userID", supabase.auth.currentUser!.id);
+        return response;
+      }else{
+        var response = await supabase
+            .from(DatabaseTable.quizScore)
+            .select()
+            .eq("userID", supabase.auth.currentUser!.id)
+            .single();
+      }
+      return response;
+
+    }catch(e){
+      print("error: $e");
+      return [];
+    }
+  }
 
   /*only for populate database*/
   Future<void> insertQuestionQuiz(String question, List<Map<String, dynamic>>options) async{

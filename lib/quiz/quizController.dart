@@ -3,25 +3,22 @@ import 'package:delta_explorer/database/supabase.dart';
 
 import '../quick_quiz/Model/quiz_model.dart';
 
-
-
-
-
-class QuizController{
+class QuizController {
   final SupabaseDB _db = SupabaseDB();
   List<Map<String, dynamic>> _questions = [];
   final List<QuestionModel> _questionModel = [];
 
+  List<Map<String, dynamic>> _pastQuiz = [];
 
   Future<void> getQuestions() async {
     var list = await _db.getQuestions();
-    list.shuffle(); list = list.sublist(0,7); //random 7 question per quiz
+    list.shuffle();
+    list = list.sublist(0, 7); //random 7 question per quiz
     print("Domande: $list");
     _questions = list;
   }
 
-  Quiz buildQuiz()  {
-
+  Quiz buildQuiz() {
     print("modello: ${_questionModel.length}");
 
     return Quiz(questions: _questionModel, timerDuration: 30);
@@ -36,14 +33,12 @@ class QuizController{
 
       var response = await _db.getAnswers(question["id"]);
 
-
       for (var answer in response) {
         options.add(answer["answer"]);
         if (answer["correct"] == true) {
           correctAnswer = answer["answer"];
         }
       }
-
 
       options.shuffle();
 
@@ -60,10 +55,24 @@ class QuizController{
     }
   }
 
-
-  Future<void>saveResult(int accuracy, int duration, int skipped, int incorrect, int score) async{
+  Future<void> saveResult(
+    int accuracy,
+    int duration,
+    int skipped,
+    int incorrect,
+    int score,
+  ) async {
     await _db.saveQuizResult(accuracy, duration, skipped, incorrect, score);
   }
+
+  Future<void> fetchPastQuiz({single = false})async{
+    _pastQuiz = await _db.getPastQuiz();
+  }
+
+  List<Map<String, dynamic>> getPastQuiz(){
+    return _pastQuiz;
+  }
+
 
 
 
@@ -79,11 +88,9 @@ class QuizController{
 
     for (var questionMap in questionList) {
       await _db.insertQuestionQuiz(
-          questionMap["question"],
-          questionMap["options"]
+        questionMap["question"],
+        questionMap["options"],
       );
     }
   }
-
-
 }
