@@ -735,21 +735,13 @@ class SupabaseDB {
     }
   }
   
-  Future<List<Map<String, dynamic>>> getPastQuiz({bool single=false})async{
-    var response;
+  Future<List<Map<String, dynamic>>> getPastQuiz()async{
     try{
-      if(single==false) {
+
         var response = await supabase.from(DatabaseTable.quizScore).select().eq(
             "userID", supabase.auth.currentUser!.id);
         return response;
-      }else{
-        var response = await supabase
-            .from(DatabaseTable.quizScore)
-            .select()
-            .eq("userID", supabase.auth.currentUser!.id)
-            .single();
-      }
-      return response;
+
 
     }catch(e){
       print("error: $e");

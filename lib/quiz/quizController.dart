@@ -65,7 +65,7 @@ class QuizController {
     await _db.saveQuizResult(accuracy, duration, skipped, incorrect, score);
   }
 
-  Future<void> fetchPastQuiz({single = false})async{
+  Future<void> fetchPastQuiz()async{
     _pastQuiz = await _db.getPastQuiz();
   }
 

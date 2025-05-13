@@ -174,7 +174,7 @@ class _QuizStartScreenState extends State<QuizStartScreen> {
   }
 
   Widget drawLastQuizInfo() {
-    var quiz = controller.getPastQuiz()[0];
+    var quiz = controller.getPastQuiz().last;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
