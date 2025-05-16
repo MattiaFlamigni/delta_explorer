@@ -1,6 +1,7 @@
 import 'package:delta_explorer/gallery/gallery.dart';
 import 'package:delta_explorer/home/homeController.dart';
 import 'package:delta_explorer/maps/maps.dart';
+import 'package:delta_explorer/quiz/quiz.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -59,6 +60,10 @@ class _HomeState extends State<Home> {
                   const SizedBox(height: 10),
                   SizedBox(height: 150, child: drawRowWithCard()),
 
+                  /*card per navigare al quiz*/
+                  drawRowTitle("METTITI ALLA PROVA"),
+                  goToQuiz(),
+
                   /*Sezione informazioni con chip e bottomsheet*/
                   drawRowTitle("INFORMAZIONI"),
                   drawRowChip(),
@@ -80,6 +85,47 @@ class _HomeState extends State<Home> {
           ),
         );
   }
+
+  Widget goToQuiz(){
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MyQuiz()),
+          );
+        },
+        child: Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 4,
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.greenAccent.shade100, Colors.green.shade300],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Quiz sul Parco",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text("Scopri quanto conosci il Delta del Po con un quiz interattivo!"),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget drawRowTitle(String text) {
     return Padding(
       padding: EdgeInsets.only(top: 20, left: 16),

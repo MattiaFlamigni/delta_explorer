@@ -7,17 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../constants/quiz.dart';
 import '../quick_quiz/pages/quiz.dart';
 
-Future<void> main() async {
-  await Supabase.initialize(
-    url: 'https://cvperzyahqhkdcjjtqvm.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2cGVyenlhaHFoa2Rjamp0cXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMyOTM3MjcsImV4cCI6MjA1ODg2OTcyN30.jj0Rkztp-QwX9sPXaAXXp8eGLz9YJ5ni1Z1EplxIX6I',
-  );
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyQuiz extends StatelessWidget {
+  const MyQuiz({super.key});
 
   @override
   Widget build(BuildContext context) {
