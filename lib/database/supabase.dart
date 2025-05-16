@@ -749,6 +749,16 @@ class SupabaseDB {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getARModels()async{
+    try {
+      var response = await supabase.from(DatabaseTable.models).select();
+      return response;
+    }catch(e){
+      print("error: $e");
+      return [];
+    }
+  }
+
   /*only for populate database*/
   Future<void> insertQuestionQuiz(String question, List<Map<String, dynamic>>options) async{
     try{
@@ -768,4 +778,6 @@ class SupabaseDB {
       print("errore: $e");
     }
   }
+
+
 }

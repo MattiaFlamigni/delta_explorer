@@ -15,6 +15,7 @@ class DatabaseTable{
   static const String questionsQuiz = "questionsQuiz";
   static const String answer = "answer";
   static const String quizScore = "quizScore";
+  static const String models = "models";
 
 }
 
