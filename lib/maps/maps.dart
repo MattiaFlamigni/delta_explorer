@@ -1,3 +1,4 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:delta_explorer/discoverPoi/discover.dart';
 import 'package:delta_explorer/lens/lens.dart';
@@ -5,6 +6,8 @@ import 'package:delta_explorer/reports/reports.dart';
 import 'package:delta_explorer/spotted/spotted.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../ar.dart';
 
@@ -25,22 +28,36 @@ class _MapsState extends State<Maps> {
   List<Map<String, dynamic>> _reportList = [];
   Set<String> _selectedCategories = {};
   Set<String> _allCategories = {};
+  bool canLocate = false;
 
   @override
   void initState() {
     super.initState();
+
+
     _initializeMapController();
     _loadInitialData();
     _setupMapTapListener();
+    initPosition().then((_){setState(() {
+
+    });});
+
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return
+      Scaffold(
       appBar: AppBar(title: const Text("Mappa Delta del Po")),
       body: Stack(
         children: [
+
+
+
+
           Positioned.fill(child: _buildMap()),
+          if(canLocate)
           Positioned(
             top: 10,
             left: 10,
@@ -53,14 +70,32 @@ class _MapsState extends State<Maps> {
         alignment: WrapAlignment.center,
         spacing: 20,
         children: [
-          _buildFloatingActionButton(Icons.pets, "avvistamento!", const Spotted()),
-          _buildFloatingActionButton(Icons.report, "segnalazione", const Reports()),
-          _buildFloatingActionButton(Icons.report, "scopri", const Lens()),
-          _buildFloatingActionButton(Icons.place_rounded, "POI", const Discover()),
+          if(canLocate)_buildFloatingActionButton(Icons.pets, "avvistamento!", const Spotted()),
+          if(canLocate)_buildFloatingActionButton(Icons.report, "segnalazione", const Reports()),
+          if(canLocate)_buildFloatingActionButton(Icons.report, "scopri", const Lens()),
+          if(canLocate)_buildFloatingActionButton(Icons.place_rounded, "POI", const Discover()),
         ],
       ),
     );
   }
+
+
+
+
+
+
+
+  
+  
+  Future<bool>initPosition() async {
+    if(await Permission.location.isGranted){
+      canLocate = true;
+      return true;
+    }else{
+     return false;
+    }
+  }
+
 
   void _initializeMapController() {
     _mapController = MapController(
@@ -443,8 +478,10 @@ class _MapsState extends State<Maps> {
     );
   }
 
-  Widget _buildMap() {
-    return OSMFlutter(
+  /*Widget _buildMap() {
+
+    return canLocate ?
+     OSMFlutter(
       controller: _mapController,
       osmOption: OSMOption(
         userTrackingOption: const UserTrackingOption(
@@ -471,8 +508,79 @@ class _MapsState extends State<Maps> {
         ),
         roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
       ),
-    );
+    ): Text("No");
+  }*/
+
+
+  Widget _buildMap() {
+    if (canLocate) {
+      return OSMFlutter(
+        controller: _mapController,
+        osmOption: OSMOption(
+          userTrackingOption: const UserTrackingOption(
+            enableTracking: true,
+            unFollowUser: true,
+          ),
+          zoomOption: const ZoomOption(
+            initZoom: 10,
+            minZoomLevel: 8,
+            maxZoomLevel: 16,
+            stepZoom: 1.0,
+          ),
+          userLocationMarker: UserLocationMaker(
+            personMarker: MarkerIcon(
+              icon: Icon(
+                Icons.location_history_rounded,
+                color: Colors.blue,
+                size: 48,
+              ),
+            ),
+            directionArrowMarker: MarkerIcon(
+              icon: Icon(Icons.gps_fixed, size: 48),
+            ),
+          ),
+          roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
+        ),
+      );
+    } else {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.location_off, size: 80, color: Colors.redAccent),
+            SizedBox(height: 16),
+            Text(
+              "Permessi di localizzazione disabilitati",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Abilita la localizzazione per usare la mappa.",
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+
+            SizedBox(height: 10),
+            OutlinedButton(
+              child: Text("Riprova"),
+              onPressed: () async {
+                // Richiama i permessi o ricontrolla
+                if(await Permission.location.isGranted){
+                  setState(() {
+                    canLocate=true;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
+
+
 
 
 }
