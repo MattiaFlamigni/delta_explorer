@@ -8,8 +8,8 @@ import '../constants/quiz.dart';
 import '../quick_quiz/pages/quiz.dart';
 
 
-class MyQuiz extends StatelessWidget {
-  const MyQuiz({super.key});
+class DeltaQuiz extends StatelessWidget {
+  const DeltaQuiz({super.key});
 
   @override
   Widget build(BuildContext context) {
