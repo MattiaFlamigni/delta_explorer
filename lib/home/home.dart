@@ -1,3 +1,4 @@
+import 'package:delta_explorer/ar/arviewer.dart';
 import 'package:delta_explorer/gallery/gallery.dart';
 import 'package:delta_explorer/home/homeController.dart';
 import 'package:delta_explorer/maps/maps.dart';
@@ -64,6 +65,7 @@ class _HomeState extends State<Home> {
                   drawRowTitle("METTITI ALLA PROVA"),
                   goToQuiz(),
 
+
                   /*Sezione informazioni con chip e bottomsheet*/
                   drawRowTitle("INFORMAZIONI"),
                   drawRowChip(),
@@ -93,7 +95,8 @@ class _HomeState extends State<Home> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MyQuiz()),
+            //MaterialPageRoute(builder: (context) => MyQuiz()),
+            MaterialPageRoute(builder: (context) => DeltaQuiz()),
           );
         },
         child: Card(
