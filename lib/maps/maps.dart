@@ -1,4 +1,4 @@
-import 'package:app_settings/app_settings.dart';
+
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:delta_explorer/discoverPoi/discover.dart';
 import 'package:delta_explorer/lens/lens.dart';
@@ -6,7 +6,6 @@ import 'package:delta_explorer/reports/reports.dart';
 import 'package:delta_explorer/spotted/spotted.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../ar.dart';
