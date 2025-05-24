@@ -130,7 +130,7 @@ class ReportsController {
           _image = File(image.path);
       }
     } else {
-      return "Permesso fotocamera negato. Abilitalo nelle impostazioni.";
+      return Future.error("Permesso fotocamera negato. Abilitalo nelle impostazioni.");
     }
     _isImagePickerActive = false;
     return "";

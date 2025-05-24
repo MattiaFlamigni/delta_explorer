@@ -34,8 +34,12 @@ class _ReportsState extends State<Reports> {
             padding: const EdgeInsets.all(8),
             child: ElevatedButton(
               onPressed: () async {
-                await controller.pickImage();
-                setState(() {});
+                try {
+                  await controller.pickImage();
+                  setState(() {});
+                }catch(e){
+                  showSnackbar(e.toString());
+                }
               },
               child: const Text("Scatta una foto"),
             ),
