@@ -62,8 +62,8 @@ class _HomeState extends State<Home> {
                   SizedBox(height: 150, child: drawRowWithCard()),
 
                   /*card per navigare al quiz*/
-                  drawRowTitle("METTITI ALLA PROVA"),
-                  goToQuiz(),
+                  drawRowTitle("DIVERTIAMOCI"),
+                  goToGame(),
 
 
                   /*Sezione informazioni con chip e bottomsheet*/
@@ -88,41 +88,72 @@ class _HomeState extends State<Home> {
         );
   }
 
-  Widget goToQuiz(){
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: GestureDetector(
-        onTap: () {
+  Widget goToGame(){
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+
+              child: gameCard(),
+            ),
+
+
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+
+              child: gameCard(title: "AR"),
+            ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget gameCard({String title = "quiz"}){
+    return InkWell(
+      onTap: () {
+
+        if(title=="quiz"){
           Navigator.push(
             context,
-            //MaterialPageRoute(builder: (context) => MyQuiz()),
             MaterialPageRoute(builder: (context) => DeltaQuiz()),
           );
-        },
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
-          child: Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.greenAccent.shade100, Colors.green.shade300],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+        }else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ArViewerScreen()),
+          );
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+      
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
+        child: Container(
+          width: 200,
+          height: 150,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.greenAccent.shade100, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                 title=="quiz" ? "Quiz sul Parco" : "Esplora in AR",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Quiz sul Parco",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text("Scopri quanto conosci il Delta del Po con un quiz interattivo!"),
-              ],
-            ),
+              SizedBox(height: 8),
+              Text(title=="quiz" ? "Scopri quanto conosci il Delta del Po con un quiz interattivo!":"Divertiti a scoprire gli animali in 3d!" ),
+            ],
           ),
         ),
       ),
@@ -294,8 +325,10 @@ class _HomeState extends State<Home> {
   }
 
 
-  Widget drawRowCard(Map<String, dynamic> current) {
-    return GestureDetector(
+
+
+  Widget drawInfoCard(Map<String, dynamic> current) {
+    return InkWell(
       onTap: () {
         showModalBottomSheet(
           enableDrag: true,
@@ -339,46 +372,43 @@ class _HomeState extends State<Home> {
           },
         );
       },
-      child: drawCard(current),
-    );
-  }
 
-  Widget drawCard(Map<String, dynamic> current) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.lightBlueAccent.shade100,
-              Colors.lightBlue.shade200,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.lightBlueAccent.shade100,
+                Colors.lightBlue.shade200,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
           ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              current["title"] ?? "Senza titolo",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                current["title"] ?? "Senza titolo",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              current["subtitle"] ?? "Sottotitolo mancante",
-              style: const TextStyle(fontSize: 14, color: Colors.white70),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                current["subtitle"] ?? "Sottotitolo mancante",
+                style: const TextStyle(fontSize: 14, color: Colors.white70),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -390,7 +420,7 @@ class _HomeState extends State<Home> {
       itemCount: controller.getCuriosity().length,
       itemBuilder: (BuildContext context, int index) {
         var current = controller.getCuriosity()[index];
-        return drawRowCard(current);
+        return drawInfoCard(current);
       },
     );
   }
