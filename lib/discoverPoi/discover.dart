@@ -29,7 +29,7 @@ class _DiscoverState extends State<Discover> {
       print("POI VICINI: ${controller.getNearPoiList()}");
     } catch (e) {
       print("Errore nel caricamento dei POI: $e");
-      _errorMessage = "Impossibile caricare i POI vicini. Riprova più tardi.";
+      _errorMessage = "Impossibile caricare i POI vicini. $e";
     } finally {
       setState(() {
         _isLoading = false;
