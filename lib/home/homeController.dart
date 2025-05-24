@@ -50,9 +50,13 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
 
   Future<void> _fetchSpotted() async {
 
-    var spotted = await _db.getData(table: "spotted", limit: 3);
-    spotted.shuffle();
-    spotted= spotted.sublist(0,2);
+    var spotted = await _db.getData(table: "spotted");
+
+    if(spotted.length>3){
+      spotted.shuffle();
+      spotted= spotted.sublist(0,2);
+    }
+
     _spottedList=spotted;
 
   }
@@ -69,6 +73,7 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
   }
 
   List<Map<String, dynamic>> getSpotted(){
+    print(_spottedList);
     return _spottedList.where((img) => img["image_path"]?.isNotEmpty == true).toList();
   }
 
