@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SpottedController {
   final SupabaseDB _db = SupabaseDB();
   final TextEditingController _commentTextController = TextEditingController();
+  final ImagePicker picker = ImagePicker();
 
   final GoTrueClient _auth = Supabase.instance.client.auth;
 
@@ -122,5 +124,22 @@ class SpottedController {
 
   void addPoints(int points, String userID) async {
     await _db.addPoints(points, userID, TypePoints.spotted);
+  }
+
+
+
+
+  Future<String> pickImage() async {
+
+    if(await Permission.camera.isGranted) {
+      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+        image = File(pickedFile.path);
+      }
+    }else{
+      return Future.error("Permessi fotocamera non abilitati");
+    }
+
+    return "";
   }
 }

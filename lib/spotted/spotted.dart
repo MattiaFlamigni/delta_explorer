@@ -84,7 +84,16 @@ class _SpottedState extends State<Spotted> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: _pickImage,
+          onPressed: () async {
+            try{
+              await controller.pickImage();
+              setState(() {
+
+              });
+            }catch(e){
+              showSnackbar(e.toString());
+            }
+          },
           child: const Text("Scatta una foto"),
         ),
         if (controller.image != null) showSelectedImage(),
@@ -92,6 +101,9 @@ class _SpottedState extends State<Spotted> {
     );
   }
 
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
   Widget buildCounterRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -190,6 +202,7 @@ class _SpottedState extends State<Spotted> {
   }
 
   Future<void> _pickImage() async {
+
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
