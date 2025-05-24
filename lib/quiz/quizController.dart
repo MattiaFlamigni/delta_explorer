@@ -1,5 +1,6 @@
 import 'package:delta_explorer/constants/quiz.dart';
 import 'package:delta_explorer/database/supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../quick_quiz/Model/quiz_model.dart';
 
@@ -71,6 +72,10 @@ class QuizController {
 
   List<Map<String, dynamic>> getPastQuiz(){
     return _pastQuiz;
+  }
+
+  User? isUserAuth(){
+    return _db.supabase.auth.currentUser;
   }
 
 

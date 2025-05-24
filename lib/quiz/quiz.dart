@@ -2,11 +2,10 @@ import 'package:delta_explorer/quiz/history.dart';
 import 'package:delta_explorer/quiz/quizController.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../components/loginRequest.dart';
 import '../constants/quiz.dart';
 import '../quick_quiz/pages/quiz.dart';
-
 
 class DeltaQuiz extends StatelessWidget {
   const DeltaQuiz({super.key});
@@ -15,12 +14,11 @@ class DeltaQuiz extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Delta Explorer Quiz', // Added title for the app
+      title: 'Delta Explorer Quiz',
       theme: ThemeData(
-        // Using ThemeData for consistent styling
         primarySwatch: Colors.blue,
         fontFamily: 'Nunito',
-        // Using a different font.  Requires adding to pubspec.yaml
+
         textTheme: const TextTheme(
           // Defining text styles
           displayLarge: TextStyle(
@@ -81,7 +79,7 @@ class DeltaQuiz extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const QuizStartScreen(), // Renamed for clarity
+      home: const QuizStartScreen(),
     );
   }
 }
@@ -112,7 +110,9 @@ class _QuizStartScreenState extends State<QuizStartScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Avvia Quiz')),
       body:
-          isDataLoaded
+          controller.isUserAuth() == null
+              ? requestLogin()
+              : isDataLoaded
               ? Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20.0,
