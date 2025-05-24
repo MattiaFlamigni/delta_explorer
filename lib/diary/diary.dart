@@ -189,9 +189,20 @@ class _DiaryState extends State<Diary> {
   Widget _drawAddPhotoButton(String labelText, bool camera) {
     return ElevatedButton.icon(
       onPressed: () async {
-        camera
-            ? await controller.pickImageFromCamera()
-            : await controller.pickImagesFromGallery();
+        if(camera){
+          try {
+            await controller.pickImageFromCamera();
+          }catch(e){
+
+            _showSnackbar(e.toString());
+          }
+        }else{
+            try{
+              await controller.pickImagesFromGallery();
+            }catch(e){
+              showSnackbar(e.toString());
+            }
+        }
         setState(() {});
       },
       icon: Icon(camera ? Icons.camera_alt : Icons.add_photo_alternate, size: 20),
@@ -205,6 +216,10 @@ class _DiaryState extends State<Diary> {
     );
   }
 
+
+  void showSnackbar(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
   Widget _drawStatusIndicator() {
     final isRecording = controller.isRecording();
     return Container(

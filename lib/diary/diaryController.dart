@@ -4,15 +4,14 @@ import 'dart:io';
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:delta_explorer/diary/TrackPosition.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../util.dart';
 
 class DiaryController {
   final _tracker = TrackPosition(); // singleton
-
 
   final List<XFile> _images = []; // immagini caricate durante la registrazione
   List<String?> _image_paths = []; // path salvati nello storage
@@ -31,31 +30,43 @@ class DiaryController {
     return _tracker.isRecording();
   }
 
-  getTitleController(){
+  getTitleController() {
     return _tracker.getTitleController();
   }
-  getDescController(){
+
+  getDescController() {
     return _tracker.getDescController();
   }
 
-
-
-  Future<void> pickImagesFromGallery() async {
+  Future<String> pickImagesFromGallery() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile> selectedImages = await picker.pickMultiImage();
 
-    if (selectedImages.isNotEmpty) {
-      _images.addAll(selectedImages);
+    if(await Permission.photos.isGranted) {
+      final List<XFile> selectedImages = await picker.pickMultiImage();
+
+      if (selectedImages.isNotEmpty) {
+        _images.addAll(selectedImages);
+      }
+    }else{
+      return Future.error("permessi non abilitati");
     }
+
+    return "";
   }
 
-  Future<void> pickImageFromCamera() async {
+  Future<String> pickImageFromCamera() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
-    if (image != null) {
-      _images.add(image);
+    if (await Permission.camera.isGranted) {
+      final XFile? image = await picker.pickImage(source: ImageSource.camera);
+
+      if (image != null) {
+        _images.add(image);
+      }
+    }else{
+      return Future.error("Permessi fotocamera non abilitati");
     }
+    return "";
   }
 
   List<XFile> getImages() {
@@ -66,17 +77,14 @@ class DiaryController {
     _images.remove(image);
   }
 
-  Future<void> startTracking()async {
-
+  Future<void> startTracking() async {
     try {
       await _tracker.startTracking();
-    }catch(_){}
-
+    } catch (_) {}
   }
 
   void stopTracking() {
     _tracker.stopTracking();
-
   }
 
   Future<int> addTrip(String titolo, String descrizione) async {
@@ -116,13 +124,13 @@ class DiaryController {
         final String fullPath = await _db.supabase.storage
             .from('trip')
             .upload(
-          '$fileName.png',
-          file,
-          fileOptions: const FileOptions(
-            cacheControl: '3600',
-            upsert: false,
-          ),
-        );
+              '$fileName.png',
+              file,
+              fileOptions: const FileOptions(
+                cacheControl: '3600',
+                upsert: false,
+              ),
+            );
 
         _image_paths.add(fullPath);
         _db.addTripImages(idPercorso, fullPath);
