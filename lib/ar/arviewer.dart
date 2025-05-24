@@ -50,60 +50,50 @@ class _ArViewerScreenState extends State<ArViewerScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('AR Viewer')),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 200,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: controller.getModels().length,
-              itemBuilder: (context, index) {
-                final obj = objects[index];
-                return GestureDetector(
-                  onTap: () {
-                    final modelUrl =
-                    Platform.isAndroid ? obj["glb"]! : obj["usdz"]!;
-                    openARModel(modelUrl, obj["name"]!);
-                  },
-                  child: Card(
-                    margin: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(obj["name"]!),
-                        ),
-                        Image.network(
-                          obj["preview"]!,
+      body: Expanded(
+        child: GridView.builder(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: controller.getModels().length,
+          itemBuilder: (context, index) {
+            final obj = objects[index];
+            return GestureDetector(
+              onTap: () {
+                final modelUrl =
+                Platform.isAndroid ? obj["glb"]! : obj["usdz"]!;
+                openARModel(modelUrl, obj["name"]!);
+              },
+              child: Card(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(obj["name"]!),
+                    const SizedBox(height: 8),
+                    Image.network(
+                      obj["preview"]!,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/default_preview.png',
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              'assets/default_preview.png', //todo: inserire path corretto
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // Puoi usarlo in futuro per aprire un modello selezionato
-              },
-              child: const Text('Apri modello in AR'),
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
