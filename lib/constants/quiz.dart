@@ -2,7 +2,8 @@ class QuizConstant{
   static final int totalQuestion = 7;
 
 
-  final List<Map<String, dynamic>> domandeQuiz = [
+  /*NB: only for seed database*/
+  final List<Map<String, dynamic>> questionsSeeder = [
     {
       "question": "In quale regione si trova il Parco del Delta del Po?",
       "options": [
@@ -187,6 +188,6 @@ class QuizConstant{
 
 
 
-  getQuestions(){return domandeQuiz;}
+  getQuestions(){return questionsSeeder;}
 
 }
