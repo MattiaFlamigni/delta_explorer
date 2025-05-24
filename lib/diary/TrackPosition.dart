@@ -28,6 +28,8 @@ class TrackPosition {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       print("Servizi di localizzazione disabilitati");
+      return Future.error("GPS disattivato");
+
       return;
     }
 
@@ -37,7 +39,7 @@ class TrackPosition {
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         print("Permessi di localizzazione non concessi");
-        return;
+        return Future.error("Permessi di localizzazione non concessi");
       }
     }
 

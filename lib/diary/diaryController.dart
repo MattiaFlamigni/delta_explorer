@@ -67,7 +67,10 @@ class DiaryController {
   }
 
   Future<void> startTracking()async {
-    await _tracker.startTracking();
+
+    try {
+      await _tracker.startTracking();
+    }catch(_){}
 
   }
 

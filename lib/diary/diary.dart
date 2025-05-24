@@ -260,8 +260,12 @@ class _DiaryState extends State<Diary> {
           });
 
         } else {
-          await controller.startTracking();
-          print("sta registrando??????? [si]${controller.isRecording()}");
+          try {
+            await controller.startTracking();
+          }catch(e){
+            _showSnackbar(e.toString());
+          }
+
         }
 
         setState(() {});
