@@ -174,7 +174,9 @@ class _SpottedState extends State<Spotted> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(controller.categoriesList[index]["nome"]),
-          Image.asset('assets/${controller.categoriesList[index]["image_path"]}', width: 50, height: 50),
+          Image.asset('assets/${controller.categoriesList[index]["image_path"]}', width: 50, height: 50, errorBuilder: (context, obj, stacktrace){
+            return Icon(Icons.image_not_supported);
+          },),
         ],
       ),
     );

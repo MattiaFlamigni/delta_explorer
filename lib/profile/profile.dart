@@ -393,7 +393,9 @@ class _ProfileState extends State<Profile> {
                           );
                         },
                         child: ClipOval(
-                          child: Image.asset(imageAsset, fit: BoxFit.cover),
+                          child: Image.asset(imageAsset, fit: BoxFit.cover,errorBuilder: (content, error, stacktrace){
+                            return Icon(Icons.image_not_supported);
+                          },),
                         ),
                       ),
                     ),
