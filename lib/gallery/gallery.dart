@@ -11,12 +11,15 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   galleryController controller = galleryController();
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     controller.fetchSpotted().then((_) {
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
@@ -48,16 +51,18 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Galleria')),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child:
-            controller.getSpottedList().isEmpty
-                ? const Center(child: Text("Nessuna immagine disponibile."))
-                : drawGridImages(),
-      ),
-    );
+    return isLoading
+        ? Center(child: CircularProgressIndicator())
+        : Scaffold(
+          appBar: AppBar(title: const Text('Galleria')),
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child:
+                controller.getSpottedList().isEmpty
+                    ? const Center(child: Text("Nessuna immagine disponibile."))
+                    : drawGridImages(),
+          ),
+        );
   }
 
   Widget drawGridImages() {
