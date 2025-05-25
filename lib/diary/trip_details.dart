@@ -1,11 +1,8 @@
-import 'package:delta_explorer/diary/detailsController.dart';
-import 'package:delta_explorer/diary/diaryController.dart';
+import 'package:delta_explorer/diary/details_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
-
-import '../util.dart';
 
 class TripDetails extends StatefulWidget {
   final Map<String, dynamic> trip;
@@ -35,8 +32,10 @@ class _TripDetailsState extends State<TripDetails> {
     final theme = Theme.of(context);
 
     final String titolo = widget.trip["titolo"] ?? "Nessun titolo";
-    final String descrizione = widget.trip["descrizione"] ?? "Nessuna descrizione";
-    final DateTime dataCreazione = DateTime.tryParse(widget.trip["created_at"] ?? "") ?? DateTime.now();
+    final String descrizione =
+        widget.trip["descrizione"] ?? "Nessuna descrizione";
+    final DateTime dataCreazione =
+        DateTime.tryParse(widget.trip["created_at"] ?? "") ?? DateTime.now();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,14 +44,17 @@ class _TripDetailsState extends State<TripDetails> {
         foregroundColor: theme.colorScheme.onPrimary,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Margini laterali
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        // Margini laterali
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16.0),
             Text(
               titolo,
-              style: theme.textTheme.headlineMedium!.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8.0),
             Row(
@@ -61,20 +63,29 @@ class _TripDetailsState extends State<TripDetails> {
                 const SizedBox(width: 4.0),
                 Text(
                   DateFormat('dd MMMM yyyy HH:mm').format(dataCreazione),
-                  style: theme.textTheme.bodySmall!.copyWith(color: Colors.grey[600]),
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16.0),
             Card(
               elevation: 1,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Descrizione", style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      "Descrizione",
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8.0),
                     Text(descrizione, style: theme.textTheme.bodyLarge!),
                   ],
@@ -86,7 +97,12 @@ class _TripDetailsState extends State<TripDetails> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Galleria", style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    "Galleria",
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8.0),
                   SizedBox(
                     height: 120,
@@ -96,11 +112,7 @@ class _TripDetailsState extends State<TripDetails> {
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 8.0),
-                          child: InkWell( // Rendi le immagini tappabili
-                            onTap: () {
-                              // Implementa qui la logica per visualizzare l'immagine a schermo intero
-                              print("Tapped on image ${controller.getImages()[index]["image_path"]}");
-                            },
+                          child: InkWell(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: Image.network(
@@ -112,7 +124,9 @@ class _TripDetailsState extends State<TripDetails> {
                                   return const SizedBox(
                                     width: 120,
                                     height: 120,
-                                    child: Center(child: Icon(Icons.broken_image)),
+                                    child: Center(
+                                      child: Icon(Icons.broken_image),
+                                    ),
                                   );
                                 },
                               ),
@@ -125,25 +139,42 @@ class _TripDetailsState extends State<TripDetails> {
                   const SizedBox(height: 24.0),
                 ],
               ),
-            Text("Il tuo percorso", style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              "Il tuo percorso",
+              style: theme.textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8.0),
-            Card( // Usa una Card per la mappa
+            Card(
+              // Usa una Card per la mappa
               elevation: 1,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: drawTripMap(controller.getCoord()),
               ),
             ),
             const SizedBox(height: 16.0),
-            Text("I tuoi dati", style: theme.textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              "I tuoi dati",
+              style: theme.textTheme.titleMedium!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8.0),
             Row(
               children: [
                 Icon(Icons.directions_run, color: theme.colorScheme.secondary),
                 const SizedBox(width: 8.0),
                 //Text("${calculateTotalDistance(controller.getCoord()).toStringAsFixed(2)} km", style: theme.textTheme.bodyLarge),
-                Text(widget.trip["distanza"].toString().length>4?widget.trip["distanza"].toString().substring(0,4) : widget.trip["distanza"].toString() )
+                Text(
+                  widget.trip["distanza"].toString().length > 4
+                      ? widget.trip["distanza"].toString().substring(0, 4)
+                      : widget.trip["distanza"].toString(),
+                ),
               ],
             ),
             const SizedBox(height: 32.0),
@@ -158,14 +189,16 @@ class _TripDetailsState extends State<TripDetails> {
       return const Center(child: Text("Nessun percorso disponibile."));
     }
 
-    List<LatLng> points = coords.map((coord) {
-      return LatLng(coord["lat"], coord["lon"]);
-    }).toList();
+    List<LatLng> points =
+        coords.map((coord) {
+          return LatLng(coord["lat"], coord["lon"]);
+        }).toList();
 
     // Calcola i limiti per centrare e zoomare la mappa
     final bounds = LatLngBounds.fromPoints(points);
     final center = bounds.center;
-    double zoom = 13.0; // Valore di zoom di default, potrebbe essere necessario calcolarlo dinamicamente
+    double zoom =
+        13.0; // Valore di zoom di default, potrebbe essere necessario calcolarlo dinamicamente
 
     return SizedBox(
       height: 300,

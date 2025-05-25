@@ -1,6 +1,6 @@
 import 'package:delta_explorer/ar/arviewer.dart';
 import 'package:delta_explorer/gallery/gallery.dart';
-import 'package:delta_explorer/home/homeController.dart';
+import 'package:delta_explorer/home/home_controller.dart';
 import 'package:delta_explorer/maps/maps.dart';
 import 'package:delta_explorer/quiz/quiz.dart';
 import 'package:flutter/material.dart';

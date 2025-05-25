@@ -1,9 +1,9 @@
 import 'package:delta_explorer/quiz/history.dart';
-import 'package:delta_explorer/quiz/quizController.dart';
+import 'package:delta_explorer/quiz/quiz_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../components/loginRequest.dart';
+import '../components/login_request.dart';
 import '../constants/quiz.dart';
 import '../quick_quiz/pages/quiz.dart';
 
@@ -111,7 +111,7 @@ class _QuizStartScreenState extends State<QuizStartScreen> {
       appBar: AppBar(title: const Text('Avvia Quiz')),
       body:
           controller.isUserAuth() == null
-              ? requestLogin()
+              ? RequestLogin()
               : isDataLoaded
               ? Padding(
                 padding: const EdgeInsets.symmetric(

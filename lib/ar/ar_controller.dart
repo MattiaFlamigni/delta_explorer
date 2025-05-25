@@ -8,7 +8,6 @@ class ARController{
   Future<void> fetchModels()async{
     var response = await _db.getARModels();
     models = response;
-    print(models);
   }
 
   List<Map<String, dynamic>> getModels(){

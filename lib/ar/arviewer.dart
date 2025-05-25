@@ -1,4 +1,4 @@
-import 'package:delta_explorer/ar/ARController.dart';
+import 'package:delta_explorer/ar/ar_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';

@@ -1,5 +1,5 @@
-import 'package:delta_explorer/diary/tripController.dart';
-import 'package:delta_explorer/diary/tripDetails.dart';
+import 'package:delta_explorer/diary/trip_controller.dart';
+import 'package:delta_explorer/diary/trip_details.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Per formattare le date
 
@@ -115,7 +115,6 @@ class _TripState extends State<Trip> {
                   builder: (context) => TripDetails(trip: tripData),
                 ),
               );
-              print("Hai toccato il viaggio: ${tripData['titolo']}");
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -128,9 +127,6 @@ class _TripState extends State<Trip> {
             child: IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
               onPressed: () {
-                print(
-                  "Richiesta di eliminazione per il viaggio: ${tripData['id']}",
-                );
                 _showDeleteConfirmationDialog(tripData['id']);
               },
             ),

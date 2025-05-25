@@ -7,7 +7,6 @@ class galleryController{
 
   Future<void> fetchSpotted() async {
     var spotted = await _db.getData(table: "spotted");
-    print("LISTA IMMAGINI $spotted");
     _spottedList = spotted;
   }
 

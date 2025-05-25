@@ -1,6 +1,6 @@
 import 'package:delta_explorer/constants/quiz.dart';
 import 'package:delta_explorer/quick_quiz/pages/review_answer.dart';
-import 'package:delta_explorer/quiz/quizController.dart';
+import 'package:delta_explorer/quiz/quiz_controller.dart';
 import 'package:flutter/material.dart';
 
 import '../Model/quiz_model.dart';

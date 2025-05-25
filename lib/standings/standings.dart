@@ -1,6 +1,6 @@
-import 'package:delta_explorer/components/loginRequest.dart';
+import 'package:delta_explorer/components/login_request.dart';
 import 'package:delta_explorer/constants/point.dart';
-import 'package:delta_explorer/standings/standingController.dart';
+import 'package:delta_explorer/standings/standing_controller.dart';
 import 'package:flutter/material.dart';
 
 class Standings extends StatefulWidget {
@@ -17,7 +17,7 @@ class _StandingsState extends State<Standings> {
   void initState() {
     controller.loadFriends();
     super.initState();
-    controller.fetchGlobal_Week().then((_) => setState(() {}));
+    controller.fetchGlobalWeek().then((_) => setState(() {}));
     controller.fetchPoints().then((_) => setState(() {}));
   }
 
@@ -37,20 +37,15 @@ class _StandingsState extends State<Standings> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 10,
-              children: [
-                drawAddButton(context),
-                drawShowButton(context),
-              ],
-            )
-
+              children: [drawAddButton(context), drawShowButton(context)],
+            ),
           ],
         ),
       );
     } else {
-      return requestLogin();
+      return RequestLogin();
     }
   }
-
 
   Widget drawAddButton(BuildContext context) {
     return ElevatedButton.icon(
@@ -101,17 +96,16 @@ class _StandingsState extends State<Standings> {
       return Column(
         children: [
           const Center(child: CircularProgressIndicator()),
-          Text("Classifica non disponibile")
+          Text("Classifica non disponibile"),
         ],
       );
-
     }
 
     return ListView.builder(
       itemCount: standings.length,
       itemBuilder: (BuildContext context, int index) {
         final item = standings[index];
-        print("ID CARICATO: ${item["userID"]}");
+
         final name =
             item["userID"] == controller.getAuthUser()
                 ? "TU"
@@ -154,10 +148,10 @@ class _StandingsState extends State<Standings> {
     } else if (type == TypePoints.reports) {
       icon = Icons.report;
       points = controller.getReportPoints();
-    } else if(type == TypePoints.trip){
+    } else if (type == TypePoints.trip) {
       icon = Icons.directions_walk;
       points = controller.getTripPoints();
-    }else{
+    } else {
       icon = Icons.help_outline;
     }
 
@@ -196,21 +190,21 @@ class _StandingsState extends State<Standings> {
         FilterChip(
           label: const Text("Globale"),
           onSelected: (b) async {
-            await controller.fetchGlobal_Week();
+            await controller.fetchGlobalWeek();
             refresh();
           },
         ),
         FilterChip(
           label: const Text("Settimanale"),
           onSelected: (b) async {
-            await controller.fetchGlobal_Week(week: true);
+            await controller.fetchGlobalWeek(week: true);
             refresh();
           },
         ),
         FilterChip(
           label: const Text("Mensile"),
           onSelected: (b) async {
-            await controller.fetchGlobal_Week(month: true);
+            await controller.fetchGlobalWeek(month: true);
             refresh();
           },
         ),
@@ -264,7 +258,11 @@ class _StandingsState extends State<Standings> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       final friend = friendController.text.trim();
-                      if (friend.isNotEmpty && friend!= await controller.getUsernamefromId(controller.currentUserId())) {
+                      if (friend.isNotEmpty &&
+                          friend !=
+                              await controller.getUsernamefromId(
+                                controller.currentUserId(),
+                              )) {
                         String res = await controller.addFriend(
                           friendController.text,
                         );
@@ -274,12 +272,12 @@ class _StandingsState extends State<Standings> {
                         ScaffoldMessenger.of(
                           context,
                         ).showSnackBar(SnackBar(content: Text(res)));
-                      }else{
+                      } else {
                         if (!context.mounted) return;
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text("Username non valido")));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Username non valido")),
+                        );
                       }
                     },
                     icon: const Icon(Icons.person_add),
@@ -316,10 +314,7 @@ class _StandingsState extends State<Standings> {
             children: [
               const Text(
                 "I Tuoi Amici",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -337,9 +332,7 @@ class _StandingsState extends State<Standings> {
                     itemBuilder: (BuildContext context, int index) {
                       final friend = friends[index];
                       return ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
+                        leading: const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(
                           friend,
                           style: const TextStyle(fontSize: 16),
@@ -347,10 +340,11 @@ class _StandingsState extends State<Standings> {
                         trailing: IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () async {
-
                             await controller.deleteFriends(friend);
                             if (!context.mounted) return;
-                            setState(() {controller.getFriends();});
+                            setState(() {
+                              controller.getFriends();
+                            });
                             Navigator.pop(context);
                             showFriendModal(context); // ricarica la lista
                           },
@@ -365,5 +359,4 @@ class _StandingsState extends State<Standings> {
       },
     );
   }
-
 }

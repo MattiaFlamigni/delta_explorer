@@ -1,9 +1,8 @@
 import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
 import 'package:delta_explorer/MainPage.dart';
 import 'package:delta_explorer/constants/point.dart';
-import 'package:delta_explorer/home/home.dart';
 import 'package:delta_explorer/login/login.dart';
-import 'package:delta_explorer/profile/profileController.dart';
+import 'package:delta_explorer/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {
@@ -18,9 +17,8 @@ class _ProfileState extends State<Profile> {
   final ValueNotifier<double> _valueNotifier = ValueNotifier(0);
   bool isLoading = true;
 
-
   @override
-  void initState(){
+  void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLoginStatus();
@@ -34,48 +32,66 @@ class _ProfileState extends State<Profile> {
     await controller.loadNumReport();
     await controller.loadNumKM();
     controller.fetchBadge().then((_) {
-      setState(() {isLoading = false;});
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading? Center(child: CircularProgressIndicator())
-
-
-
+    return isLoading
+        ? Center(child: CircularProgressIndicator())
         : Scaffold(
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            drawLevelRow(),
-            const SizedBox(height: 20),
-            drawPersonalNumbers(),
-            const SizedBox(height: 20),
-            drawBadgeRow(),
-            const SizedBox(height: 20),
-            drawSignOutButton()
-
-          ],
-        ),
-      ),
-    );
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                drawLevelRow(),
+                const SizedBox(height: 20),
+                drawPersonalNumbers(),
+                const SizedBox(height: 20),
+                drawBadgeRow(),
+                const SizedBox(height: 20),
+                drawSignOutButton(),
+              ],
+            ),
+          ),
+        );
   }
 
-  Widget drawPersonalNumbers(){
+  Widget drawPersonalNumbers() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Statistiche personali", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.green)),
+        Text(
+          "Statistiche personali",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.green,
+          ),
+        ),
         const SizedBox(height: 8),
-        drawDoubleTextRow("Punti Guadagnati", controller.getUserPoint().toString()),
-        drawDoubleTextRow("Contributi", controller.getNumSpotted().toInt().toString()),
-        drawDoubleTextRow("Segnalazioni", controller.getNumReport().toInt().toString()),
-        drawDoubleTextRow("KM percorsi", controller.getNumKm().toString().length>4?controller.getNumKm().toString().substring(0,4) : controller.getNumKm().toString() ),
-
+        drawDoubleTextRow(
+          "Punti Guadagnati",
+          controller.getUserPoint().toString(),
+        ),
+        drawDoubleTextRow(
+          "Contributi",
+          controller.getNumSpotted().toInt().toString(),
+        ),
+        drawDoubleTextRow(
+          "Segnalazioni",
+          controller.getNumReport().toInt().toString(),
+        ),
+        drawDoubleTextRow(
+          "KM percorsi",
+          controller.getNumKm().toString().length > 4
+              ? controller.getNumKm().toString().substring(0, 4)
+              : controller.getNumKm().toString(),
+        ),
       ],
     );
   }
@@ -86,7 +102,14 @@ class _ProfileState extends State<Profile> {
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         title: Text(text1, style: TextStyle(fontSize: 15, color: Colors.black)),
-        trailing: Text(text2, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green)),
+        trailing: Text(
+          text2,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
       ),
     );
   }
@@ -104,25 +127,57 @@ class _ProfileState extends State<Profile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Livelli', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+        const Text(
+          'Livelli',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
         const SizedBox(height: 15),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _levelItem("Novizio", "assets/level/novizio.png", controller.getUserPoint().toDouble() / ThresholdLevel.level1, controller.getUserPoint() >= ThresholdLevel.level1),
+            _levelItem(
+              "Novizio",
+              "assets/level/novizio.png",
+              controller.getUserPoint().toDouble() / ThresholdLevel.level1,
+              controller.getUserPoint() >= ThresholdLevel.level1,
+            ),
             const SizedBox(width: 10),
-            _levelItem("Apprendista", "assets/level/apprendista.png", controller.getUserPoint().toDouble() / ThresholdLevel.level2, controller.getUserPoint() >= ThresholdLevel.level2),
+            _levelItem(
+              "Apprendista",
+              "assets/level/apprendista.png",
+              controller.getUserPoint().toDouble() / ThresholdLevel.level2,
+              controller.getUserPoint() >= ThresholdLevel.level2,
+            ),
             const SizedBox(width: 10),
-            _levelItem("Esperto", "assets/level/esperto.png", controller.getUserPoint().toDouble() / ThresholdLevel.level3, controller.getUserPoint() >= ThresholdLevel.level3),
+            _levelItem(
+              "Esperto",
+              "assets/level/esperto.png",
+              controller.getUserPoint().toDouble() / ThresholdLevel.level3,
+              controller.getUserPoint() >= ThresholdLevel.level3,
+            ),
             const SizedBox(width: 10),
-            _levelItem("Master", "assets/level/master.png", controller.getUserPoint().toDouble() / ThresholdLevel.level4, controller.getUserPoint() >= ThresholdLevel.level4),
+            _levelItem(
+              "Master",
+              "assets/level/master.png",
+              controller.getUserPoint().toDouble() / ThresholdLevel.level4,
+              controller.getUserPoint() >= ThresholdLevel.level4,
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _levelItem(String title, String imageAsset, double progress, bool isAchieved) {
+  Widget _levelItem(
+    String title,
+    String imageAsset,
+    double progress,
+    bool isAchieved,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8.0),
@@ -160,7 +215,10 @@ class _ProfileState extends State<Profile> {
                   child: Image.asset(
                     imageAsset,
                     fit: BoxFit.cover,
-                    color: isAchieved ? null : Colors.grey[400], // Opacizza se non raggiunto
+                    color:
+                        isAchieved
+                            ? null
+                            : Colors.grey[400], // Opacizza se non raggiunto
                   ),
                 ),
               ),
@@ -187,7 +245,14 @@ class _ProfileState extends State<Profile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Badge', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+        const Text(
+          'Badge',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -205,9 +270,9 @@ class _ProfileState extends State<Profile> {
 
             if (item["type"] == "spot") {
               progres = controller.getNumSpotted();
-            } else if(item["type"] == "report") {
+            } else if (item["type"] == "report") {
               progres = controller.getNumReport();
-            }else{
+            } else {
               progres = controller.getNumKm();
             }
 
@@ -237,7 +302,7 @@ class _ProfileState extends State<Profile> {
           child: DashedCircularProgressBar.aspectRatio(
             aspectRatio: 1,
             valueNotifier: _valueNotifier,
-            progress: progress*100,
+            progress: progress * 100,
             startAngle: 225,
             sweepAngle: 270,
             foregroundColor: Colors.green,
@@ -252,12 +317,26 @@ class _ProfileState extends State<Profile> {
           ),
         ),
         const SizedBox(height: 5),
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
 
-  Widget badgeWidget(String imageAsset, String badgeName, double progress, String description, int threshold) {
+  Widget badgeWidget(
+    String imageAsset,
+    String badgeName,
+    double progress,
+    String description,
+    int threshold,
+  ) {
     bool isAchieved = progress >= 1;
 
     return Column(
@@ -268,39 +347,57 @@ class _ProfileState extends State<Profile> {
           height: 100,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: isAchieved
-                ? Border.all(color: Colors.amber, width: 4)  // Bordo dorato per badge sbloccato
-                : null,
-            boxShadow: isAchieved
-                ? [BoxShadow(color: Colors.amber.withOpacity(0.7), blurRadius: 10, spreadRadius: 1)]
-                : [],
+            border:
+                isAchieved
+                    ? Border.all(
+                      color: Colors.amber,
+                      width: 4,
+                    ) // Bordo dorato per badge sbloccato
+                    : null,
+            boxShadow:
+                isAchieved
+                    ? [
+                      BoxShadow(
+                        color: Colors.amber.withOpacity(0.7),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                    : [],
           ),
-          child: isAchieved
-              ? Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Image.asset(imageAsset, fit: BoxFit.cover),
-          )
-              : DashedCircularProgressBar.aspectRatio(
-            aspectRatio: 1,
-            valueNotifier: _valueNotifier,
-            progress: progress*100,
-            startAngle: 225,
-            sweepAngle: 270,
-            foregroundColor: Colors.blue,
-            backgroundColor: const Color(0xffeeeeee),
-            foregroundStrokeWidth: 2,
-            backgroundStrokeWidth: 2,
-            animation: true,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onTap: () {
-                  bottomSheetBadge(description, progress * 100, threshold);
-                },
-                child: ClipOval(child: Image.asset(imageAsset, fit: BoxFit.cover)),
-              ),
-            ),
-          ),
+          child:
+              isAchieved
+                  ? Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Image.asset(imageAsset, fit: BoxFit.cover),
+                  )
+                  : DashedCircularProgressBar.aspectRatio(
+                    aspectRatio: 1,
+                    valueNotifier: _valueNotifier,
+                    progress: progress * 100,
+                    startAngle: 225,
+                    sweepAngle: 270,
+                    foregroundColor: Colors.blue,
+                    backgroundColor: const Color(0xffeeeeee),
+                    foregroundStrokeWidth: 2,
+                    backgroundStrokeWidth: 2,
+                    animation: true,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          bottomSheetBadge(
+                            description,
+                            progress * 100,
+                            threshold,
+                          );
+                        },
+                        child: ClipOval(
+                          child: Image.asset(imageAsset, fit: BoxFit.cover),
+                        ),
+                      ),
+                    ),
+                  ),
         ),
         const SizedBox(height: 5),
         Text(
@@ -318,12 +415,12 @@ class _ProfileState extends State<Profile> {
     );
   }
 
-
-
   Future bottomSheetBadge(String desc, double progres, int obiettivo) {
     return showModalBottomSheet(
       enableDrag: true,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       context: context,
       builder: (BuildContext context) {
         return Container(
@@ -340,18 +437,30 @@ class _ProfileState extends State<Profile> {
                 child: Container(
                   width: 40,
                   height: 4,
-                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
-              Text("Dettagli", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                "Dettagli",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 20),
-              Text(desc, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                desc,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               Row(
                 children: [
                   Icon(Icons.web, color: Colors.blue),
                   SizedBox(width: 10),
-                  Text("Obiettivo:", style: TextStyle(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Obiettivo:",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   Spacer(),
                   SelectableText(obiettivo.toString()),
                 ],
@@ -360,7 +469,10 @@ class _ProfileState extends State<Profile> {
                 children: [
                   Icon(Icons.web, color: Colors.blue),
                   SizedBox(width: 10),
-                  Text("Progresso:", style: TextStyle(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Progresso:",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
                   Spacer(),
                   SelectableText("${progres.toStringAsFixed(2)}%"),
                 ],
@@ -377,21 +489,25 @@ class _ProfileState extends State<Profile> {
       child: ElevatedButton.icon(
         onPressed: () {
           controller.signOut();
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => MainPage()),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => MainPage()));
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
           backgroundColor: Colors.green,
           elevation: 4,
           shadowColor: Colors.greenAccent,
         ),
         icon: const Icon(Icons.logout, color: Colors.white),
-        label: const Text("Logout", style: TextStyle(color: Colors.white, fontSize: 16)),
+        label: const Text(
+          "Logout",
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
       ),
     );
   }
-
 }

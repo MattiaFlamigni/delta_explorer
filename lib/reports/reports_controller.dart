@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import '../constants/databaseTable.dart';
+import '../constants/database_table.dart';
 import '../database/supabase.dart';
 
 class ReportsController {
@@ -24,7 +24,7 @@ class ReportsController {
 
   Future<void> loadCategories() async {
       List<Map<String, dynamic>> list = [];
-      list = await _db.getData(table: DatabaseTable.reports_category);
+      list = await _db.getData(table: DatabaseTable.reportsCategory);
       _categoriesList = list;
   }
 

@@ -2,7 +2,7 @@ import 'package:weatherapi/weatherapi.dart';
 
 import '../database/supabase.dart';
 
-class HomeController{
+class HomeController {
   final WeatherRequest _wr = WeatherRequest('9e7aac68e41b4e53877132202250804');
   final SupabaseDB _db = SupabaseDB();
   List<Map<String, dynamic>> _curiosity = [];
@@ -10,9 +10,7 @@ class HomeController{
   List<Map<String, dynamic>> _currentMeteo = [];
   bool _isLoading = true;
 
-
-
-  Future<void>_fetchMeteo() async {
+  Future<void> _fetchMeteo() async {
     List<Map<String, dynamic>> meteoCondition = [];
     var meteo = await _wr.getRealtimeWeatherByLocation(44.95, 12.41);
 
@@ -37,51 +35,46 @@ Sei pronto a metterti in gioco? La natura ti aspetta! 🌿🦩📍
 ''';
   }
 
-  bool isLoading(){
+  bool isLoading() {
     return _isLoading;
   }
-
 
   Future<void> _fetchCuriosity() async {
     var cur = await _db.getData(table: "curiosity");
     _curiosity = cur;
-    _isLoading = false; //ultima funzione chiamata in initState, si puo mostrare UI a utente
+    _isLoading =
+        false; //ultima funzione chiamata in initState, si puo mostrare UI a utente
   }
 
   Future<void> _fetchSpotted() async {
-
     var spotted = await _db.getData(table: "spotted");
 
-    if(spotted.length>3){
+    if (spotted.length > 3) {
       spotted.shuffle();
-      spotted= spotted.sublist(0,2);
+      spotted = spotted.sublist(0, 2);
     }
 
-    _spottedList=spotted;
-
+    _spottedList = spotted;
   }
 
-  Future<void> fetchData({bool meteo = true})async{
+  Future<void> fetchData({bool meteo = true}) async {
     if (meteo) await _fetchMeteo();
     await _fetchSpotted();
     await _fetchCuriosity();
   }
 
-  List<Map<String, dynamic>> getCuriosity(){
+  List<Map<String, dynamic>> getCuriosity() {
     _curiosity.shuffle();
-    return _curiosity.sublist(0,5);
+    return _curiosity.sublist(0, 5);
   }
 
-  List<Map<String, dynamic>> getSpotted(){
-    print(_spottedList);
-    return _spottedList.where((img) => img["image_path"]?.isNotEmpty == true).toList();
+  List<Map<String, dynamic>> getSpotted() {
+    return _spottedList
+        .where((img) => img["image_path"]?.isNotEmpty == true)
+        .toList();
   }
 
-  List<Map<String, dynamic>> getMeteo(){
+  List<Map<String, dynamic>> getMeteo() {
     return _currentMeteo;
   }
-
-
-
-
 }

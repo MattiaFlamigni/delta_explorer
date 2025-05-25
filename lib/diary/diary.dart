@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:delta_explorer/components/loginRequest.dart';
-import 'package:delta_explorer/diary/diaryController.dart';
+import 'package:delta_explorer/components/login_request.dart';
+import 'package:delta_explorer/diary/diary_controller.dart';
 import 'package:delta_explorer/diary/trip.dart';
 import 'package:flutter/material.dart';
 
@@ -15,13 +15,13 @@ class Diary extends StatefulWidget {
 class _DiaryState extends State<Diary> {
   DiaryController controller = DiaryController();
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    if(controller.isUserLog()) {
+    if (controller.isUserLog()) {
       return Scaffold(
-        body: Container( // Sfondo leggero
+        body: Container(
+          // Sfondo leggero
           color: Colors.grey[100],
           child: Stack(
             children: [
@@ -56,12 +56,12 @@ class _DiaryState extends State<Diary> {
           ),
         ),
       );
-    }else{
-      return requestLogin(); //se utente non loggato invita a farlo
+    } else {
+      return RequestLogin(); //se utente non loggato invita a farlo
     }
   }
 
-  Widget drawRowButton(){
+  Widget drawRowButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -71,12 +71,11 @@ class _DiaryState extends State<Diary> {
     );
   }
 
-  Widget drawTitlePage(){
+  Widget drawTitlePage() {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(Icons.flight_takeoff, size: 32, color: theme
-            .colorScheme.primary),
+        Icon(Icons.flight_takeoff, size: 32, color: theme.colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           "Nuova Avventura",
@@ -88,7 +87,7 @@ class _DiaryState extends State<Diary> {
     );
   }
 
-  Widget drawForm(){
+  Widget drawForm() {
     return Column(
       children: [
         const SizedBox(height: 32),
@@ -106,15 +105,14 @@ class _DiaryState extends State<Diary> {
         ),
       ],
     );
-
   }
 
   Widget _drawTextField(
-      TextEditingController controller,
-      String labelText,
-      IconData icon, {
-        int? maxLines = 1,
-      }) {
+    TextEditingController controller,
+    String labelText,
+    IconData icon, {
+    int? maxLines = 1,
+  }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
@@ -137,75 +135,78 @@ class _DiaryState extends State<Diary> {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: controller.getImages().map<Widget>((img) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              children: [
-                Image.file(
-                  File(img.path),
-                  height: 100,
-                  width: 100,
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                  top: -5,
-                  right: -5,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.close,
-                      size: 18,
-                      color: Colors.white,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.redAccent.withOpacity(0.8),
-                    ),
-                    onPressed: () {
-                      controller.removeImage(img);
-                      setState(() {});
-                    },
+      children:
+          controller.getImages().map<Widget>((img) {
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
                   ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    Image.file(
+                      File(img.path),
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      top: -5,
+                      right: -5,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.redAccent.withOpacity(0.8),
+                        ),
+                        onPressed: () {
+                          controller.removeImage(img);
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+              ),
+            );
+          }).toList(),
     );
   }
 
   Widget _drawAddPhotoButton(String labelText, bool camera) {
     return ElevatedButton.icon(
       onPressed: () async {
-        if(camera){
+        if (camera) {
           try {
             await controller.pickImageFromCamera();
-          }catch(e){
-
+          } catch (e) {
             _showSnackbar(e.toString());
           }
-        }else{
-            try{
-              await controller.pickImagesFromGallery();
-            }catch(e){
-              showSnackbar(e.toString());
-            }
+        } else {
+          try {
+            await controller.pickImagesFromGallery();
+          } catch (e) {
+            showSnackbar(e.toString());
+          }
         }
         setState(() {});
       },
-      icon: Icon(camera ? Icons.camera_alt : Icons.add_photo_alternate, size: 20),
+      icon: Icon(
+        camera ? Icons.camera_alt : Icons.add_photo_alternate,
+        size: 20,
+      ),
       label: Text(labelText),
       style: ElevatedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
@@ -216,10 +217,10 @@ class _DiaryState extends State<Diary> {
     );
   }
 
-
   void showSnackbar(String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
+
   Widget _drawStatusIndicator() {
     final isRecording = controller.isRecording();
     return Container(
@@ -231,17 +232,22 @@ class _DiaryState extends State<Diary> {
       child: Row(
         children: [
           Icon(
-            isRecording ? Icons.radio_button_checked : Icons.pause_circle_outline,
+            isRecording
+                ? Icons.radio_button_checked
+                : Icons.pause_circle_outline,
             color: isRecording ? Colors.greenAccent[400] : Colors.grey.shade600,
             size: 28,
           ),
           const SizedBox(width: 12),
           Text(
-            isRecording ? "Registrazione in corso..." : "Registrazione in pausa",
+            isRecording
+                ? "Registrazione in corso..."
+                : "Registrazione in pausa",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: isRecording ? Colors.greenAccent[700] : Colors.grey.shade800,
+              color:
+                  isRecording ? Colors.greenAccent[700] : Colors.grey.shade800,
             ),
           ),
         ],
@@ -258,9 +264,8 @@ class _DiaryState extends State<Diary> {
           return;
         }
         setState(() {});
-        print("sta registrando??????? ${controller.isRecording()}");
+
         if (isRecording) {
-          print("STOP");
           controller.stopTracking();
           var idPercorso = await controller.addTrip(
             controller.getTitleController().text,
@@ -270,24 +275,22 @@ class _DiaryState extends State<Diary> {
           controller.getTitleController().clear();
           controller.getDescController().clear();
           controller.deleteImages();
-          setState(() {
-
-          });
-
+          setState(() {});
         } else {
           try {
             await controller.startTracking();
-          }catch(e){
+          } catch (e) {
             _showSnackbar(e.toString());
           }
-
         }
 
         setState(() {});
       },
       style: ElevatedButton.styleFrom(
         backgroundColor:
-        isRecording ? Colors.redAccent : Theme.of(context).colorScheme.primary,
+            isRecording
+                ? Colors.redAccent
+                : Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -306,11 +309,12 @@ class _DiaryState extends State<Diary> {
       alignment: Alignment.bottomCenter,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 24),
-        child: ElevatedButton.icon( // Usa FilledButton.tonal
+        child: ElevatedButton.icon(
+          // Usa FilledButton.tonal
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Trip()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => Trip()));
           },
           icon: const Icon(Icons.history),
           label: const Text("I Miei Viaggi"),

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:delta_explorer/spotted/spottedController.dart';
+import 'package:delta_explorer/spotted/spotted_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 

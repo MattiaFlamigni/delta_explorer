@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
-import 'package:delta_explorer/diary/TrackPosition.dart';
+import 'package:delta_explorer/diary/track_position.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +14,7 @@ class DiaryController {
   final _tracker = TrackPosition(); // singleton
 
   final List<XFile> _images = []; // immagini caricate durante la registrazione
-  List<String?> _image_paths = []; // path salvati nello storage
+  List<String?> _imagePaths = []; // path salvati nello storage
 
   final SupabaseDB _db = SupabaseDB();
 
@@ -41,13 +41,13 @@ class DiaryController {
   Future<String> pickImagesFromGallery() async {
     final ImagePicker picker = ImagePicker();
 
-    if(await Permission.photos.isGranted) {
+    if (await Permission.photos.isGranted) {
       final List<XFile> selectedImages = await picker.pickMultiImage();
 
       if (selectedImages.isNotEmpty) {
         _images.addAll(selectedImages);
       }
-    }else{
+    } else {
       return Future.error("permessi non abilitati");
     }
 
@@ -63,7 +63,7 @@ class DiaryController {
       if (image != null) {
         _images.add(image);
       }
-    }else{
+    } else {
       return Future.error("Permessi fotocamera non abilitati");
     }
     return "";
@@ -111,7 +111,6 @@ class DiaryController {
 
       return idPercorso;
     } catch (e) {
-      print("Errore durante l'aggiunta del viaggio: $e");
       return 0;
     }
   }
@@ -132,18 +131,17 @@ class DiaryController {
               ),
             );
 
-        _image_paths.add(fullPath);
+        _imagePaths.add(fullPath);
         _db.addTripImages(idPercorso, fullPath);
       } catch (e) {
-        print("Errore durante l'upload di ${image.name}: $e");
-        _image_paths.add(null);
+        _imagePaths.add(null);
       }
     }
 
-    return _image_paths;
+    return _imagePaths;
   }
 
   List<String?> getImagesPaths() {
-    return _image_paths;
+    return _imagePaths;
   }
 }

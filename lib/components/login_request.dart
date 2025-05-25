@@ -1,17 +1,17 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 
 import '../login/login.dart';
 
 
-class requestLogin extends StatefulWidget {
-  const requestLogin({super.key});
+class RequestLogin extends StatefulWidget {
+  const RequestLogin({super.key});
 
   @override
-  State<requestLogin> createState() => _requestLoginState();
+  State<RequestLogin> createState() => _RequestLoginState();
 }
 
-class _requestLoginState extends State<requestLogin> {
+class _RequestLoginState extends State<RequestLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

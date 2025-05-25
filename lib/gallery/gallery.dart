@@ -1,4 +1,4 @@
-import 'package:delta_explorer/gallery/galleryController.dart';
+import 'package:delta_explorer/gallery/gallery_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 

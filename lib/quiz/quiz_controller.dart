@@ -15,13 +15,10 @@ class QuizController {
     var list = await _db.getQuestions();
     list.shuffle();
     list = list.sublist(0, 7); //random 7 question per quiz
-    print("Domande: $list");
     _questions = list;
   }
 
   Quiz buildQuiz() {
-    print("modello: ${_questionModel.length}");
-
     return Quiz(questions: _questionModel, timerDuration: 30);
   }
 
@@ -66,26 +63,17 @@ class QuizController {
     await _db.saveQuizResult(accuracy, duration, skipped, incorrect, score);
   }
 
-  Future<void> fetchPastQuiz()async{
+  Future<void> fetchPastQuiz() async {
     _pastQuiz = await _db.getPastQuiz();
   }
 
-  List<Map<String, dynamic>> getPastQuiz(){
+  List<Map<String, dynamic>> getPastQuiz() {
     return _pastQuiz;
   }
 
-  User? isUserAuth(){
+  User? isUserAuth() {
     return _db.supabase.auth.currentUser;
   }
-
-
-
-
-
-
-
-
-
 
   /*only for populate database*/
   Future<void> populateQuestion() async {

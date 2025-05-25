@@ -2,18 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/constants/point.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../constants/databaseTable.dart';
+import '../constants/database_table.dart';
 
 class SupabaseDB {
   final supabase = Supabase.instance.client;
 
   void inserisciCategorie() async {
-    print("inserimento");
-
     Map<String, dynamic> categorie = {
       "uccelli": {
         "image_path": "resources/uccelli.png",
@@ -79,25 +76,22 @@ class SupabaseDB {
             "nome": entry.value["nome"],
             "sottocategorie": entry.value["sottocategorie"],
           })
-          .then((response) {
-            print("✅ Inserita categoria: ${entry.key}");
-          })
-          .catchError((error) {
-            print("❌ Errore nell'inserimento di ${entry.key}: $error");
-          });
+          .then((response) {})
+          .catchError((error) {});
     }
   }
 
   Future<void> removeFriend(String friendID) async {
     try {
-      await supabase.from(DatabaseTable.friends).delete().eq("friendID", friendID);
-    } catch (e) {
-      print("error: $e");
-    }
+      await supabase
+          .from(DatabaseTable.friends)
+          .delete()
+          .eq("friendID", friendID);
+    } catch (_) {}
   }
 
   Future<void> addReports(
-    String image_path,
+    String imagePath,
     String type,
     String comment,
     GeoPoint geopoint,
@@ -106,20 +100,17 @@ class SupabaseDB {
     try {
       await supabase.from(DatabaseTable.reports).insert({
         'data': DateTime.now().toIso8601String(),
-        'image_path': image_path,
+        'image_path': imagePath,
         'comment': comment,
         'type': type,
         'position': [geopoint.latitude, geopoint.longitude],
         'user': userID,
       });
-      print("Data added successfully!");
-    } catch (e) {
-      print("Error adding document: $e");
-    }
+    } catch (e) {}
   }
 
   Future<void> addSpotted(
-    String image_path,
+    String imagePath,
     String type,
     String comment,
     String sub,
@@ -140,7 +131,7 @@ class SupabaseDB {
                 )
                 .toIso8601String(),
 
-        'image_path': image_path,
+        'image_path': imagePath,
         'comment': comment,
         'category': type,
         'subCategory': sub,
@@ -150,11 +141,7 @@ class SupabaseDB {
         }),
         'user': userID,
       });
-
-      print("Data added successfully!");
-    } catch (e) {
-      print("Error adding document: $e");
-    }
+    } catch (_) {}
   }
 
   Future<void> addPOIs() async {
@@ -201,15 +188,7 @@ class SupabaseDB {
           'description': poi['description'],
           'category': poi['category'],
         });
-
-        if (response.error != null) {
-          print("Errore nell'inserimento POI: ${response.error?.message}");
-        } else {
-          print("POI inserito correttamente: ${poi['title']}");
-        }
-      } catch (e) {
-        print("Errore nell'inserimento: $e");
-      }
+      } catch (_) {}
     }
   }
 
@@ -219,10 +198,7 @@ class SupabaseDB {
         "id": user.id,
         "username": username,
       });
-      print("Nuovo utente inserito: $username");
-    } catch (e) {
-      print("ERRORE: $e");
-    }
+    } catch (_) {}
   }
 
   Future<bool> isUsernameAvailable(String username) async {
@@ -232,8 +208,6 @@ class SupabaseDB {
             .select("username")
             .eq("username", username)
             .maybeSingle();
-
-    print("RISPOSTA USER: $response");
 
     return response != null ? false : true;
   }
@@ -254,9 +228,7 @@ class SupabaseDB {
           .eq("id", supabase.auth.currentUser!.id);
 
       return "punti aggiornati";
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
     return "errore nell'aggiornamento dei punti";
   }
 
@@ -272,11 +244,8 @@ class SupabaseDB {
         totalPoints += row["numPoints"] as int;
       }
 
-      print("PUNTI ATTUALI: $totalPoints");
       return totalPoints;
-    } catch (e) {
-      print("errore $e");
-    }
+    } catch (_) {}
     return -1;
   }
 
@@ -287,9 +256,7 @@ class SupabaseDB {
     try {
       final response = await supabaseClient.from(DatabaseTable.poi).select();
       poiList = response;
-    } catch (e) {
-      print("Errore nella lettura dei dati: $e");
-    }
+    } catch (_) {}
 
     return poiList;
   }
@@ -311,16 +278,12 @@ class SupabaseDB {
       final response = await query;
 
       if (response == null || response.isEmpty) {
-        print("No data found in table: $table");
         return [];
       }
 
       // Supabase returns a List<Map<String, dynamic>> directly
       poiList = List<Map<String, dynamic>>.from(response);
-      print("eccola $poiList");
-    } catch (e) {
-      print("Error reading data from Supabase: $e");
-    }
+    } catch (_) {}
     return poiList;
   }
 
@@ -335,8 +298,6 @@ class SupabaseDB {
     );
     DateTime todayEnd = todayStart.add(Duration(days: 1));
 
-    print("Inizio ricerca 'spotted' per oggi: ${todayStart} - ${todayEnd}");
-
     try {
       final response = await Supabase.instance.client
           .from(DatabaseTable.reports)
@@ -345,11 +306,8 @@ class SupabaseDB {
           .lt('data', todayEnd.toIso8601String());
 
       if (response == null) {
-        print("Nessun dato trovato per oggi.");
         return [];
       }
-
-      print("Dati 'spotted' recuperati. Documenti trovati: ${response.length}");
 
       for (var item in response) {
         Map<String, dynamic> spottedData = Map<String, dynamic>.from(
@@ -366,33 +324,16 @@ class SupabaseDB {
                 decoded.containsKey('lat') &&
                 decoded.containsKey('lng')) {
               spottedData['position'] = decoded;
-            } else {
-              print(
-                "Stringa JSON valida ma formato non riconosciuto: $decoded",
-              );
             }
-          } catch (e) {
-            print("Errore nel parsing JSON string di 'position': $e");
-          }
+          } catch (_) {}
         } else if (pos is List && pos.length >= 2) {
           spottedData['position'] = {'lat': pos[0], 'lng': pos[1]};
-
-          print("SPOTTATO: $spottedData");
-        } else {
-          print("Formato 'position' non riconosciuto o incompleto: $pos");
         }
 
-        print("Documento trovato: ${spottedData}");
         spottedList.add(spottedData);
       }
-    } catch (e) {
-      print("Errore durante la lettura dei dati: $e");
-    }
+    } catch (_) {}
 
-    print(
-      "Fine ricerca 'spotted'. Documenti restituiti: ${spottedList.length}",
-    );
-    print(spottedList);
     return spottedList;
   }
 
@@ -400,15 +341,13 @@ class SupabaseDB {
     try {
       final response =
           await supabase.from(table).select().eq("user", userid).count();
-      print("conteggio: ${response.count}");
       return response.count;
     } catch (e) {
-      print("Errore durante il conteggio delle righe: $e");
       return null;
     }
   }
 
-  Future<List<Map<String, dynamic>>> global_weekStanding({
+  Future<List<Map<String, dynamic>>> globalWeekStanding({
     bool week = false,
     bool month = false,
   }) async {
@@ -420,13 +359,9 @@ class SupabaseDB {
             ? "leaderboard_month"
             : "leaderboard";
     try {
-      print("tabella: $table");
       var response = await supabase.from(table).select().limit(5);
       list = response;
-      print("Classifica: $response");
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
     return list;
   }
 
@@ -442,11 +377,7 @@ class SupabaseDB {
       for (var row in response) {
         tot += (row["numPoints"] as int);
       }
-
-      print("totale: $tot");
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
     return tot;
   }
 
@@ -464,9 +395,7 @@ class SupabaseDB {
         "id": friendID,
         "friendID": userID,
       });
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
   }
 
   Future<List<String>> getFriends(String userID) async {
@@ -475,14 +404,11 @@ class SupabaseDB {
           .from(DatabaseTable.friends)
           .select("friendID")
           .eq("id", userID);
-      print("AMICI: $response");
       // Estrai solo gli ID
       return response
           .map<String>((item) => item["friendID"] as String)
           .toList();
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
     return [];
   }
 
@@ -495,8 +421,6 @@ class SupabaseDB {
         .select("id, username, points")
         .inFilter("id", friendsIDs)
         .order("points", ascending: false);
-
-    print("CLASSIFICA AMICI: $response");
     return response;
   }
 
@@ -509,9 +433,7 @@ class SupabaseDB {
               .eq("id", userID)
               .single();
       return res["username"];
-    } catch (e) {
-      print("errore: $e");
-    }
+    } catch (_) {}
     return "";
   }
 
@@ -525,7 +447,6 @@ class SupabaseDB {
               .single();
       return response["id"];
     } catch (e) {
-      print("error: $e");
       return "";
     }
   }
@@ -541,7 +462,6 @@ class SupabaseDB {
       }
       return false;
     } catch (e) {
-      print("error: $e");
       return false;
     }
   }
@@ -568,16 +488,12 @@ class SupabaseDB {
   }
 
   Future<void> addTripImages(int idViaggio, String imagePath) async {
-    print("IDVIAGGIO: $idViaggio");
     try {
       await supabase.from('tripImages').insert({
         'idViaggio': idViaggio,
         'image_path': imagePath,
       });
-      print('Inserimento riuscito.');
-    } catch (e) {
-      print('Eccezione durante l\'inserimento: $e');
-    }
+    } catch (_) {}
   }
 
   Future<List<Map<String, dynamic>>> getImagesUrl(String title) async {
@@ -603,7 +519,10 @@ class SupabaseDB {
   }
 
   Future<List<Map<String, dynamic>>> getCoordByTripId(int tripId) async {
-    return await supabase.from(DatabaseTable.coordinate).select().eq("idPercorso", tripId);
+    return await supabase
+        .from(DatabaseTable.coordinate)
+        .select()
+        .eq("idPercorso", tripId);
   }
 
   Future<void> addCoord(List<Position> posizioni, int idPercorso) async {
@@ -622,18 +541,17 @@ class SupabaseDB {
 
     try {
       await supabase.from(DatabaseTable.coordinate).insert(coordinate);
-      print("Coordinate inserite con successo!");
-    } catch (e) {
-      print("Errore durante inserimento coordinate: $e");
-    }
+    } catch (_) {}
   }
 
   Future<List<Map<String, dynamic>>> getTrip(String userID) async {
     try {
-      var trip = await supabase.from(DatabaseTable.percorsi).select().eq("userID", userID);
+      var trip = await supabase
+          .from(DatabaseTable.percorsi)
+          .select()
+          .eq("userID", userID);
       return trip;
     } catch (e) {
-      print("error: $e");
       return [];
     }
   }
@@ -652,7 +570,6 @@ class SupabaseDB {
 
       return tot;
     } catch (e) {
-      print("error: $e");
       return -1;
     }
   }
@@ -661,26 +578,20 @@ class SupabaseDB {
     //recupero il valore
     try {
       var response =
-          await supabase.from(DatabaseTable.reports).select().eq("id", reportId).single();
+          await supabase
+              .from(DatabaseTable.reports)
+              .select()
+              .eq("id", reportId)
+              .single();
       int num = response["verified"];
-
-      print("NUMERO OTTENUTO: $num");
 
       //incremento +1
       await supabase
           .from(DatabaseTable.reports)
           .update({"verified": num + 1})
           .eq("id", reportId);
-    } catch (e) {
-      print("error: $e");
-    }
+    } catch (_) {}
   }
-
-
-
-
-
-
 
   Future<String?> uploadPNGImage(File image, String bucket) async {
     try {
@@ -688,10 +599,10 @@ class SupabaseDB {
       final String fullPath = await supabase.storage
           .from(bucket)
           .upload(
-        '$fileName.png',
-        image,
-        fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-      );
+            '$fileName.png',
+            image,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
       return fullPath;
     } catch (e) {
       return null;
@@ -702,82 +613,83 @@ class SupabaseDB {
     try {
       var response = await supabase.from(DatabaseTable.questionsQuiz).select();
       return response;
-    }catch(e){
-      print("error: $e");
+    } catch (e) {
       return [];
     }
   }
-  
-  Future<List<Map<String, dynamic>>> getAnswers(int questionId) async{
+
+  Future<List<Map<String, dynamic>>> getAnswers(int questionId) async {
     try {
-      var response = await supabase.from(DatabaseTable.answer).select().eq(
-          "questionID", questionId);
+      var response = await supabase
+          .from(DatabaseTable.answer)
+          .select()
+          .eq("questionID", questionId);
       return response;
-    }catch(e){
-      print("errore: $e");
-      return[];
-    }
-  }
-
-  Future<void> saveQuizResult(int accuracy, int duration, int skipped, int incorrect, int score)async{
-    try{
-      await supabase.from(DatabaseTable.quizScore).insert({
-        "accuracy" : accuracy,
-        "duration" : duration,
-        "skipped" : skipped,
-        "incorrect":incorrect,
-        "score":score,
-        "userID":supabase.auth.currentUser!.id,
-      });
-
-    }catch(e){
-      print("error: $e");
-    }
-  }
-  
-  Future<List<Map<String, dynamic>>> getPastQuiz()async{
-    try{
-
-        var response = await supabase.from(DatabaseTable.quizScore).select().eq(
-            "userID", supabase.auth.currentUser!.id);
-        return response;
-
-
-    }catch(e){
-      print("error: $e");
+    } catch (e) {
       return [];
     }
   }
 
-  Future<List<Map<String, dynamic>>> getARModels()async{
+  Future<void> saveQuizResult(
+    int accuracy,
+    int duration,
+    int skipped,
+    int incorrect,
+    int score,
+  ) async {
+    try {
+      await supabase.from(DatabaseTable.quizScore).insert({
+        "accuracy": accuracy,
+        "duration": duration,
+        "skipped": skipped,
+        "incorrect": incorrect,
+        "score": score,
+        "userID": supabase.auth.currentUser!.id,
+      });
+    } catch (_) {}
+  }
+
+  Future<List<Map<String, dynamic>>> getPastQuiz() async {
+    try {
+      var response = await supabase
+          .from(DatabaseTable.quizScore)
+          .select()
+          .eq("userID", supabase.auth.currentUser!.id);
+      return response;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getARModels() async {
     try {
       var response = await supabase.from(DatabaseTable.models).select();
       return response;
-    }catch(e){
-      print("error: $e");
+    } catch (e) {
       return [];
     }
   }
 
   /*only for populate database*/
-  Future<void> insertQuestionQuiz(String question, List<Map<String, dynamic>>options) async{
-    try{
-      var responseQuestion = await supabase.from(DatabaseTable.questionsQuiz).insert({"question":question}).select().single();
+  Future<void> insertQuestionQuiz(
+    String question,
+    List<Map<String, dynamic>> options,
+  ) async {
+    try {
+      var responseQuestion =
+          await supabase
+              .from(DatabaseTable.questionsQuiz)
+              .insert({"question": question})
+              .select()
+              .single();
       var questionID = responseQuestion["id"];
-      for(var option in options){
+      for (var option in options) {
         await supabase.from(DatabaseTable.answer).insert({
-          "answer":option["answer"],
+          "answer": option["answer"],
           "correct": option["correct"],
-          "questionID":questionID
+          "questionID": questionID,
         });
       }
-
-
-
-    }catch(e){
-      print("errore: $e");
-    }
+    } catch (_) {}
   }
-
-
 }

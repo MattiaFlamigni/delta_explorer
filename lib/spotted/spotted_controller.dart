@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:delta_explorer/constants/databaseTable.dart';
+import 'package:delta_explorer/constants/database_table.dart';
 import 'package:delta_explorer/constants/point.dart';
 import 'package:delta_explorer/database/supabase.dart';
 import 'package:flutter/material.dart';

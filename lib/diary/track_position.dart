@@ -1,11 +1,14 @@
 import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 
 class TrackPosition {
   // Singleton
   static final TrackPosition _instance = TrackPosition._internal();
+
   factory TrackPosition() => _instance;
+
   TrackPosition._internal();
 
   final List<Position> _percorso = [];
@@ -14,11 +17,11 @@ class TrackPosition {
   final TextEditingController titoloController = TextEditingController();
   final TextEditingController descrizioneController = TextEditingController();
 
-
-  getTitleController(){
+  getTitleController() {
     return titoloController;
   }
-  getDescController(){
+
+  getDescController() {
     return descrizioneController;
   }
 
@@ -27,10 +30,7 @@ class TrackPosition {
     _percorso.clear();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print("Servizi di localizzazione disabilitati");
       return Future.error("GPS disattivato");
-
-      return;
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
@@ -38,7 +38,6 @@ class TrackPosition {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        print("Permessi di localizzazione non concessi");
         return Future.error("Permessi di localizzazione non concessi");
       }
     }
@@ -56,7 +55,6 @@ class TrackPosition {
         //distanceFilter: 5, // aggiorna solo se ci si sposta di almeno 5 metri
       ),
     ).listen((Position position) {
-      print('Posizione: ${position.latitude}, ${position.longitude}');
       _percorso.add(position); // salva le posizioni
     });
   }
@@ -67,7 +65,6 @@ class TrackPosition {
     await _positionStream?.cancel();
     _positionStream = null;
     _registrando = false;
-    print("Tracking interrotto. Percorso registrato: $_percorso");
   }
 
   bool isRecording() => _registrando;

@@ -1,6 +1,5 @@
 import 'package:delta_explorer/constants/quiz.dart';
-import 'package:delta_explorer/quiz/quizController.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:delta_explorer/quiz/quiz_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

@@ -1,5 +1,5 @@
 import 'package:delta_explorer/login/login.dart';
-import 'package:delta_explorer/login/loginController.dart';
+import 'package:delta_explorer/login/login_controller.dart';
 import 'package:flutter/material.dart';
 
 class RegisterForm extends StatefulWidget {

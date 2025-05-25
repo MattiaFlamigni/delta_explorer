@@ -1,4 +1,4 @@
-import 'package:delta_explorer/reports/reportsController.dart';
+import 'package:delta_explorer/reports/reports_controller.dart';
 import 'package:flutter/material.dart';
 
 class Reports extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:delta_explorer/lens/lensController.dart';
+import 'package:delta_explorer/lens/lens_controller.dart';
 import 'package:flutter/material.dart';
 
 class Lens extends StatefulWidget {
@@ -174,13 +174,12 @@ class _LensState extends State<Lens> {
   }
 
 
-  Widget drawCard(String commonName,String originalName, double score, String image_path){
-    print("original name $originalName");
+  Widget drawCard(String commonName,String originalName, double score, String imagePath){
     if(commonName!="N/A") {
       return GestureDetector(
         onTap: () async {
           String desc = await controller.getDescription(originalName);
-          drawBottomSheet(image_path, desc);
+          drawBottomSheet(imagePath, desc);
         },
 
 
