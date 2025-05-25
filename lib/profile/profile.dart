@@ -16,6 +16,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   ProfileController controller = ProfileController();
   final ValueNotifier<double> _valueNotifier = ValueNotifier(0);
+  bool isLoading = true;
 
 
   @override
@@ -33,13 +34,17 @@ class _ProfileState extends State<Profile> {
     await controller.loadNumReport();
     await controller.loadNumKM();
     controller.fetchBadge().then((_) {
-      setState(() {});
+      setState(() {isLoading = false;});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading? Center(child: CircularProgressIndicator())
+
+
+
+        : Scaffold(
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
