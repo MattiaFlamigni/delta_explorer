@@ -1,5 +1,5 @@
 import 'package:delta_explorer/MainPage.dart';
-import 'package:delta_explorer/login/loginController.dart';
+import 'package:delta_explorer/login/login_controller.dart';
 import 'package:delta_explorer/login/registration.dart';
 import 'package:flutter/material.dart';
 
@@ -105,19 +105,19 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  // Row with buttons
+
   Widget drawRowButton() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _loading
-            ? CircularProgressIndicator()
+            ? Center(child: CircularProgressIndicator())
             : _buildButton('Login', () async {
           var res = await controller.submitLogin(
             _emailController.text,
             _passwordController.text,
           );
           if (res == "Ok") {
-
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => MainPage()),
             );
@@ -125,26 +125,39 @@ class _LoginFormState extends State<LoginForm> {
             showSnackbar(res);
           }
         }),
-        SizedBox(height: 16),
-        _buildButton('Registrati', () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => RegisterForm()),
-          );
-        }),
-
-        SizedBox(height: 16),
-        _buildButton('Torna alla Home', () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => MainPage()),
-                (route) => false, // Rimuove tutte le route precedenti
-          );
-
-        }),
-
+        SizedBox(height: 12),
+        //Center(child: forgetPasswordBtn()),
+        SizedBox(height: 20),
+        Divider(thickness: 1, color: Colors.white70),
+        SizedBox(height: 12),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => RegisterForm()),
+            );
+          },
+          child: Text(
+            "Non hai un account? Registrati",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => MainPage()),
+                  (route) => false,
+            );
+          },
+          child: Text(
+            "Torna alla Home",
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
       ],
     );
   }
+
 
   // Custom button with gradient and hover effect
   Widget _buildButton(String text, VoidCallback onPressed) {
@@ -179,4 +192,20 @@ class _LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
+  /*Widget forgetPasswordBtn() {
+    return TextButton(
+      onPressed: () {
+        controller.sendResetPasswordEmail(_emailController.text);
+      },
+      child: Text(
+        "Password dimenticata?",
+        style: TextStyle(
+          color: Colors.white70,
+          decoration: TextDecoration.underline,
+        ),
+      ),
+    );
+  }*/
+
 }
